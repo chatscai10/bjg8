@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店家數據分析</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+    </style>
+    <!-- 引入 PapaParse 庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <h2>店家數據分析</h2>
+    <p id="storeCount">正在加載數據...</p>
+    <table id="storeTable">
+        <thead>
+            <tr>
+                <th>店家名稱</th>
+                <th>最新 3 筆時間</th>
+                <th>最新 1 筆 B 欄內容</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // 使用 CORS 代理解決跨域問題
+        const sheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
+
+        // 使用 PapaParse 解析 CSV
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: false,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const data = results.data;
+                const headers = data.shift(); // 移除標題行
+
+                const dateIndex = 0;    // A 欄 (日期)
+                const contentIndex = 1; // B 欄 (內容)
+                const storeIndex = 2;   // C 欄 (店家名稱)
+
+                const stores = {};
+
+                // 整理數據，按店家名稱分組
+                data.forEach(row => {
+                    const date = row[dateIndex];
+                    const content = row[contentIndex];
+                    const store = row[storeIndex];
+
+                    if (store && store.trim() !== "") {
+                        if (!stores[store]) {
+                            stores[store] = [];
+                        }
+                        stores[store].push({ date, content });
+                    }
+                });
+
+                const storeNames = Object.keys(stores);
+                document.getElementById("storeCount").innerText = `數據分析共有 ${storeNames.length} 家店`;
+
+                const tbody = document.querySelector("#storeTable tbody");
+
+                storeNames.forEach(store => {
+                    // 依日期排序，取最新 3 筆
+                    const sortedEntries = stores[store]
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 3);
+
+                    // 提取最新 3 筆日期
+                    const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
+
+                    // 提取最新 1 筆 B 欄內容
+                    const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
+
+                    // 添加表格行
+                    const row = `<tr>
+                        <td>${store}</td>
+                        <td>${latestDates}</td>
+                        <td>${latestContent}</td>
+                    </tr>`;
+
+                    tbody.innerHTML += row;
+                });
+            },
+            error: function(err) {
+                document.getElementById("storeCount").innerText = "數據加載失敗：" + err.message;
+                console.error("Error fetching the data:", err);
+            }
+        });
+    </script>
+</body>
+</html>

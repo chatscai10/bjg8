@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>送貨品項分類工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        .controls, .buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select, button {
+            font-size: 16px;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            background: #fff;
+        }
+        .input-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .half { width: 48%; }
+        .third { width: 30%; }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .list {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        .list h2 {
+            text-align: center;
+            color: #555;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .merge-output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .merge-output button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .merge-output button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>送貨品項分類工具</h1>
+
+    <div class="controls">
+        <label for="storeCount">選擇店家數量：</label>
+        <select id="storeCount" onchange="setStoreInputs()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <label for="storeNameLine">店家名稱行：</label>
+        <select id="storeNameLine">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <label for="skipLines">不需處理的行數：</label>
+        <select id="skipLines">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+
+    <div class="input-container" id="inputContainer"></div>
+
+    <div class="buttons">
+        <button onclick="classifyItems()">分類品項</button>
+        <button onclick="clearAll()">清除</button>
+    </div>
+
+    <div class="container" id="resultsContainer"></div>
+
+    <div class="merge-output" id="mergedOutput">
+        <button onclick="selectAll()">全選</button>
+        <pre id="mergeResultText"></pre>
+    </div>
+
+    <script>
+        function setStoreInputs() {
+            const count = document.getElementById('storeCount').value;
+            const container = document.getElementById('inputContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                let textarea = document.createElement('textarea');
+                textarea.classList.add(count >= 3 ? 'third' : count == 2 ? 'half' : '');
+                textarea.classList.add('input-box');
+                container.appendChild(textarea);
+            }
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('mergeResultText').innerText = '';
+        }
+
+        function classifyItems() {
+            const replacementMap = {
+                '甜不辣': '台北甜不辣',
+                '米腸': '散裝小米',
+                '豬血糕': '大新豬血',
+                '銀絲卷': '志成大麵包',
+                '馬鈴薯條': 'C細薯',
+                '地瓜': '水林地瓜',
+                '貢丸': '福懋大貢丸',
+                '花枝丸': '大武小花枝',
+                '百頁豆腐': '尚百頁',
+                '鑫鑫腸': '捷香鑫鑫腸',
+                '大熱狗': '祥亮大熱狗',
+                '薯餅': '四角薯餅',
+                '麥克雞塊': '正點麥克雞塊',
+                '章魚腳': '章魚腳串20根的',
+                '炸油': '大成炸油'
+            };
+
+            const storeNameLine = parseInt(document.getElementById('storeNameLine').value) - 1;
+            const skipLines = parseInt(document.getElementById('skipLines').value);
+            const inputs = document.querySelectorAll('.input-box');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const mergedOutput = document.getElementById('mergeResultText');
+            resultsContainer.innerHTML = '';
+            mergedOutput.innerText = '';
+            let mergedData = '';
+
+            inputs.forEach((textarea, index) => {
+                const data = textarea.value.split('\n').map(line => line.trim()).filter(line => line !== '');
+                const storeName = data[storeNameLine] || `店家 ${index + 1}`;
+                let markedItems = [];
+                let unmarkedItems = [];
+
+                data.slice(skipLines).forEach(item => {
+                    for (const [original, replacement] of Object.entries(replacementMap)) {
+                        if (item.includes(original)) {
+                            item = item.replace(original, replacement);
+                        }
+                    }
+                    if (item.startsWith('*')) {
+                        markedItems.push(item.substring(1).trim());
+                    } else {
+                        unmarkedItems.push(item);
+                    }
+                });
+
+                let listDiv = document.createElement('div');
+                listDiv.className = 'list';
+                listDiv.innerHTML = `<h2>${storeName}</h2>
+                    <h3>🔹 有標記的品項</h3>
+                    <ul>${markedItems.map(item => `<li class="highlight">${item}</li>`).join('')}</ul>
+                    <h3>🔹 未標記的品項</h3>
+                    <ul>${unmarkedItems.map(item => `<li>${item}</li>`).join('')}</ul>`;
+                resultsContainer.appendChild(listDiv);
+
+                if (markedItems.length > 0) {
+                    mergedData += `${storeName}\n${markedItems.join('\n')}\n\n`;
+                }
+            });
+
+            mergedOutput.innerText = mergedData.trim();
+        }
+
+        function clearAll() {
+            setStoreInputs();
+        }
+
+        function selectAll() {
+            const mergeResult = document.getElementById('mergeResultText');
+            const range = document.createRange();
+            range.selectNodeContents(mergeResult);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        // 初始化輸入框
+        setStoreInputs();
+    </script>
+</body>
+</html>
