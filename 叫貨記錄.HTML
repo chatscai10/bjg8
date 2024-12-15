@@ -16,6 +16,7 @@
 <body>
     <h2>叫貨記錄</h2>
     <p id="storeCount">正在加載數據...</p>
+    <button id="refreshButton">重新讀取數據</button>
     <table id="storeTable">
         <thead>
             <tr>
@@ -31,67 +32,77 @@
         // 使用 CORS 代理解決跨域問題
         const sheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
 
-        // 使用 PapaParse 解析 CSV
-        Papa.parse(sheetUrl, {
-            download: true,
-            header: false,
-            skipEmptyLines: true,
-            complete: function(results) {
-                const data = results.data;
-                const headers = data.shift(); // 移除標題行
+        function fetchData() {
+            document.getElementById("storeCount").innerText = "正在加載數據...";
+            const tbody = document.querySelector("#storeTable tbody");
+            tbody.innerHTML = ""; // 清空現有表格內容
 
-                const dateIndex = 0;    // A 欄 (日期)
-                const contentIndex = 1; // B 欄 (內容)
-                const storeIndex = 2;   // C 欄 (店家名稱)
+            // 使用 PapaParse 解析 CSV
+            Papa.parse(sheetUrl + `&t=${new Date().getTime()}`, { // 加上時間戳來避免快取
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const headers = data.shift(); // 移除標題行
 
-                const stores = {};
+                    const dateIndex = 0;    // A 欄 (日期)
+                    const contentIndex = 1; // B 欄 (內容)
+                    const storeIndex = 2;   // C 欄 (店家名稱)
 
-                // 整理數據，按店家名稱分組
-                data.forEach(row => {
-                    const date = row[dateIndex];
-                    const content = row[contentIndex];
-                    const store = row[storeIndex];
+                    const stores = {};
 
-                    if (store && store.trim() !== "") {
-                        if (!stores[store]) {
-                            stores[store] = [];
+                    // 整理數據，按店家名稱分組
+                    data.forEach(row => {
+                        const date = row[dateIndex];
+                        const content = row[contentIndex];
+                        const store = row[storeIndex];
+
+                        if (store && store.trim() !== "") {
+                            if (!stores[store]) {
+                                stores[store] = [];
+                            }
+                            stores[store].push({ date, content });
                         }
-                        stores[store].push({ date, content });
-                    }
-                });
+                    });
 
-                const storeNames = Object.keys(stores);
-                document.getElementById("storeCount").innerText = `數據分析共有 ${storeNames.length} 家店`;
+                    const storeNames = Object.keys(stores);
+                    document.getElementById("storeCount").innerText = `數據分析共有 ${storeNames.length} 家店`;
 
-                const tbody = document.querySelector("#storeTable tbody");
+                    storeNames.forEach(store => {
+                        // 依日期排序，取最新 3 筆
+                        const sortedEntries = stores[store]
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                            .slice(0, 3);
 
-                storeNames.forEach(store => {
-                    // 依日期排序，取最新 3 筆
-                    const sortedEntries = stores[store]
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .slice(0, 3);
+                        // 提取最新 3 筆日期
+                        const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
 
-                    // 提取最新 3 筆日期
-                    const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
+                        // 提取最新 1 筆 B 欄內容
+                        const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
 
-                    // 提取最新 1 筆 B 欄內容
-                    const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
+                        // 添加表格行
+                        const row = `<tr>
+                            <td>${store}</td>
+                            <td>${latestDates}</td>
+                            <td>${latestContent}</td>
+                        </tr>`;
 
-                    // 添加表格行
-                    const row = `<tr>
-                        <td>${store}</td>
-                        <td>${latestDates}</td>
-                        <td>${latestContent}</td>
-                    </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                },
+                error: function(err) {
+                    document.getElementById("storeCount").innerText = "數據加載失敗：" + err.message;
+                    console.error("Error fetching the data:", err);
+                }
+            });
+        }
 
-                    tbody.innerHTML += row;
-                });
-            },
-            error: function(err) {
-                document.getElementById("storeCount").innerText = "數據加載失敗：" + err.message;
-                console.error("Error fetching the data:", err);
-            }
-        });
+        // 初次加載數據
+        fetchData();
+
+        // 重新加載按鈕事件
+        document.getElementById("refreshButton").addEventListener("click", fetchData);
     </script>
 </body>
 </html>
