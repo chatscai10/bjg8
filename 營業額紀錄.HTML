@@ -15,6 +15,7 @@
 <body>
     <h2>營業額紀錄</h2>
     <p id="storeCount">正在加載數據...</p>
+    <button id="refreshButton">重新加載數據</button>
     <table id="storeTable">
         <thead>
             <tr>
@@ -27,64 +28,74 @@
     </table>
 
     <script>
-        const sheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1pEg1uLe-oNotCpZlFL8UDGGcMYwQYz0Gt94aE79VeeY/export?format=csv&gid=46678731");
+        function fetchData() {
+            const sheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1pEg1uLe-oNotCpZlFL8UDGGcMYwQYz0Gt94aE79VeeY/export?format=csv&gid=46678731") + `&t=${new Date().getTime()}`;
 
-        fetch(sheetUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(csvText => {
-                const rows = csvText.split("\n").map(row => row.split(","));
-                const headers = rows.shift();
-                const data = rows.filter(row => row.length >= 3 && row[2].trim() !== "");
+            document.getElementById("storeCount").innerText = "正在加載數據...";
+            const tbody = document.querySelector("#storeTable tbody");
+            tbody.innerHTML = ""; // 清空現有表格內容
 
-                const dateIndex = 0;    // A欄日期
-                const contentIndex = 1; // B欄內容
-                const storeIndex = 2;   // C欄店家名稱
-
-                const stores = {};
-
-                data.forEach(row => {
-                    const date = row[dateIndex].trim();
-                    const content = row[contentIndex].trim();
-                    const store = row[storeIndex].trim();
-
-                    if (!stores[store]) {
-                        stores[store] = [];
+            fetch(sheetUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    stores[store].push({ date, content });
+                    return response.text();
+                })
+                .then(csvText => {
+                    const rows = csvText.split("\n").map(row => row.split(","));
+                    const headers = rows.shift();
+                    const data = rows.filter(row => row.length >= 3 && row[2].trim() !== "");
+
+                    const dateIndex = 0;    // A欄日期
+                    const contentIndex = 1; // B欄內容
+                    const storeIndex = 2;   // C欄店家名稱
+
+                    const stores = {};
+
+                    data.forEach(row => {
+                        const date = row[dateIndex].trim();
+                        const content = row[contentIndex].trim();
+                        const store = row[storeIndex].trim();
+
+                        if (!stores[store]) {
+                            stores[store] = [];
+                        }
+                        stores[store].push({ date, content });
+                    });
+
+                    const storeNames = Object.keys(stores);
+                    document.getElementById("storeCount").innerText = `數據分析共有 ${storeNames.length} 家店`;
+
+                    storeNames.forEach(store => {
+                        // 按日期排序，取最新 3 筆
+                        const sortedEntries = stores[store]
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                            .slice(0, 3);
+
+                        const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
+                        const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
+
+                        const row = `<tr>
+                            <td>${store}</td>
+                            <td>${latestDates}</td>
+                            <td>${latestContent}</td>
+                        </tr>`;
+
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => {
+                    document.getElementById("storeCount").innerText = "數據加載失敗：" + error.message;
+                    console.error("Error fetching the data:", error);
                 });
+        }
 
-                const storeNames = Object.keys(stores);
-                document.getElementById("storeCount").innerText = `數據分析共有 ${storeNames.length} 家店`;
+        // 初次加載數據
+        fetchData();
 
-                const tbody = document.querySelector("#storeTable tbody");
-
-                storeNames.forEach(store => {
-                    // 按日期排序，取最新 3 筆
-                    const sortedEntries = stores[store]
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .slice(0, 3);
-
-                    const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
-                    const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
-
-                    const row = `<tr>
-                        <td>${store}</td>
-                        <td>${latestDates}</td>
-                        <td>${latestContent}</td>
-                    </tr>`;
-
-                    tbody.innerHTML += row;
-                });
-            })
-            .catch(error => {
-                document.getElementById("storeCount").innerText = "數據加載失敗：" + error.message;
-                console.error("Error fetching the data:", error);
-            });
+        // 綁定按鈕點擊事件
+        document.getElementById("refreshButton").addEventListener("click", fetchData);
     </script>
 </body>
 </html>
