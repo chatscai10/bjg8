@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數據記錄系統</title>
+  <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; display: none; font-size: 14px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #007BFF; color: white; }
+        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+        #content { margin-top: 20px; }
+        #announcement { 
+            white-space: pre-wrap; 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            background-color: #f9f9f9; 
+            display: none; 
+            max-height: 100px; 
+            max-width: 600px; 
+            overflow-y: auto; 
+            font-size: 12px; 
+            line-height: 1.4; 
+            margin: 10px auto;
+        }
+    </style>
+    <!-- 引入 PapaParse 庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <h2>數據記錄系統</h2>
+
+    <label for="dataType">選擇要查看的記錄：</label>
+    <select id="dataType">
+        <option value="announcement">公告</option>
+        <option value="revenue">營業額紀錄</option>
+        <option value="order">叫貨記錄</option>
+    </select>
+
+    <div id="content">
+        <p id="storeCount" style="display: none;">正在加載數據...</p>
+        <div id="announcement" style="display: block;">正在加載公告內容...</div>
+        <table id="storeTable">
+            <thead>
+                <tr>
+                    <th>店家名稱</th>
+                    <th>最近 3 筆輸入時間</th>
+                    <th>最新 1 筆內容</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button id="refreshButton" style="display: none;">重新加載數據</button>
+    </div>
+
+    <script>
+        const dataTypeSelect = document.getElementById("dataType");
+        const announcement = document.getElementById("announcement");
+        const storeCount = document.getElementById("storeCount");
+        const storeTable = document.getElementById("storeTable");
+        const refreshButton = document.getElementById("refreshButton");
+
+        // 營業額紀錄和叫貨記錄的 URL
+        const revenueSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1pEg1uLe-oNotCpZlFL8UDGGcMYwQYz0Gt94aE79VeeY/export?format=csv&gid=46678731");
+        const orderSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
+
+        // 公告內容的 URL，請替換為您的公告網址
+        const announcementUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/document/d/e/2PACX-1vSAj70tmNizKILl02VBxMtR8qOoW0uKbdBpEKVQ6Jpd0Qg7SGwp641aX1LACa_lLm7pcE2F7boEovPo/pub");
+
+        dataTypeSelect.addEventListener("change", () => {
+            const selectedValue = dataTypeSelect.value;
+            announcement.style.display = "none";
+            storeCount.style.display = "none";
+            storeTable.style.display = "none";
+            refreshButton.style.display = "none";
+            clearTable();
+
+            if (selectedValue === "announcement") {
+                fetchAnnouncement();
+            } else if (selectedValue === "revenue") {
+                fetchData(revenueSheetUrl);
+            } else if (selectedValue === "order") {
+                fetchData(orderSheetUrl);
+            }
+        });
+
+        refreshButton.addEventListener("click", () => {
+            const selectedValue = dataTypeSelect.value;
+            if (selectedValue === "revenue") {
+                fetchData(revenueSheetUrl);
+            } else if (selectedValue === "order") {
+                fetchData(orderSheetUrl);
+            }
+        });
+
+        function fetchAnnouncement() {
+            announcement.style.display = "block";
+            announcement.innerText = "正在加載公告內容...";
+
+            fetch(announcementUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    announcement.innerHTML = data;
+                })
+                .catch(error => {
+                    announcement.innerText = "公告加載失敗：" + error.message;
+                    console.error("Error fetching the announcement:", error);
+                });
+        }
+
+        function fetchData(sheetUrl) {
+            storeCount.style.display = "block";
+            storeCount.innerText = "正在加載數據...";
+            storeTable.style.display = "none";
+            refreshButton.style.display = "none";
+
+            Papa.parse(sheetUrl + `&t=${new Date().getTime()}`, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const dateIndex = 0;
+                    const contentIndex = 1;
+                    const storeIndex = 2;
+
+                    const stores = {};
+
+                    data.forEach(row => {
+                        const date = row[dateIndex].trim();
+                        const content = row[contentIndex].trim();
+                        const store = row[storeIndex].trim();
+
+                        if (store) {
+                            if (!stores[store]) {
+                                stores[store] = [];
+                            }
+                            stores[store].push({ date, content });
+                        }
+                    });
+
+                    const storeNames = Object.keys(stores);
+                    storeCount.innerText = `數據分析共有 ${storeNames.length} 家店`;
+
+                    const tbody = storeTable.querySelector("tbody");
+                    clearTable();
+
+                    storeNames.forEach(store => {
+                        const sortedEntries = stores[store]
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                            .slice(0, 3);
+
+                        const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
+                        const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
+
+                        const row = `<tr>
+                            <td>${store}</td>
+                            <td>${latestDates}</td>
+                            <td>${latestContent}</td>
+                        </tr>`;
+
+                        tbody.innerHTML += row;
+                    });
+
+                    storeTable.style.display = "table";
+                    refreshButton.style.display = "inline-block";
+                },
+                error: function(err) {
+                    storeCount.innerText = "數據加載失敗：" + err.message;
+                    console.error("Error fetching the data:", err);
+                }
+            });
+        }
+
+        function clearTable() {
+            storeTable.querySelector("tbody").innerHTML = "";
+        }
+
+        // 初次加載公告
+        fetchAnnouncement();
+    </script>
+</body>
+</html>
