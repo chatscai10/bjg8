@@ -4,27 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>數據記錄系統</title>
-  <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; display: none; font-size: 14px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #007BFF; color: white; }
-        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
-        #content { margin-top: 20px; }
-        #announcement { 
-            white-space: pre-wrap; 
-            border: 1px solid #ccc; 
-            padding: 10px; 
-            background-color: #f9f9f9; 
-            display: none; 
-            max-height: 100px; 
-            max-width: 600px; 
-            overflow-y: auto; 
-            font-size: 12px; 
-            line-height: 1.4; 
-            margin: 10px auto;
-        }
-    </style>
+ <style>
+    /* 設定網頁的基本樣式 */
+    body { 
+        font-family: Arial, sans-serif; /* 使用 Arial 或 sans-serif 字體 */
+        margin: 20px;                   /* 設定頁面外邊距為 20 像素 */
+        background-color: #f4f4f4;      /* 設定背景顏色為淺灰色 */
+    }
+
+    /* 設定表格的樣式 */
+    table { 
+        width: 100%;                    /* 表格寬度設為 100% */
+        border-collapse: collapse;      /* 合併相鄰的邊框 */
+        margin-top: 20px;               /* 在表格上方添加 20 像素的間距 */
+        display: none;                  /* 初始時隱藏表格 */
+        font-size: 14px;                /* 設定字體大小為 14 像素 */
+    }
+
+    /* 設定表格標題和儲存格的樣式 */
+    th, td { 
+        border: 1px solid #ccc;         /* 設定邊框為 1 像素灰色線條 */
+        padding: 8px;                   /* 內邊距為 8 像素 */
+        text-align: left;               /* 文字靠左對齊 */
+    }
+
+    /* 設定表格標題列的樣式 */
+    th { 
+        background-color: #007BFF;      /* 背景顏色設為藍色 */
+        color: white;                   /* 文字顏色設為白色 */
+    }
+
+    /* 設定按鈕的樣式 */
+    button { 
+        margin-top: 20px;               /* 在按鈕上方添加 20 像素的間距 */
+        padding: 10px 20px;             /* 設定按鈕的內邊距為 10 像素上下和 20 像素左右 */
+        font-size: 16px;                /* 字體大小設為 16 像素 */
+    }
+
+    /* 設定內容區域的樣式 */
+    #content { 
+        margin-top: 20px;               /* 在內容區域上方添加 20 像素的間距 */
+    }
+
+    /* 設定公告區域的樣式 */
+    #announcement { 
+        white-space: pre-wrap;          /* 保持原始空白並自動換行 */
+        border: 1px solid #ccc;         /* 邊框為 1 像素灰色線條 */
+        padding: 5px;                  /* 內邊距為 10 像素 */
+        background-color: #f9f9f9;      /* 背景顏色為淡灰色 */
+        display: none;                  /* 初始時隱藏公告 */
+        max-height: 500px;              /* 設定最大高度為 100 像素，超出部分會顯示捲軸 */
+        max-width: 600px;               /* 設定最大寬度為 600 像素 */
+        overflow-y: auto;               /* 如果內容超過高度，顯示垂直捲軸 */
+        font-size: 12px;                /* 字體大小設為 12 像素 */
+        line-height: 1.4;               /* 行高設為 1.4 倍 */
+        margin: 10px auto;              /* 上下間距 10 像素，左右自動置中 */
+    }
+</style>
+
     <!-- 引入 PapaParse 庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
@@ -94,25 +131,59 @@
             }
         });
 
-        function fetchAnnouncement() {
-            announcement.style.display = "block";
-            announcement.innerText = "正在加載公告內容...";
 
-            fetch(announcementUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    announcement.innerHTML = data;
-                })
-                .catch(error => {
-                    announcement.innerText = "公告加載失敗：" + error.message;
-                    console.error("Error fetching the announcement:", error);
-                });
-        }
+
+
+
+ function fetchAnnouncement() {
+    announcement.style.display = "block";
+    announcement.innerText = "正在加載公告內容...";
+
+    fetch(announcementUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(data => {
+            // 將獲取到的公告內容插入到公告區域
+            announcement.innerHTML = data;
+
+            // 隱藏包含「每 5 分鐘自動更新」或「Updated automatically every 5 minutes」的元素
+            hideAutoUpdateText(announcement);
+        })
+        .catch(error => {
+            announcement.innerText = "公告加載失敗：" + error.message;
+            console.error("Error fetching the announcement:", error);
+        });
+}
+
+// 函數：遞歸尋找並隱藏包含特定文本的元素
+function hideAutoUpdateText(element) {
+    const unwantedTexts = [
+        "每 5 分鐘自動更新",
+        "Updated automatically every 5 minutes"
+    ];
+
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, null, false);
+
+    let currentNode = walker.nextNode();
+    while (currentNode) {
+        unwantedTexts.forEach(text => {
+            if (currentNode.textContent.includes(text)) {
+                currentNode.style.display = "none";
+            }
+        });
+        currentNode = walker.nextNode();
+    }
+}
+
+
+
+
+
+
 
         function fetchData(sheetUrl) {
             storeCount.style.display = "block";
