@@ -73,7 +73,11 @@
         <option value="announcement">公告</option>
         <option value="revenue">營業額紀錄</option>
         <option value="order">叫貨記錄</option>
+<option value="bonus">查看獎金(僅供參考)</option>
+
     </select>
+
+
 
     <div id="content">
         <p id="storeCount" style="display: none;">正在加載數據...</p>
@@ -89,14 +93,65 @@
             <tbody></tbody>
         </table>
         <button id="refreshButton" style="display: none;">重新加載數據</button>
+
+<div id="passwordSection" style="display: none;">
+    <label for="passwordInput">輸入密碼：</label>
+    <input type="password" id="passwordInput">
+    <button onclick="checkPassword()">提交</button>
+</div>
+
+
+
     </div>
 
     <script>
+
         const dataTypeSelect = document.getElementById("dataType");
         const announcement = document.getElementById("announcement");
         const storeCount = document.getElementById("storeCount");
         const storeTable = document.getElementById("storeTable");
         const refreshButton = document.getElementById("refreshButton");
+
+const passwordSection = document.getElementById("passwordSection");
+const passwordInput = document.getElementById("passwordInput");
+const bonusSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1Y1GuZt18FQg5MZ-O20Gk_bGj6Ce_lSeBV13BgyWlHH4/export?format=csv&gid=0");
+
+// 密碼驗證函數
+function checkPassword() {
+    const passwordUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1C2B_g5_F4hfu7qtXO8u5T78z6iY6Toii_UOVSHfaBVs/export?format=csv&gid=0");
+
+    fetch(passwordUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(data => {
+            // 解析 CSV 並取得 B2 儲存格的密碼
+            const rows = data.split("\n").map(row => row.split(","));
+            const correctPassword = rows[1][1].trim(); // B2 儲存格的值
+
+            if (passwordInput.value === correctPassword) {
+                passwordSection.style.display = "none";
+                console.log("密碼正確，開始加載獎金數據...");
+                console.log("加載 URL: ", bonusSheetUrl); // 添加日誌確認 URL
+                fetchData(bonusSheetUrl);
+            } else {
+                alert("密碼錯誤，請重試。");
+            }
+        })
+        .catch(error => {
+            alert("無法加載密碼：" + error.message);
+            console.error("Error fetching the password:", error);
+        });
+}
+
+
+
+
+
+
 
         // 營業額紀錄和叫貨記錄的 URL
         const revenueSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1pEg1uLe-oNotCpZlFL8UDGGcMYwQYz0Gt94aE79VeeY/export?format=csv&gid=46678731");
@@ -119,7 +174,16 @@
                 fetchData(revenueSheetUrl);
             } else if (selectedValue === "order") {
                 fetchData(orderSheetUrl);
+
+
+	} else if (selectedValue === "bonus") {
+  	  passwordSection.style.display = "block";
+
+
+
             }
+
+
         });
 
         refreshButton.addEventListener("click", () => {
@@ -185,11 +249,13 @@ function hideAutoUpdateText(element) {
 
 
 
+
         function fetchData(sheetUrl) {
             storeCount.style.display = "block";
             storeCount.innerText = "正在加載數據...";
             storeTable.style.display = "none";
             refreshButton.style.display = "none";
+
 
             Papa.parse(sheetUrl + `&t=${new Date().getTime()}`, {
                 download: true,
@@ -203,18 +269,29 @@ function hideAutoUpdateText(element) {
 
                     const stores = {};
 
-                    data.forEach(row => {
-                        const date = row[dateIndex].trim();
-                        const content = row[contentIndex].trim();
-                        const store = row[storeIndex].trim();
+data.forEach((row, index) => {
+    console.log(`第 ${index + 1} 行:`, row); // 輸出每一行數據，方便調試
 
-                        if (store) {
-                            if (!stores[store]) {
-                                stores[store] = [];
-                            }
-                            stores[store].push({ date, content });
-                        }
-                    });
+    if (row.length >= 3 && row[0] && row[1] && row[2]) {
+        const date = row[0].trim();
+        const content = row[1].trim();
+        const store = row[2].trim();
+
+        if (store) {
+            if (!stores[store]) {
+                stores[store] = [];
+            }
+            stores[store].push({ date, content });
+        }
+    } else {
+        console.warn(`第 ${index + 1} 行數據不完整: `, row);
+    }
+});
+
+
+
+
+
 
                     const storeNames = Object.keys(stores);
                     storeCount.innerText = `數據分析共有 ${storeNames.length} 家店`;
