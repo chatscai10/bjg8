@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>數據記錄系統</title>
+    <title>吃雞排找不早</title>
  <style>
     /* 設定網頁的基本樣式 */
     body { 
@@ -73,7 +73,8 @@
         <option value="announcement">公告</option>
         <option value="revenue">營業額紀錄</option>
         <option value="order">叫貨記錄</option>
-<option value="bonus">查看獎金(僅供參考)</option>
+        <option value="bonus">查看獎金(僅供參考)</option>
+       <option value="crispyQnA">脆皮粉 Q&A</option>
 
     </select>
 
@@ -98,9 +99,16 @@
     <label for="passwordInput">輸入密碼：</label>
     <input type="password" id="passwordInput">
     <button onclick="checkPassword()">提交</button>
+<p style="margin-top: 30px; font-size: 18px; color: red;">※※ 資料僅供參考 ※※</p>
+<p style="margin-top: 5px; font-size: 18px; color: red;">　密碼每天中午12點半</p>
+<p style="margin-top: 5px; font-size: 18px; color: red;">　  系統會更新在群組</p>
 </div>
 
 
+<!-- 新增的脆皮粉 Q&A 區域 -->
+<div id="crispyQnASection" style="display: none; margin-top: 20px; height: 500px;">
+    <iframe id="crispyIframe" src="https://chatscai10.github.io/bjg8/Q&A.HTML" width="100%" height="100%" style="border: none;"></iframe>
+</div>
 
     </div>
 
@@ -166,7 +174,15 @@ function checkPassword() {
             storeCount.style.display = "none";
             storeTable.style.display = "none";
             refreshButton.style.display = "none";
+    //excelData.style.display = "none";
+    document.getElementById("crispyQnASection").style.display = "none";
+
             clearTable();
+
+
+
+
+
 
             if (selectedValue === "announcement") {
                 fetchAnnouncement();
@@ -174,15 +190,14 @@ function checkPassword() {
                 fetchData(revenueSheetUrl);
             } else if (selectedValue === "order") {
                 fetchData(orderSheetUrl);
-
-
 	} else if (selectedValue === "bonus") {
   	  passwordSection.style.display = "block";
-
-
-
-            }
-
+            
+} else if (selectedValue === "crispyQnA") {
+    document.getElementById("crispyQnASection").style.display = "block";
+} else {
+    document.getElementById("crispyQnASection").style.display = "none";
+}
 
         });
 
