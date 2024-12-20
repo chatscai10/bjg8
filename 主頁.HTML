@@ -315,9 +315,30 @@ data.forEach((row, index) => {
                     clearTable();
 
                     storeNames.forEach(store => {
-                        const sortedEntries = stores[store]
-                            .sort((a, b) => new Date(b.date) - new Date(a.date))
-                            .slice(0, 3);
+       // 格式化日期函數
+const formatDate = (dateStr) => {
+    return dateStr.replace(/(\d{4}-\d{2}-\d{2}) (\d{1,2}):(\d{2}):(\d{2})/, (match, date, hour, minute, second) => {
+        return `${date}T${hour.padStart(2, '0')}:${minute}:${second}`;
+    });
+};
+
+// 排序並取最近 3 筆數據
+const sortedEntries = stores[store]
+    .sort((a, b) => {
+        const dateA = new Date(formatDate(a.date));
+        const dateB = new Date(formatDate(b.date));
+
+        console.log("Formatted dates:", a.date, "->", dateA, "|", b.date, "->", dateB);
+
+        if (isNaN(dateA) || isNaN(dateB)) {
+            console.warn("Invalid date encountered:", a.date, b.date);
+            return 0;
+        }
+
+        return dateB - dateA;
+    })
+    .slice(0, 3);
+
 
                         const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
                         const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
