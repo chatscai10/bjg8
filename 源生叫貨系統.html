@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>源生叫貨系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        .controls, .buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select, button {
+            font-size: 16px;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            background: #fff;
+        }
+        .input-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .half { width: 48%; }
+        .third { width: 30%; }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .list {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        .list h2 {
+            text-align: center;
+            color: #555;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .merge-output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        #storeTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        #storeTable th, #storeTable td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        #storeTable th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .content-cell {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>源生叫貨系統</h1>
+
+    <!-- 分類工具部分 -->
+    <div class="controls">
+        <label for="storeCount">選擇店家數量：</label>
+        <select id="storeCount" onchange="setStoreInputs()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" >3</option>
+            <option value="4">4</option>
+            <option value="5"selected>5</option>
+        </select>
+        <label for="storeNameLine">店家名稱行：</label>
+        <select id="storeNameLine">
+            <option value="1">1</option>
+            <option value="2"selected>2</option>
+            <option value="3" >3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <label for="skipLines">不需處理的行數：</label>
+        <select id="skipLines">
+            <option value="1"selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+
+    <div class="input-container" id="inputContainer"></div>
+
+    <div class="buttons">
+        <button onclick="classifyItems()">分類品項</button>
+        <button onclick="clearAll()">清除</button>
+    </div>
+
+    <div class="container" id="resultsContainer"></div>
+
+    <div class="merge-output" id="mergedOutput">
+        <button onclick="selectAll()">全選</button>
+        <pre id="mergeResultText"></pre>
+    </div>
+
+    <!-- 叫貨記錄部分 -->
+    <div id="recordSection">
+        <h2>叫貨記錄查詢</h2>
+        <p id="storeCount" style="text-align: center;">正在加載數據...</p>
+        <table id="storeTable">
+            <thead>
+                <tr>
+                    <th>店家名稱</th>
+                    <th>最近 3 筆輸入時間</th>
+                    <th>最新 1 筆內容</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="fetchData()">重新加載數據</button>
+        </div>
+    </div>
+
+
+
+
+
+      <script>
+        function setStoreInputs() {
+            const count = parseInt(document.getElementById('storeCount').value);
+            const container = document.getElementById('inputContainer');
+            container.innerHTML = '';
+            
+            // 創建指定數量的文本框
+            for (let i = 0; i < count; i++) {
+                const textarea = document.createElement('textarea');
+                textarea.className = `input-box ${count >= 3 ? 'third' : count == 2 ? 'half' : ''}`;
+                container.appendChild(textarea);
+            }
+        }
+
+        function classifyItems() {
+            const replacementMap = {
+                '甜不辣': '台北甜不辣',
+                '米腸': '散裝小米',
+                '豬血糕': '大新豬血',
+                '銀絲卷': '志成大麵包',
+                '馬鈴薯條': 'C細薯',
+                '地瓜': '水林地瓜',
+                '貢丸': '福懋大貢丸',
+                '花枝丸': '大武小花枝',
+                '百頁豆腐': '尚百頁',
+                '鑫鑫腸': '捷香鑫鑫腸',
+                '大熱狗': '祥亮大熱狗',
+                '薯餅': '四角薯餅',
+                '麥克雞塊': '正點麥克雞塊',
+                '章魚腳': '章魚腳串20根的',
+                '炸油': '大成炸油'
+            };
+
+            const storeNameLine = parseInt(document.getElementById('storeNameLine').value) - 1;
+            const skipLines = parseInt(document.getElementById('skipLines').value);
+            const inputs = document.querySelectorAll('.input-box');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const mergedOutput = document.getElementById('mergeResultText');
+            
+            // 清空之前的結果
+            resultsContainer.innerHTML = '';
+            mergedOutput.innerText = '';
+            let mergedData = '';
+
+            inputs.forEach((textarea, index) => {
+                if (!textarea.value.trim()) return; // 跳過空的輸入框
+                
+                const data = textarea.value.split('\n').map(line => line.trim()).filter(line => line !== '');
+                const storeName = data[storeNameLine] || `店家 ${index + 1}`;
+                let markedItems = [];
+                let unmarkedItems = [];
+
+                data.slice(skipLines).forEach(item => {
+                    if (!item) return; // 跳過空行
+                    
+                    // 替換品項名稱
+                    let processedItem = item;
+                    for (const [original, replacement] of Object.entries(replacementMap)) {
+                        if (processedItem.includes(original)) {
+                            processedItem = processedItem.replace(original, replacement);
+                        }
+                    }
+
+                    if (item.startsWith('*')) {
+                        markedItems.push(processedItem.substring(1).trim());
+                    } else {
+                        unmarkedItems.push(processedItem);
+                    }
+                });
+
+                // 只有當有內容時才創建結果區塊
+                if (markedItems.length > 0 || unmarkedItems.length > 0) {
+                    let listDiv = document.createElement('div');
+                    listDiv.className = 'list';
+                    listDiv.innerHTML = `
+                        <h2>${storeName}</h2>
+                        <h3>🔹 有標記的品項</h3>
+                        <ul>${markedItems.map(item => `<li class="highlight">${item}</li>`).join('')}</ul>
+                        <h3>🔹 未標記的品項</h3>
+                        <ul>${unmarkedItems.map(item => `<li>${item}</li>`).join('')}</ul>
+                    `;
+                    resultsContainer.appendChild(listDiv);
+
+                    if (markedItems.length > 0) {
+                        mergedData += `${storeName}\n${markedItems.join('\n')}\n\n`;
+                    }
+                }
+            });
+
+            mergedOutput.innerText = mergedData.trim();
+        }
+
+        function clearAll() {
+            // 清空所有輸入框的內容
+            document.querySelectorAll('.input-box').forEach(input => {
+                input.value = '';
+            });
+            
+            // 清空結果區域
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('mergeResultText').innerText = '';
+        }
+
+        function selectAll() {
+            const mergeResult = document.getElementById('mergeResultText');
+            const range = document.createRange();
+            range.selectNodeContents(mergeResult);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        function fillClassifyInput(content) {
+            // 將 <br> 替換為換行符
+            content = content.replace(/<br>/g, '\n');
+            
+            const inputs = document.querySelectorAll('.input-box');
+            let emptyInput = null;
+            
+            // 尋找第一個空的輸入框
+            for (let input of inputs) {
+                if (!input.value.trim()) {
+                    emptyInput = input;
+                    break;
+                }
+            }
+            
+            // 如果找到空的輸入框，就填入內容
+            if (emptyInput) {
+                emptyInput.value = content;
+            } else {
+                // 如果沒有空的輸入框，就填入第一個輸入框
+                inputs[0].value = content;
+            }
+        }
+
+        // 叫貨記錄相關函數
+        const orderSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
+
+        function fetchData() {
+            const storeCount = document.getElementById("storeCount");
+            const storeTable = document.getElementById("storeTable");
+            
+            storeCount.style.display = "block";
+            storeCount.innerText = "正在加載數據...";
+
+            Papa.parse(orderSheetUrl + `&t=${new Date().getTime()}`, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const stores = {};
+
+                    data.forEach((row, index) => {
+                        if (row.length >= 3 && row[0] && row[1] && row[2]) {
+                            const date = row[0].trim();
+                            const content = row[1].trim();
+                            const store = row[2].trim();
+
+                            if (store) {
+                                if (!stores[store]) {
+                                    stores[store] = [];
+                                }
+                                stores[store].push({ date, content });
+                            }
+                        }
+                    });
+
+                    const storeNames = Object.keys(stores);
+                    storeCount.innerText = `數據分析共有 ${storeNames.length} 家店`;
+
+                    const tbody = storeTable.querySelector("tbody");
+                    tbody.innerHTML = "";
+
+                    storeNames.forEach(store => {
+                        const formatDate = (dateStr) => {
+                            return dateStr.replace(/(\d{4}-\d{2}-\d{2}) (\d{1,2}):(\d{2}):(\d{2})/, 
+                                (match, date, hour, minute, second) => {
+                                    return `${date}T${hour.padStart(2, '0')}:${minute}:${second}`;
+                                });
+                        };
+
+                        const sortedEntries = stores[store]
+                            .sort((a, b) => {
+                                const dateA = new Date(formatDate(a.date));
+                                const dateB = new Date(formatDate(b.date));
+                                return dateB - dateA;
+                            })
+                            .slice(0, 3);
+
+                        const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
+                        const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
+
+                        const row = `<tr>
+                            <td>${store}</td>
+                            <td>${latestDates}</td>
+                            <td><span class="content-cell" onclick="fillClassifyInput('${latestContent.replace(/'/g, "\\'")}')">${latestContent}</span></td>
+                        </tr>`;
+
+                        tbody.innerHTML += row;
+                    });
+                },
+                error: function(err) {
+                    storeCount.innerText = "數據加載失敗：" + err.message;
+                    console.error("Error fetching the data:", err);
+                }
+            });
+        }
+
+        // 初始化
+        setStoreInputs();
+        fetchData();
+    </script>
+</body>
+</html>
