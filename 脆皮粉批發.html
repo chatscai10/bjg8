@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>頂級天然發酵脆皮粉</title>
+    <title>天然脆皮粉 - 自然發酵</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -197,6 +197,92 @@
             transform: translateY(0);
         }
 
+        /* 更新產品照片區塊樣式 */
+        .gallery-section {
+            background: var(--bg-light);
+            padding: 8rem 2rem;
+            overflow: hidden;
+        }
+
+        .gallery-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 1rem 0;
+            scroll-behavior: smooth;
+        }
+
+        .gallery-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-350px * 3 - 6rem)); /* 3張圖片的寬度加上間距 */
+            }
+        }
+
+        .gallery-grid {
+            display: flex;
+            gap: 2rem;
+            padding: 2rem 0;
+            width: max-content;
+            animation: scroll 30s linear infinite;
+            animation-play-state: running;
+        }
+
+        .gallery-grid:hover {
+            animation-play-state: paused;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            width: 350px;
+            flex: 0 0 auto;
+            aspect-ratio: 4/3;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: var(--white);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-caption {
+            opacity: 1;
+        }
+
         /* Modal Styles */
         .modal {
             position: fixed;
@@ -235,14 +321,6 @@
 
         .modal.active .modal-content {
             transform: translateY(0);
-        }
-
-        .modal-content h2 {
-            font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 2rem;
-            text-align: center;
-            font-weight: 700;
         }
 
         .close-modal {
@@ -301,41 +379,6 @@
             width: 100%;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            background-color: var(--white);
-            box-shadow: 0 0 0 4px rgba(154, 138, 120, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .order-form .btn {
-            margin-top: 1rem;
-            padding: 1rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            background: var(--accent);
-            color: var(--white);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .order-form .btn:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
         .success-message {
             position: fixed;
             bottom: 2rem;
@@ -354,9 +397,24 @@
             transform: translateX(0);
         }
 
+        /* 響應式樣式 */
         @media (max-width: 768px) {
             .section {
                 padding: 4rem 1rem;
+            }
+
+            .gallery-section {
+                padding: 4rem 1rem;
+            }
+
+            .gallery-item {
+                width: 280px;
+            }
+
+            .gallery-caption {
+                opacity: 1;
+                font-size: 0.9rem;
+                padding: 0.8rem;
             }
 
             .features-grid {
@@ -382,14 +440,28 @@
                 font-size: 16px;
             }
         }
+
+        /* 觸控設備優化 */
+        @media (hover: none) {
+            .gallery-caption {
+                opacity: 1;
+            }
+
+            .gallery-item:hover {
+                transform: none;
+            }
+
+            .gallery-item:hover img {
+                transform: none;
+            }
+        }
     </style>
 </head>
-
 <body>
     <section class="hero">
         <div class="hero-content fade-in">
             <h1>頂級天然發酵脆皮粉</h1>
-            <p>三十年傳統工藝，不添加任何化學粉末</p>
+            <p>三十年匠心傳承，專注於純天然脆皮粉的製作工藝，嚴選原料，絕不添加任何化學粉末，保留食材最真實的風味與口感。每一批粉料都經過細緻調配與反覆測試，只為讓您與顧客享受更健康、更安心的美味。</p>
         </div>
     </section>
 
@@ -415,12 +487,55 @@
         </div>
     </section>
 
-    <section class="section price-section">
+    <!-- 更新的產品照片區塊 -->
+    <section class="section gallery-section">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>產品展示</h2>
+            </div>
+            <div class="gallery-container">
+                <div class="gallery-grid">
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">外酥內軟的完美口感</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">傳統工藝製作過程</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">精選優質原料</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">成品展示</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">包裝展示</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <img src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="脆皮產品展示">
+                        <div class="gallery-caption">應用展示</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+  <section class="section price-section">
         <div class="container">
             <div class="section-title fade-in">
                 <h2>產品價格</h2>
             </div>
-            <div class="price-tag fade-in">NT$ 75/公斤</div>
+        <div class="price-box fade-in">
+            <p class="price-label">每包裝20公斤</p>
+            <div class="price-tag">
+                <span class="currency">NT$</span>
+                <span class="amount">75</span>
+                <span class="unit">/ 公斤</span>
+            </div>
+        </div>
             <p class="price-note fade-in">大量訂購另有優惠，歡迎來電洽詢</p>
             <button class="btn fade-in" id="orderBtn">立即訂購</button>
         </div>
@@ -442,14 +557,16 @@
                     <input type="tel" id="phone" name="聯絡電話" required>
                 </div>
                 <div class="form-group">
-                    <label for="quantity">訂購數量（公斤）</label>
+                    <label for="quantity">訂購數量（每包20公斤）</label>
                     <select id="quantity" name="訂購數量" required>
                         <option value="">請選擇數量</option>
-                        <option value="1">1公斤</option>
-                        <option value="5">5公斤</option>
-                        <option value="10">10公斤</option>
-                        <option value="20">20公斤</option>
-                        <option value="30">30公斤</option>
+                        <option value="試用品">試用品</option>
+                        <option value="1包">1包</option>
+                        <option value="2包">2包</option>
+                        <option value="3包">3包</option>
+                        <option value="4包">4包</option>
+                        <option value="5包">5包</option>
+
                         <option value="other">其他數量</option>
                     </select>
                 </div>
@@ -492,6 +609,43 @@
             if (!el.classList.contains('hero-content')) {
                 observer.observe(el);
             }
+        });
+
+        // 滑鼠滾輪橫向滾動
+        const galleryContainer = document.querySelector('.gallery-container');
+
+        galleryContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            galleryContainer.scrollLeft += e.deltaY;
+        });
+
+        // 自動滾動功能
+        const galleryGrid = document.querySelector('.gallery-grid');
+        const scrollSpeed = 1; // 調整滾動速度
+        let scrollPosition = 0;
+        let isScrolling = true;
+
+        function autoScroll() {
+            if (isScrolling) {
+                scrollPosition += scrollSpeed;
+                if (scrollPosition >= galleryContainer.scrollWidth - galleryContainer.clientWidth) {
+                    scrollPosition = 0;
+                }
+                galleryContainer.scrollLeft = scrollPosition;
+            }
+            requestAnimationFrame(autoScroll);
+        }
+
+        // 開始自動滾動
+        autoScroll();
+
+        // 滑鼠懸停時暫停滾動
+        galleryContainer.addEventListener('mouseenter', () => {
+            isScrolling = false;
+        });
+
+        galleryContainer.addEventListener('mouseleave', () => {
+            isScrolling = true;
         });
 
         // 訂購表單處理
