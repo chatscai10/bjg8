@@ -11,7 +11,7 @@
             background-color: #f2f2f2;
             color: #333;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #444;
         }
@@ -96,22 +96,42 @@
         #storeTable {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px 0;
             background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         #storeTable th, #storeTable td {
             border: 1px solid #ccc;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         #storeTable th {
-            background-color: #007BFF;
+            background-color: #28a745;
             color: white;
         }
         .content-cell {
             cursor: pointer;
-            color: blue;
+            color: #007bff;
             text-decoration: underline;
+        }
+        #recordSection {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .reload-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .reload-button:hover {
+            background-color: #0056b3;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -119,27 +139,46 @@
 <body>
     <h1>源生叫貨系統</h1>
 
+    <!-- 叫貨記錄部分 -->
+    <div id="recordSection">
+        <h2>叫貨記錄查詢</h2>
+        <p id="storeCountDisplay" style="text-align: center;">正在加載數據...</p>
+        <table id="storeTable">
+            <thead>
+                <tr>
+                    <th>店家名稱</th>
+                    <th>最近 3 筆輸入時間</th>
+                    <th>最新 1 筆內容</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div style="text-align: center;">
+            <button class="reload-button" onclick="fetchData()">重新加載數據</button>
+        </div>
+    </div>
+
     <!-- 分類工具部分 -->
     <div class="controls">
-        <label for="storeCount">選擇店家數量：</label>
-        <select id="storeCount" onchange="setStoreInputs()">
+        <label for="storeCountSelect">選擇店家數量：</label>
+        <select id="storeCountSelect" onchange="setStoreInputs()">
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3" >3</option>
+            <option value="3" selected>3</option>
             <option value="4">4</option>
-            <option value="5"selected>5</option>
+            <option value="5">5</option>
         </select>
         <label for="storeNameLine">店家名稱行：</label>
         <select id="storeNameLine">
             <option value="1">1</option>
-            <option value="2"selected>2</option>
-            <option value="3" >3</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
         </select>
         <label for="skipLines">不需處理的行數：</label>
         <select id="skipLines">
-            <option value="1"selected>1</option>
+            <option value="1" selected>1</option>
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
@@ -160,37 +199,12 @@
         <button onclick="selectAll()">全選</button>
         <pre id="mergeResultText"></pre>
     </div>
-
-    <!-- 叫貨記錄部分 -->
-    <div id="recordSection">
-        <h2>叫貨記錄查詢</h2>
-        <p id="storeCount" style="text-align: center;">正在加載數據...</p>
-        <table id="storeTable">
-            <thead>
-                <tr>
-                    <th>店家名稱</th>
-                    <th>最近 3 筆輸入時間</th>
-                    <th>最新 1 筆內容</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="fetchData()">重新加載數據</button>
-        </div>
-    </div>
-
-
-
-
-
-      <script>
+    <script>
         function setStoreInputs() {
-            const count = parseInt(document.getElementById('storeCount').value);
+            const count = parseInt(document.getElementById('storeCountSelect').value);
             const container = document.getElementById('inputContainer');
             container.innerHTML = '';
             
-            // 創建指定數量的文本框
             for (let i = 0; i < count; i++) {
                 const textarea = document.createElement('textarea');
                 textarea.className = `input-box ${count >= 3 ? 'third' : count == 2 ? 'half' : ''}`;
@@ -223,13 +237,12 @@
             const resultsContainer = document.getElementById('resultsContainer');
             const mergedOutput = document.getElementById('mergeResultText');
             
-            // 清空之前的結果
             resultsContainer.innerHTML = '';
             mergedOutput.innerText = '';
             let mergedData = '';
 
             inputs.forEach((textarea, index) => {
-                if (!textarea.value.trim()) return; // 跳過空的輸入框
+                if (!textarea.value.trim()) return;
                 
                 const data = textarea.value.split('\n').map(line => line.trim()).filter(line => line !== '');
                 const storeName = data[storeNameLine] || `店家 ${index + 1}`;
@@ -237,9 +250,8 @@
                 let unmarkedItems = [];
 
                 data.slice(skipLines).forEach(item => {
-                    if (!item) return; // 跳過空行
+                    if (!item) return;
                     
-                    // 替換品項名稱
                     let processedItem = item;
                     for (const [original, replacement] of Object.entries(replacementMap)) {
                         if (processedItem.includes(original)) {
@@ -254,7 +266,6 @@
                     }
                 });
 
-                // 只有當有內容時才創建結果區塊
                 if (markedItems.length > 0 || unmarkedItems.length > 0) {
                     let listDiv = document.createElement('div');
                     listDiv.className = 'list';
@@ -277,12 +288,9 @@
         }
 
         function clearAll() {
-            // 清空所有輸入框的內容
             document.querySelectorAll('.input-box').forEach(input => {
                 input.value = '';
             });
-            
-            // 清空結果區域
             document.getElementById('resultsContainer').innerHTML = '';
             document.getElementById('mergeResultText').innerText = '';
         }
@@ -297,13 +305,11 @@
         }
 
         function fillClassifyInput(content) {
-            // 將 <br> 替換為換行符
             content = content.replace(/<br>/g, '\n');
             
             const inputs = document.querySelectorAll('.input-box');
             let emptyInput = null;
             
-            // 尋找第一個空的輸入框
             for (let input of inputs) {
                 if (!input.value.trim()) {
                     emptyInput = input;
@@ -311,24 +317,21 @@
                 }
             }
             
-            // 如果找到空的輸入框，就填入內容
             if (emptyInput) {
                 emptyInput.value = content;
             } else {
-                // 如果沒有空的輸入框，就填入第一個輸入框
                 inputs[0].value = content;
             }
         }
 
-        // 叫貨記錄相關函數
         const orderSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
 
         function fetchData() {
-            const storeCount = document.getElementById("storeCount");
+            const storeCountDisplay = document.getElementById("storeCountDisplay");
             const storeTable = document.getElementById("storeTable");
             
-            storeCount.style.display = "block";
-            storeCount.innerText = "正在加載數據...";
+            storeCountDisplay.style.display = "block";
+            storeCountDisplay.innerText = "正在加載數據...";
 
             Papa.parse(orderSheetUrl + `&t=${new Date().getTime()}`, {
                 download: true,
@@ -354,7 +357,7 @@
                     });
 
                     const storeNames = Object.keys(stores);
-                    storeCount.innerText = `數據分析共有 ${storeNames.length} 家店`;
+                    storeCountDisplay.innerText = `數據分析共有 ${storeNames.length} 家店`;
 
                     const tbody = storeTable.querySelector("tbody");
                     tbody.innerHTML = "";
@@ -388,7 +391,7 @@
                     });
                 },
                 error: function(err) {
-                    storeCount.innerText = "數據加載失敗：" + err.message;
+                    storeCountDisplay.innerText = "數據加載失敗：" + err.message;
                     console.error("Error fetching the data:", err);
                 }
             });
