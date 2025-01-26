@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利潤計算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+        label, select, input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>利潤計算器</h2>
+
+        <label for="commission">抽成趴數 (%)</label>
+        <input type="number" id="commission" value="35">
+
+        <label for="cost">食材成本 (元)</label>
+        <input type="number" id="cost" value="27">
+
+        <label for="price">平台售價 (元)</label>
+        <input type="number" id="price" value="150">
+
+        <label for="activity">活動</label>
+        <select id="activity">
+            <option value="buy1get1">買1送1</option>
+            <option value="95">95折</option>
+            <option value="90">9折</option>
+        </select>
+
+        <button onclick="calculateProfit()">計算利潤</button>
+
+        <div class="result" id="result">
+            請輸入數據並點擊計算。
+        </div>
+    </div>
+
+    <script>
+        function calculateProfit() {
+            // 獲取輸入數據
+            const commission = parseFloat(document.getElementById("commission").value) / 100;
+            const cost = parseFloat(document.getElementById("cost").value);
+            const price = parseFloat(document.getElementById("price").value);
+            const activity = document.getElementById("activity").value;
+
+            let effectivePrice; // 實際售價
+            let totalCost; // 總成本
+
+            // 計算不同活動的實際售價和總成本
+            if (activity === "buy1get1") {
+                effectivePrice = price; // 買1送1活動售價不變
+                totalCost = cost * 2;  // 買1送1需要2份成本
+            } else if (activity === "95") {
+                effectivePrice = price * 0.95; // 95折
+                totalCost = cost;
+            } else if (activity === "90") {
+                effectivePrice = price * 0.9; // 9折
+                totalCost = cost;
+            }
+
+            // 扣除抽成後的實際收入
+            const netIncome = effectivePrice * (1 - commission);
+
+            // 計算利潤
+            const profit = netIncome - totalCost;
+
+            // 顯示結果
+            document.getElementById("result").innerHTML = `
+                <p>抽成後收入: ${netIncome.toFixed(2)} 元</p>
+                <p>總成本: ${totalCost.toFixed(2)} 元</p>
+                <p>利潤: ${profit.toFixed(2)} 元</p>
+            `;
+        }
+    </script>
+</body>
+</html>
