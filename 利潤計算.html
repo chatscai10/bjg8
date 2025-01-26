@@ -7,32 +7,58 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
         }
         .container {
             max-width: 400px;
             margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        label, select, input, button {
-            display: block;
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select, button {
             width: 100%;
             margin: 10px 0;
             padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         button {
             background-color: #4CAF50;
             color: white;
-            border: none;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #45a049;
         }
         .result {
             margin-top: 20px;
-            padding: 10px;
+            padding: 15px;
             background-color: #f1f1f1;
             border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .result p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #333;
         }
     </style>
 </head>
@@ -41,16 +67,17 @@
         <h2>利潤計算器</h2>
 
         <label for="commission">抽成趴數 (%)</label>
-        <input type="number" id="commission" value="35">
+        <input type="number" id="commission" value="35" step="0.01" placeholder="輸入抽成趴數">
 
         <label for="cost">食材成本 (元)</label>
-        <input type="number" id="cost" value="27">
+        <input type="number" id="cost" value="27" step="0.01" placeholder="輸入食材成本">
 
         <label for="price">平台售價 (元)</label>
-        <input type="number" id="price" value="150">
+        <input type="number" id="price" value="150" step="0.01" placeholder="輸入平台售價">
 
         <label for="activity">活動</label>
         <select id="activity">
+            <option value="none">無</option>
             <option value="buy1get1">買1送1</option>
             <option value="95">95折</option>
             <option value="90">9折</option>
@@ -59,7 +86,7 @@
         <button onclick="calculateProfit()">計算利潤</button>
 
         <div class="result" id="result">
-            請輸入數據並點擊計算。
+            <p>請輸入數據並點擊計算。</p>
         </div>
     </div>
 
@@ -75,8 +102,11 @@
             let totalCost; // 總成本
 
             // 計算不同活動的實際售價和總成本
-            if (activity === "buy1get1") {
-                effectivePrice = price; // 買1送1活動售價不變
+            if (activity === "none") {
+                effectivePrice = price; // 無活動，售價不變
+                totalCost = cost;      // 成本只算一份
+            } else if (activity === "buy1get1") {
+                effectivePrice = price; // 買1送1售價不變
                 totalCost = cost * 2;  // 買1送1需要2份成本
             } else if (activity === "95") {
                 effectivePrice = price * 0.95; // 95折
