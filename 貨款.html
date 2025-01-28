@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>貨款計算</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+    }
+    .item label {
+      font-size: 16px;
+    }
+    .item input {
+      width: 60px;
+      padding: 5px;
+      font-size: 16px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>貨款計算</h1>
+    <div class="item">
+      <label>雞排 (1包 $550)</label>
+      <input type="number" id="chicken" value="0" min="0" oninput="calculateTotal()">
+    </div>
+    <div class="item">
+      <label>鹹酥雞 (1包 $400)</label>
+      <input type="number" id="popcorn" value="0" min="0" oninput="calculateTotal()">
+    </div>
+    <div class="item">
+      <label>炸粉 (1包 $1000)</label>
+      <input type="number" id="powder" value="0" min="0" oninput="calculateTotal()">
+    </div>
+    <div class="item">
+      <label>蔬菜 ($500 固定)</label>
+      <span>$500</span>
+    </div>
+    <div class="total" id="total">總金額: $0</div>
+    <button onclick="calculateTotal()">計算總金額</button>
+  </div>
+
+  <script>
+    function calculateTotal() {
+      const chickenPrice = 550;
+      const popcornPrice = 400;
+      const powderPrice = 1000;
+      const vegetablePrice = 500;
+
+      const chickenQty = parseInt(document.getElementById('chicken').value) || 0;
+      const popcornQty = parseInt(document.getElementById('popcorn').value) || 0;
+      const powderQty = parseInt(document.getElementById('powder').value) || 0;
+
+      const total = (chickenQty * chickenPrice) + (popcornQty * popcornPrice) + (powderQty * powderPrice) + vegetablePrice;
+
+      document.getElementById('total').innerText = `總金額: $${total}`;
+    }
+  </script>
+</body>
+</html>
