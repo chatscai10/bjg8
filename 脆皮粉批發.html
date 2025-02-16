@@ -393,6 +393,37 @@
             transform: translateX(0);
         }
 
+        .contact-section {
+            background: var(--bg-light);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .line-info {
+            display: inline-flex;
+            align-items: center;
+            background: #06c755;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            text-decoration: none;
+        }
+
+        .line-info:hover {
+            transform: translateY(-3px);
+        }
+
+        .line-info::before {
+            content: '';
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTE4LjA1IDMuNzVDMTQuMDIgMy43NSA5Ljk5OCAzLjc1IDUuOTUgMy43NWMtMS44MiAwLTMuMTUuMjYtNC4xNSAxLjItMS4wMyAxLjAxLTEuMjMgMi40MS0xLjIzIDQuMlYxNC44YzAgMS43OS4yIDMuMTkgMS4yMyA0LjIgMS4wMyAxLjAxIDIuMzMgMS4yIDQuMTUgMS4yIDMuOTggMCA3Ljk4IDAgMTIuMSAwIDEuODIgMCAzLjEyLS4xOSA0LjE1LTEuMiAxLjAzLTEuMDEgMS4yMy0yLjQxIDEuMjMtNC4yVjkuMTVjMC0xLjc5LS4yLTMuMTktMS4yMy00LjItMS4wMy0xLjAxLTIuMzMtMS4yLTQuMTUtMS4ybS0uNDMgMTIuOTJoLTMuNWMtLjI0IDAtLjQzLS4yLS40My0uNDUgMC0uMjQuMTktLjQ1LjQzLS40NWgzLjVjLjI0IDAgLjQzLjIxLjQzLjQ1IDAgLjI1LS4xOS40NS0uNDMuNDVtLTUuODUgMGgtMy41Yy0uMjQgMC0uNDMtLjItLjQzLS40NSAwLS4yNC4xOS0uNDUuNDMtLjQ1aDMuNWMuMjQgMCAuNDMuMjEuNDMuNDUgMCAuMjUtLjE5LjQ1LS40My40NW0yLjE1LTUuOTRjMCAuNjYtLjU0IDEuMi0xLjIgMS4ySDcuMzhjLS42NiAwLTEuMi0uNTQtMS4yLTEuMnYtMy4zYzAtLjY2LjU0LTEuMiAxLjItMS4yaDUuMzljLjY2IDAgMS4yLjU0IDEuMiAxLjJ2My4zeiIvPjwvc3ZnPg==') no-repeat;
+            margin-right: 0.8rem;
+        }
+
         @media (max-width: 768px) {
             .section {
                 padding: 4rem 1rem;
@@ -440,11 +471,10 @@
         }
     </style>
 </head>
-
 <body>
     <section class="hero">
         <div class="hero-content fade-in">
-            <h1>頂級天然發酵脆皮粉</h1>
+            <h1>專業級天然發酵 - 脆皮粉</h1>
             <p>三十年匠心傳承，專注於純天然脆皮粉的製作工藝，嚴選原料，絕不添加任何化學粉末，只為讓您與顧客享受更健康、更安心的美味。</p>
         </div>
     </section>
@@ -489,18 +519,27 @@
             <div class="section-title fade-in">
                 <h2>產品價格</h2>
             </div>
-<div class="price-box fade-in">
-    <p class="price-label">－</p>
-    <div class="price-tag">
-        <span class="currency">NT$</span>
-        <span class="amount">55</span>
-        <span class="unit">/ 公斤</span>
-        <span style="font-size: 0.5em;">起</span>
-    </div>
-</div>
+            <div class="price-box fade-in">
+                <p class="price-label">－</p>
+                <div class="price-tag">
+                    <span class="currency">NT$</span>
+                    <span class="amount">55</span>
+                    <span class="unit">/ 公斤</span>
+                    <span style="font-size: 0.5em;">起</span>
+                </div>
             </div>
             <p class="price-note fade-in">5件以上免運費，10件以上優惠價</p>
             <button class="btn fade-in" id="orderBtn">立即訂購</button>
+        </div>
+    </section>
+
+    <section class="contact-section fade-in">
+        <div class="container">
+            <h3>聯繫我們</h3>
+            <p class="price-note fade-in">諮詢請洽官方line:@fried</p>
+            <a href="https://line.me/ti/p/@fried" target="_blank" class="line-info">
+                LINE官方帳號
+            </a>
         </div>
     </section>
 
@@ -516,25 +555,28 @@
                 </div>
                 <div class="form-group">
                     <label for="phone">聯絡電話</label>
-                    <input type="tel" id="phone" name="聯絡電話" required>
+                    <input type="tel" id="phone" name="聯絡電話" pattern="[0-9]{10}" required>
                 </div>
                 <div class="form-group">
                     <label for="address">寄送地址</label>
                     <input type="text" id="address" name="寄送地址" required>
                 </div>
                 <div class="form-group">
-                    <label for="quantity">訂購種類</label>
-                    <select id="quantity" name="訂購種類" required>
-                        <option value="">請選擇數量</option>
-                        <option value="試用品200g(運費自付)">試用品200g(運費自付)</option>
-                        <option value="1公斤包裝($85)">1公斤包裝($85)</option>
-                        <option value="20公斤包裝($1300)">20公斤包裝($1300)</option>
-                        <option value="other">其他</option>
+                    <label for="type">訂購種類</label>
+                    <select id="type" name="訂購種類" required>
+                        <option value="">請選擇種類</option>
+                        <option value="試用品200g">試用品200g(運費自付)</option>
+                        <option value="1公斤包裝">1公斤包裝</option>
+                        <option value="20公斤包裝">20公斤包裝</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="message">所需包數</label>
-                    <textarea id="message" name="所需包數" rows="3"></textarea>
+                    <label for="quantity">訂購包數</label>
+                    <input type="number" id="quantity" name="訂購包數" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">備註訊息</label>
+                    <textarea id="message" name="備註訊息" rows="3"></textarea>
                 </div>
                 <button type="submit" class="btn">確認送出</button>
             </form>
@@ -546,94 +588,67 @@
     </div>
 
     <script>
-        // 滾動顯示動畫
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
+        // 滾動動畫
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.1 });
 
-        // 頁面加載完成後立即顯示 hero 區塊的內容
-        window.addEventListener('load', () => {
-            document.querySelector('.hero-content').classList.add('visible');
-        });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // 為其他元素添加滾動顯示效果
-        document.querySelectorAll('.fade-in').forEach((el) => {
-            if (!el.classList.contains('hero-content')) {
-                observer.observe(el);
-            }
-        });
-
-        // 從 Google 表格獲取並顯示圖片
+        // 圖片載入
         async function fetchAndDisplayGallery() {
             try {
                 const response = await fetch('https://script.google.com/macros/s/AKfycbyv4gB6Ek7FaVNhGAlGKbD6V7W7YTf15Bp4kenflAglVRjuHk-sjT4SdI6lX2u8kMhctg/exec');
                 const data = await response.json();
-                
                 const galleryGrid = document.getElementById('galleryGrid');
-                galleryGrid.innerHTML = ''; // 清空現有內容
-                
-                // 創建並插入所有圖片元素
-                data.forEach(item => {
+                galleryGrid.innerHTML = '';
+
+                data.forEach((item, index) => {
                     const galleryItem = document.createElement('div');
-                    galleryItem.className = 'gallery-item fade-in';
+                    galleryItem.className = `gallery-item fade-in delay-${index % 5}`;
                     galleryItem.innerHTML = `
-                        <img src="${item.imageUrl}" alt="產品展示" loading="lazy">
+                        <img src="${item.imageUrl}" 
+                             alt="${item.caption}" 
+                             loading="lazy"
+                             onerror="this.src='https://via.placeholder.com/350x263?text=圖片加載失敗'">
                         <div class="gallery-caption">${item.caption}</div>
                     `;
                     galleryGrid.appendChild(galleryItem);
+                    observer.observe(galleryItem);
                 });
-                
-                // 重新初始化觀察器
-                document.querySelectorAll('.gallery-item').forEach(el => {
-                    observer.observe(el);
-                });
-                
+
             } catch (error) {
-                console.error('無法載入圖片:', error);
-                const galleryGrid = document.getElementById('galleryGrid');
-                galleryGrid.innerHTML = '<p style="color: var(--text-light); text-align: center; width: 100%;">暫時無法載入圖片，請稍後再試</p>';
+                console.error('圖片載入失敗:', error);
+                galleryGrid.innerHTML = `
+                    <div class="error-message">
+                        <p>暫時無法載入圖片，請稍後再試</p>
+                        <button onclick="fetchAndDisplayGallery()">重新載入</button>
+                    </div>
+                `;
             }
         }
 
-        // 為 gallery container 添加滑鼠滾輪橫向滾動
-        const galleryContainer = document.querySelector('.gallery-container');
-        galleryContainer.addEventListener('wheel', (e) => {
-            if (e.deltaY !== 0) {
-                e.preventDefault();
-                galleryContainer.scrollLeft += e.deltaY;
-            }
-        });
-
-        // 訂購表單處理
+        // 表單處理
         const modal = document.getElementById('orderModal');
         const orderBtn = document.getElementById('orderBtn');
         const closeBtn = document.querySelector('.close-modal');
         const orderForm = document.getElementById('orderForm');
         const successMessage = document.getElementById('successMessage');
 
-        // 打開彈窗
         orderBtn.addEventListener('click', () => {
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         });
 
-        // 關閉彈窗
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
             document.body.style.overflow = '';
         });
 
-        // 點擊彈窗外部關閉
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('active');
@@ -641,61 +656,53 @@
             }
         });
 
-        // 表單提交處理
         orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // 顯示加載狀態
             const submitBtn = orderForm.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = '送出中...';
             submitBtn.disabled = true;
+            submitBtn.textContent = '送出中...';
 
             try {
-                // 準備表單數據
                 const formData = new FormData(orderForm);
                 formData.set('Timestamp', new Date().toLocaleString('zh-TW'));
-                const searchParams = new URLSearchParams();
 
-                // 將 FormData 轉換為 URLSearchParams
-                for (const [key, value] of formData.entries()) {
-                    searchParams.append(key, value);
-                }
-
-                const response = await fetch('https://script.google.com/macros/s/AKfycbwU0ib8zjv40tP-ajTijiQCX0rm4gTuSInFopS6dJpK5vcwEvqx7YJCaRQUSRKDQkXR/exec', {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzOA7MF2K3Ya69W9Ibr6xE1rGWVtt6viv4fbEHq-tJIEUut7W7TDuDjVynM3Zi5cB_i/exec', {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: searchParams.toString()
+                    body: new URLSearchParams(formData)
                 });
 
-                // 顯示成功訊息
-                successMessage.classList.add('show');
-                setTimeout(() => {
-                    successMessage.classList.remove('show');
-                }, 3000);
+                if (!response.ok) throw new Error('伺服器回應異常');
 
-                // 關閉彈窗
+                successMessage.classList.add('show');
+                setTimeout(() => successMessage.classList.remove('show'), 3000);
+                
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
-
-                // 重置表單
                 orderForm.reset();
-                
+
             } catch (error) {
-                console.error('提交失敗：', error);
-                alert('訂單發送失敗，請稍後再試或直接聯繫我們');
+                console.error('提交失敗:', error);
+                alert('訂單提交失敗，請檢查網路連線後再試');
             } finally {
-                // 恢復按鈕狀態
-                submitBtn.textContent = originalBtnText;
                 submitBtn.disabled = false;
+                submitBtn.textContent = '確認送出';
             }
         });
 
-        // 頁面加載時獲取圖片
+        // 初始化
         window.addEventListener('load', fetchAndDisplayGallery);
+
+        // 橫向滾動
+        const galleryContainer = document.querySelector('.gallery-container');
+        galleryContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                galleryContainer.scrollLeft += e.deltaY;
+            }
+        });
     </script>
 </body>
 </html>
