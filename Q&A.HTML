@@ -1,49 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>脆皮粉Q&A</title>
+    <title>脆皮粉使用指南</title>
     <style>
+        /* 基础样式 */
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f4f4f4;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .construction-container {
-            max-width: 600px;
             padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+            background: #f8f8f8;
+            font-family: -apple-system, system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        /* 内容容器 */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        /* 标题样式 */
         h1 {
-            color: #ff9800;
-            font-size: 36px;
-            margin-bottom: 10px;
+            color: #2d3436;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
-        p {
-            font-size: 18px;
+
+        /* 图片容器 */
+        .image-wrapper {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            position: relative;
+        }
+
+        /* 图片样式 */
+        .guide-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 1.414;
+        }
+
+        /* 下载提示 */
+        .download-hint {
+            text-align: center;
+            margin: 20px 0;
             color: #666;
+            font-size: 0.95rem;
         }
-        .icon {
-            font-size: 60px;
-            color: #ff9800;
-            margin-bottom: 20px;
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .download-hint {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="construction-container">
-        <div class="icon">⚠️</div>
-        <h1>建設中...</h1>
-        <p></p>
+    <div class="container">
+        <h1>脆皮粉使用指南</h1>
+        
+        <div class="image-wrapper">
+            <img 
+                src="https://chatscai10.github.io/bjg8/%E8%84%86%E7%9A%AE%E7%B2%89%EF%BC%B1%EF%BC%A1.jpg"
+                alt="脆皮粉使用指南"
+                class="guide-image"
+                loading="lazy"
+                decoding="async">
+        </div>
+
+        <p class="download-hint">
+            2025/02/16 - 更新
+        </p>
     </div>
 </body>
 </html>
