@@ -76,7 +76,7 @@
 <body>
     <h2>不早數據系統</h2>
 
-    <label for="dataType">選擇要查看的記錄：</label>
+    <label for="dataType">選擇要查看的項目：</label>
     <select id="dataType">
         <option value="announcement">公告</option>
         <option value="revenue">營業額紀錄</option>
@@ -116,11 +116,14 @@
             <label for="passwordInput">輸入密碼：</label>
             <input type="password" id="passwordInput">
             <button onclick="checkPassword()">提交</button>
+            <p style="margin-top: 20px; margin-bottom: 3px; font-size: 18px; color: red; line-height: 1.2;">※※ 系統自動計算※※</p>
             <p style="margin-top: 20px; margin-bottom: 3px; font-size: 18px; color: red; line-height: 1.2;">※※ 資料僅供參考 ※※</p>
+
+
             <p style="margin-top: 3px; margin-bottom: 3px; font-size: 18px; color: red; line-height: 1.2;">　密碼每天晚上12點</p>
-            <p style="margin-top: 3px; font-size: 18px; color: red; line-height: 1.2;">　  系統會更新在群組</p>
- 	<img src="https://chatscai10.github.io/bjg8/%E5%BA%97%E9%95%B7%E8%96%AA%E8%B3%87.jpg" alt="階級薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
- 	<img src="https://chatscai10.github.io/bjg8/%E6%AD%A3%E8%81%B7%E8%96%AA%E8%B3%87.jpg" alt="階級薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
+            <p style="margin-top: 3px; font-size: 18px; color: red; line-height: 1.2;">　  系統會發布在群組</p>
+ 	<img src="https://chatscai10.github.io/bjg8/%E5%BA%97%E9%95%B7%E8%96%AA%E8%B3%87.jpg" alt="店長薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
+ 	<img src="https://chatscai10.github.io/bjg8/%E6%AD%A3%E8%81%B7%E8%96%AA%E8%B3%87.jpg" alt="正職薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
 
 
 
@@ -143,8 +146,54 @@
                     style="border: none;"></iframe>
         </div>
     </div>
+<script>
+// 在现有代码中添加以下内容
 
-    <script>
+// 新增初始化函数
+async function initialize() {
+    try {
+        await clearCache(true); // 添加静默模式参数
+        await fetchAnnouncement();
+    } catch (error) {
+        console.error('初始化失败:', error);
+    }
+}
+
+// 修改后的清除暂存函数
+async function clearCache(silent = false) {
+    try {
+        localStorage.clear();
+        sessionStorage.clear();
+        const type = dataTypeSelect.value;
+        
+        if (['revenue', 'order'].includes(type)) {
+            await loadRegularData(type === 'revenue' ? revenueSheetUrl : orderSheetUrl);
+        } else if (type === 'bonus') {
+            await loadBonusData();
+        }
+        
+        if (!silent) {
+            alert('暫存已清除並重新加載數據');
+        }
+    } catch (error) {
+        console.error('清除暫存失敗:', error);
+        if (!silent) {
+            alert('清除暫存時發生錯誤');
+        }
+    }
+}
+
+// 修改现有的事件监听器
+window.addEventListener('load', () => {
+    // 替换原来的 fetchAnnouncement()
+    initialize();
+});
+
+// ... 其他现有代码保持不变 ...
+
+
+
+
         const dataTypeSelect = document.getElementById("dataType");
         const announcement = document.getElementById("announcement");
         const storeTable = document.getElementById("storeTable");
