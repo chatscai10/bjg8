@@ -1,72 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>吃雞排找不早</title>
- <style>
-    /* 設定網頁的基本樣式 */
-    body { 
-        font-family: Arial, sans-serif; /* 使用 Arial 或 sans-serif 字體 */
-        margin: 20px;                   /* 設定頁面外邊距為 20 像素 */
-        background-color: #f4f4f4;      /* 設定背景顏色為淺灰色 */
-    }
+    <style>
 
-    /* 設定表格的樣式 */
-    table { 
-        width: 100%;                    /* 表格寬度設為 100% */
-        border-collapse: collapse;      /* 合併相鄰的邊框 */
-        margin-top: 20px;               /* 在表格上方添加 20 像素的間距 */
-        display: none;                  /* 初始時隱藏表格 */
-        font-size: 14px;                /* 設定字體大小為 14 像素 */
-    }
 
-    /* 設定表格標題和儲存格的樣式 */
-    th, td { 
-        border: 1px solid #ccc;         /* 設定邊框為 1 像素灰色線條 */
-        padding: 8px;                   /* 內邊距為 8 像素 */
-        text-align: left;               /* 文字靠左對齊 */
-    }
 
-    /* 設定表格標題列的樣式 */
-    th { 
-        background-color: #007BFF;      /* 背景顏色設為藍色 */
-        color: white;                   /* 文字顏色設為白色 */
-    }
+        body { 
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
 
-    /* 設定按鈕的樣式 */
-    button { 
-        margin-top: 20px;               /* 在按鈕上方添加 20 像素的間距 */
-        padding: 10px 20px;             /* 設定按鈕的內邊距為 10 像素上下和 20 像素左右 */
-        font-size: 16px;                /* 字體大小設為 16 像素 */
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            display: none;
+        }
 
-    /* 設定內容區域的樣式 */
-    #content { 
-        margin-top: 20px;               /* 在內容區域上方添加 20 像素的間距 */
-    }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
 
-    /* 設定公告區域的樣式 */
-    #announcement { 
-        white-space: pre-wrap;          /* 保持原始空白並自動換行 */
-        border: 1px solid #ccc;         /* 邊框為 1 像素灰色線條 */
-        padding: 5px;                  /* 內邊距為 10 像素 */
-        background-color: #f9f9f9;      /* 背景顏色為淡灰色 */
-        display: none;                  /* 初始時隱藏公告 */
-        max-height: 500px;              /* 設定最大高度為 100 像素，超出部分會顯示捲軸 */
-        max-width: 400px;               /* 設定最大寬度為 600 像素 */
-        overflow-y: auto;               /* 如果內容超過高度，顯示垂直捲軸 */
-        font-size: 12px;                /* 字體大小設為 12 像素 */
-        line-height: 1.4;               /* 行高設為 1.4 倍 */
-        margin: 10px auto;              /* 上下間距 10 像素，左右自動置中 */
-    }
-</style>
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
 
-    <!-- 引入 PapaParse 庫 -->
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        #content {
+            margin-top: 20px;
+        }
+
+        #announcement {
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: #f9f9f9;
+            display: none;
+            max-height: 500px;
+            max-width: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 10px auto;
+        }
+
+        #passwordSection {
+            display: none;
+        }
+
+        #bonusTable td {
+            background-color: white;
+        }
+
+        /* 隱藏 Google Docs 發布產生的多餘元素 */
+        a[href*="reportAbuse"], 
+        div[aria-label="頁尾"],
+        div[style*="margin-top: 0.5em;"] {
+            display: none !important;
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
-    <h2>數據記錄系統</h2>
+    <h2>不早數據系統</h2>
 
     <label for="dataType">選擇要查看的記錄：</label>
     <select id="dataType">
@@ -74,15 +82,18 @@
         <option value="revenue">營業額紀錄</option>
         <option value="order">叫貨記錄</option>
         <option value="bonus">查看獎金(僅供參考)</option>
-       <option value="crispyQnA">脆皮粉 Q&A</option>
-
+        <option disabled>--------</option>
+        <option value="crispyQnA">脆皮粉指南</option>
+        <option value="fryingTime">炸物時間</option>
+        <option value="other">其他</option>
     </select>
 
 
 
     <div id="content">
-        <p id="storeCount" style="display: none;">正在加載數據...</p>
         <div id="announcement" style="display: block;">正在加載公告內容...</div>
+        
+        <!-- 預設表格 -->
         <table id="storeTable">
             <thead>
                 <tr>
@@ -93,281 +104,204 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <!-- 獎金專用表格 -->
+        <table id="bonusTable">
+            <tbody></tbody>
+        </table>
+
         <button id="refreshButton" style="display: none;">重新加載數據</button>
 
-<div id="passwordSection" style="display: none;">
-    <label for="passwordInput">輸入密碼：</label>
-    <input type="password" id="passwordInput">
-    <button onclick="checkPassword()">提交</button>
-<p style="margin-top: 30px; font-size: 18px; color: red;">※※ 資料僅供參考 ※※</p>
-<p style="margin-top: 5px; font-size: 18px; color: red;">　密碼每天晚上12點</p>
-<p style="margin-top: 5px; font-size: 18px; color: red;">　  系統會更新在群組</p>
-</div>
+        <div id="passwordSection">
+            <label for="passwordInput">輸入密碼：</label>
+            <input type="password" id="passwordInput">
+            <button onclick="checkPassword()">提交</button>
+            <p style="margin-top: 20px; margin-bottom: 3px; font-size: 18px; color: red; line-height: 1.2;">※※ 資料僅供參考 ※※</p>
+            <p style="margin-top: 3px; margin-bottom: 3px; font-size: 18px; color: red; line-height: 1.2;">　密碼每天晚上12點</p>
+            <p style="margin-top: 3px; font-size: 18px; color: red; line-height: 1.2;">　  系統會更新在群組</p>
+ 	<img src="https://chatscai10.github.io/bjg8/%E5%BA%97%E9%95%B7%E8%96%AA%E8%B3%87.jpg" alt="階級薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
+ 	<img src="https://chatscai10.github.io/bjg8/%E6%AD%A3%E8%81%B7%E8%96%AA%E8%B3%87.jpg" alt="階級薪資" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;">
 
 
-<!-- 新增的脆皮粉 Q&A 區域 -->
-<div id="crispyQnASection" style="display: none; margin-top: 20px; height: 500px;">
-    <iframe id="crispyIframe" src="https://chatscai10.github.io/bjg8/Q&A.HTML" width="100%" height="100%" style="border: none;"></iframe>
-</div>
 
+
+
+
+
+
+
+        </div>
+
+        <div id="crispyQnASection" style="display: none; margin-top: 20px; height: 500px;">
+            <iframe id="crispyIframe" src="https://chatscai10.github.io/bjg8/Q&A.HTML" width="100%" height="100%" style="border: none;"></iframe>
+        </div>
+
+        <div id="fryingTimeSection" style="display: none; margin-top: 20px; height: 600px;">
+            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRqZjNvh06IbKPZ_2fmxBBAEvThIlkkvX53KWHhogeDtduOmH7l31cOZQz12dgJWbw5dFwyxvSG293L/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" 
+                    width="100%" 
+                    height="100%" 
+                    style="border: none;"></iframe>
+        </div>
     </div>
 
     <script>
-
         const dataTypeSelect = document.getElementById("dataType");
         const announcement = document.getElementById("announcement");
-        const storeCount = document.getElementById("storeCount");
         const storeTable = document.getElementById("storeTable");
+        const bonusTable = document.getElementById("bonusTable");
         const refreshButton = document.getElementById("refreshButton");
+        const passwordSection = document.getElementById("passwordSection");
+        const passwordInput = document.getElementById("passwordInput");
 
-const passwordSection = document.getElementById("passwordSection");
-const passwordInput = document.getElementById("passwordInput");
-const bonusSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1Y1GuZt18FQg5MZ-O20Gk_bGj6Ce_lSeBV13BgyWlHH4/export?format=csv&gid=0");
-
-// 密碼驗證函數
-function checkPassword() {
-    const passwordUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1C2B_g5_F4hfu7qtXO8u5T78z6iY6Toii_UOVSHfaBVs/export?format=csv&gid=0");
-
-    fetch(passwordUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(data => {
-            // 解析 CSV 並取得 B2 儲存格的密碼
-            const rows = data.split("\n").map(row => row.split(","));
-            const correctPassword = rows[1][1].trim(); // B2 儲存格的值
-
-            if (passwordInput.value === correctPassword) {
-                passwordSection.style.display = "none";
-                console.log("密碼正確，開始加載獎金數據...");
-                console.log("加載 URL: ", bonusSheetUrl); // 添加日誌確認 URL
-                fetchData(bonusSheetUrl);
-            } else {
-                alert("密碼錯誤，請重試。");
-            }
-        })
-        .catch(error => {
-            alert("無法加載密碼：" + error.message);
-            console.error("Error fetching the password:", error);
-        });
-}
-
-
-
-
-
-
-
-        // 營業額紀錄和叫貨記錄的 URL
         const revenueSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1pEg1uLe-oNotCpZlFL8UDGGcMYwQYz0Gt94aE79VeeY/export?format=csv&gid=46678731");
         const orderSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1wFYq6iXBv2id8sygigeCHH4GU2u-iKHblAhOXR4VL_o/export?format=csv&gid=1417803249");
-
-        // 公告內容的 URL，請替換為您的公告網址
         const announcementUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/document/d/e/2PACX-1vSAj70tmNizKILl02VBxMtR8qOoW0uKbdBpEKVQ6Jpd0Qg7SGwp641aX1LACa_lLm7pcE2F7boEovPo/pub");
+        const bonusSheetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1Y1GuZt18FQg5MZ-O20Gk_bGj6Ce_lSeBV13BgyWlHH4/export?format=csv&gid=0");
 
-        dataTypeSelect.addEventListener("change", () => {
-            const selectedValue = dataTypeSelect.value;
-            announcement.style.display = "none";
-            storeCount.style.display = "none";
+
+
+
+
+
+
+        function checkPassword() {
+            const passwordUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/1C2B_g5_F4hfu7qtXO8u5T78z6iY6Toii_UOVSHfaBVs/export?format=csv&gid=0");
+
+            fetch(passwordUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split("\n").map(row => row.split(","));
+                    const correctPassword = rows[1][1].trim();
+
+                    if (passwordInput.value === correctPassword) {
+                        passwordSection.style.display = "none";
+                        loadBonusData();
+                    } else {
+                        alert("密碼錯誤，請重試。");
+                    }
+                })
+                .catch(error => {
+                    alert("無法加載密碼：" + error.message);
+                });
+        }
+
+        function loadBonusData() {
+            bonusTable.style.display = "table";
             storeTable.style.display = "none";
-            refreshButton.style.display = "none";
-    passwordSection.style.display = "none"; // 隱藏密碼輸入區域
-    document.getElementById("crispyQnASection").style.display = "none";
-
-            clearTable();
-
-
-
-
-
-
-            if (selectedValue === "announcement") {
-                fetchAnnouncement();
-            } else if (selectedValue === "revenue") {
-                fetchData(revenueSheetUrl);
-            } else if (selectedValue === "order") {
-                fetchData(orderSheetUrl);
-	} else if (selectedValue === "bonus") {
-  	  passwordSection.style.display = "block";
             
-} else if (selectedValue === "crispyQnA") {
-    document.getElementById("crispyQnASection").style.display = "block";
-} else {
-    document.getElementById("crispyQnASection").style.display = "none";
-}
-
-        });
-
-        refreshButton.addEventListener("click", () => {
-            const selectedValue = dataTypeSelect.value;
-            if (selectedValue === "revenue") {
-                fetchData(revenueSheetUrl);
-            } else if (selectedValue === "order") {
-                fetchData(orderSheetUrl);
-            }
-        });
-
-
-
-
-
- function fetchAnnouncement() {
-    announcement.style.display = "block";
-    announcement.innerText = "正在加載公告內容...";
-
-    fetch(announcementUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(data => {
-            // 將獲取到的公告內容插入到公告區域
-            announcement.innerHTML = data;
-
-            // 隱藏包含「每 5 分鐘自動更新」或「Updated automatically every 5 minutes」的元素
-            hideAutoUpdateText(announcement);
-        })
-        .catch(error => {
-            announcement.innerText = "公告加載失敗：" + error.message;
-            console.error("Error fetching the announcement:", error);
-        });
-}
-
-// 函數：遞歸尋找並隱藏包含特定文本的元素
-function hideAutoUpdateText(element) {
-    const unwantedTexts = [
-        "每 5 分鐘自動更新",
-        "Updated automatically every 5 minutes"
-    ];
-
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, null, false);
-
-    let currentNode = walker.nextNode();
-    while (currentNode) {
-        unwantedTexts.forEach(text => {
-            if (currentNode.textContent.includes(text)) {
-                currentNode.style.display = "none";
-            }
-        });
-        currentNode = walker.nextNode();
-    }
-}
-
-
-
-
-
-
-
-
-        function fetchData(sheetUrl) {
-            storeCount.style.display = "block";
-            storeCount.innerText = "正在加載數據...";
-            storeTable.style.display = "none";
-            refreshButton.style.display = "none";
-
-
-            Papa.parse(sheetUrl + `&t=${new Date().getTime()}`, {
+            Papa.parse(bonusSheetUrl, {
                 download: true,
-                header: false,
+                header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    const data = results.data;
-                    const dateIndex = 0;
-                    const contentIndex = 1;
-                    const storeIndex = 2;
+                    const tbody = bonusTable.querySelector("tbody");
+                    tbody.innerHTML = "";
 
-                    const stores = {};
-
-data.forEach((row, index) => {
-    console.log(`第 ${index + 1} 行:`, row); // 輸出每一行數據，方便調試
-
-    if (row.length >= 3 && row[0] && row[1] && row[2]) {
-        const date = row[0].trim();
-        const content = row[1].trim();
-        const store = row[2].trim();
-
-        if (store) {
-            if (!stores[store]) {
-                stores[store] = [];
-            }
-            stores[store].push({ date, content });
-        }
-    } else {
-        console.warn(`第 ${index + 1} 行數據不完整: `, row);
-    }
-});
-
-
-
-
-
-
-                    const storeNames = Object.keys(stores);
-                    storeCount.innerText = `數據分析共有 ${storeNames.length} 家店`;
-
-                    const tbody = storeTable.querySelector("tbody");
-                    clearTable();
-
-                    storeNames.forEach(store => {
-       // 格式化日期函數
-const formatDate = (dateStr) => {
-    return dateStr.replace(/(\d{4}-\d{2}-\d{2}) (\d{1,2}):(\d{2}):(\d{2})/, (match, date, hour, minute, second) => {
-        return `${date}T${hour.padStart(2, '0')}:${minute}:${second}`;
-    });
-};
-
-// 排序並取最近 3 筆數據
-const sortedEntries = stores[store]
-    .sort((a, b) => {
-        const dateA = new Date(formatDate(a.date));
-        const dateB = new Date(formatDate(b.date));
-
-        console.log("Formatted dates:", a.date, "->", dateA, "|", b.date, "->", dateB);
-
-        if (isNaN(dateA) || isNaN(dateB)) {
-            console.warn("Invalid date encountered:", a.date, b.date);
-            return 0;
-        }
-
-        return dateB - dateA;
-    })
-    .slice(0, 3);
-
-
-                        const latestDates = sortedEntries.map(entry => entry.date).join("<br>");
-                        const latestContent = sortedEntries.length > 0 ? sortedEntries[0].content : "無資料";
-
-                        const row = `<tr>
-                            <td>${store}</td>
-                            <td>${latestDates}</td>
-                            <td>${latestContent}</td>
-                        </tr>`;
-
-                        tbody.innerHTML += row;
+                    results.data.forEach(row => {
+                        const tr = document.createElement("tr");
+                        Object.values(row).forEach(value => {
+                            const td = document.createElement("td");
+                            td.textContent = value;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
                     });
-
-                    storeTable.style.display = "table";
-                    refreshButton.style.display = "inline-block";
                 },
                 error: function(err) {
-                    storeCount.innerText = "數據加載失敗：" + err.message;
-                    console.error("Error fetching the data:", err);
+                    console.error("Error loading bonus data:", err);
                 }
             });
         }
 
-        function clearTable() {
-            storeTable.querySelector("tbody").innerHTML = "";
+        dataTypeSelect.addEventListener("change", () => {
+            const selectedValue = dataTypeSelect.value;
+            announcement.style.display = "none";
+            storeTable.style.display = "none";
+            bonusTable.style.display = "none";
+            refreshButton.style.display = "none";
+            passwordSection.style.display = "none";
+            document.getElementById("crispyQnASection").style.display = "none";
+            document.getElementById("fryingTimeSection").style.display = "none";
+
+            if (selectedValue === "announcement") {
+                fetchAnnouncement();
+            } else if (selectedValue === "revenue") {
+                loadRegularData(revenueSheetUrl);
+            } else if (selectedValue === "order") {
+                loadRegularData(orderSheetUrl);
+            } else if (selectedValue === "bonus") {
+                passwordSection.style.display = "block";
+            } else if (selectedValue === "crispyQnA") {
+                document.getElementById("crispyQnASection").style.display = "block";
+            } else if (selectedValue === "fryingTime") {
+                document.getElementById("fryingTimeSection").style.display = "block";
+            }
+        })
+
+
+        function loadRegularData(url) {
+            storeTable.style.display = "table";
+            Papa.parse(url, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const tbody = storeTable.querySelector("tbody");
+                    tbody.innerHTML = "";
+
+                    const stores = {};
+                    results.data.forEach(row => {
+                        if (row.length >= 3) {
+                            const store = row[2].trim();
+                            if (store) {
+                                if (!stores[store]) stores[store] = [];
+                                stores[store].push({ date: row[0].trim(), content: row[1].trim() });
+                            }
+                        }
+                    });
+
+                    Object.keys(stores).forEach(store => {
+                        const sortedEntries = stores[store]
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                            .slice(0, 3);
+                        
+                        const rowHTML = `<tr>
+                            <td>${store}</td>
+                            <td>${sortedEntries.map(e => e.date).join('<br>')}</td>
+                            <td>${sortedEntries[0]?.content || '無資料'}</td>
+                        </tr>`;
+                        tbody.innerHTML += rowHTML;
+                    });
+                    refreshButton.style.display = "inline-block";
+                }
+            });
         }
 
-        // 初次加載公告
-        fetchAnnouncement();
+        function fetchAnnouncement() {
+            announcement.style.display = "block";
+            fetch(announcementUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data;
+
+                    tempDiv.querySelectorAll('a[href*="reportAbuse"]').forEach(el => el.remove());
+                    tempDiv.querySelectorAll('footer').forEach(el => el.remove());
+                    
+                    const unwantedDivs = Array.from(tempDiv.querySelectorAll('div'));
+                    unwantedDivs.forEach(div => {
+                        if (div.textContent.includes('Published using Google Docs') || 
+                            div.textContent.includes('Report abuse')) {
+                            div.remove();
+                        }
+                    });
+
+                    const mainContent = tempDiv.querySelector('.doc-content') || tempDiv;
+                    announcement.innerHTML = mainContent.innerHTML;
+                });
+        }
+
+        window.addEventListener('load', fetchAnnouncement);
     </script>
 </body>
 </html>
