@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天然脆皮粉 - 自然發酵</title>
+    <title>專業の脆皮粉 - 自然發酵工藝</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -469,12 +469,99 @@
                 transform: none;
             }
         }
+
+
+
+
+/* 专业级样式优化 */
+.line-float {
+  position: fixed;
+  bottom: 25vh;
+  right: 2rem;
+  z-index: 1000;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.line-float-btn {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #00C300 0%, #00B300 100%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.line-svg-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: white;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+  transition: transform 0.2s ease;
+}
+
+.line-float-text {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 0.75rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 悬停动效 */
+.line-float-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 195, 0, 0.3);
+  background: linear-gradient(135deg, #00B300 0%, #009900 100%);
+}
+
+.line-float-btn:hover .line-svg-icon {
+  transform: scale(1.1);
+}
+
+/* 手机版优化 */
+@media (max-width: 768px) {
+  .line-float {
+    bottom: 1.5rem;
+    right: 1rem;
+  }
+  
+  .line-float-btn {
+    padding: 0.75rem;
+    border-radius: 50%;
+  }
+  
+  .line-float-text {
+    display: none;
+  }
+  
+  .line-svg-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+/* 加载动画 */
+@keyframes line-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.line-float-btn {
+  animation: line-float 3s ease-in-out infinite;
+}
+
+
+
     </style>
 </head>
 <body>
     <section class="hero">
         <div class="hero-content fade-in">
-            <h1>專業級天然發酵 - 脆皮粉</h1>
+            <h1>專業の脆皮粉 - 自然發酵工藝</h1>
             <p>三十年匠心傳承，專注於純天然脆皮粉的製作工藝，嚴選原料，絕不添加任何化學粉末，只為讓您與顧客享受更健康、更安心的美味。</p>
         </div>
     </section>
@@ -515,6 +602,9 @@
     </section>
 
     <section class="section price-section">
+
+
+
         <div class="container">
             <div class="section-title fade-in">
                 <h2>產品價格</h2>
@@ -531,6 +621,9 @@
             <p class="price-note fade-in">5件以上免運費，10件以上優惠價</p>
             <button class="btn fade-in" id="orderBtn">立即訂購</button>
         </div>
+
+
+
     </section>
 
     <section class="contact-section fade-in">
@@ -704,5 +797,21 @@
             }
         });
     </script>
+
+
+<!-- 修改浮动按钮部分 -->
+<div class="line-float">
+  <a href="https://line.me/ti/p/@fried" target="_blank" class="line-float-btn">
+    <svg class="line-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.07 4.93C17.22 3.07 14.76 2 12 2 6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10 0-2.76-1.07-5.22-2.93-7.07zM9.5 17.5H7.25c-.41 0-.75-.34-.75-.75s.34-.75.75-.75H9.5c.41 0 .75.34.75.75s-.34.75-.75.75zm4.5 0h-2.25c-.41 0-.75-.34-.75-.75s.34-.75.75-.75H14c.41 0 .75.34.75.75s-.34.75-.75.75zm2.25-6H7.25c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h9.5c.41 0 .75.34.75.75s-.34.75-.75.75z" 
+            fill="currentColor"/>
+    </svg>
+    <span class="line-float-text">官方line</span>
+  </a>
+</div>
+
+
+
+
 </body>
 </html>
