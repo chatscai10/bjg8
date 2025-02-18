@@ -9,12 +9,16 @@
         body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 20px; }
         h1, h2 { color: #333; }
         table { width: 100%; max-width: 400px; margin: 20px auto; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; font-size: 18px; }
+        th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; font-size: 18px; position: relative; }
+        th { background-color: #ddd; }
         .disabled { background-color: red !important; color: white; pointer-events: none; }
         .selected { background-color: gray; color: white; }
+        .small-text { font-size: 12px; color: #555; position: absolute; bottom: 2px; left: 2px; }
         button { font-size: 18px; padding: 12px 24px; margin: 10px; border: none; border-radius: 5px; cursor: pointer; }
         #confirm-btn { background: #28a745; color: white; }
         #cancel-btn { background: #dc3545; color: white; }
+        #final-confirm-btn { background: #007bff; color: white; display: none; }
+        #think-again-btn { background: #f39c12; color: white; display: none; }
         #result { font-size: 18px; font-weight: bold; color: #333; margin-top: 20px; }
     </style>
 </head>
@@ -26,13 +30,21 @@
     <p>不可排休日期: <span id="blocked-dates"></span></p>
     <p>每日排休人數上限: <span id="max-per-day"></span></p>
 
-    <table id="calendar"></table>
+    <table id="calendar">
+        <tr>
+            <th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th>
+        </tr>
+    </table>
 
-    <button id="confirm-btn" onclick="confirmSchedule()">確認排休</button>
+    <button id="confirm-btn" onclick="showConfirmDialog()">確認排班</button>
     <button id="cancel-btn" onclick="clearSelection()">取消</button>
 
-    <h2>排休結果</h2>
-    <p id="result"></p>
+    <div id="confirmation-dialog" style="display:none;">
+        <h2>確認您的排班</h2>
+        <p id="result"></p>
+        <button id="final-confirm-btn" onclick="finalSubmit()">確定送出</button>
+        <button id="think-again-btn" onclick="hideConfirmDialog()">再思考一下</button>
+    </div>
 
     <script>
         let maxDays = 0, month = "", blockedDays = [], dailyLimit = 0;
@@ -47,11 +59,10 @@
             const text = await response.text();
             const json = JSON.parse(text.substring(47, text.length - 2));
 
-            // 解析「數據設定」分頁
             const rows = json.table.rows;
             maxDays = parseInt(rows[0].c[0].v);
             month = rows[0].c[1].v;
-            blockedDays = rows[0].c[2].v.split('.').map(Number);
+            blockedDays = rows[0].c[2].v.split('.').map(Number).filter(n => n > 0); // 過濾掉 0
             dailyLimit = parseInt(rows[0].c[3].v);
 
             document.getElementById("month-title").textContent = `${month}月排班`;
@@ -62,11 +73,15 @@
             generateCalendar();
         }
 
-        // 產生月曆
         function generateCalendar() {
             const table = document.getElementById("calendar");
-            table.innerHTML = "";
             let row = table.insertRow();
+            let firstDay = new Date(new Date().getFullYear(), month - 1, 1).getDay();
+
+            for (let i = 0; i < firstDay; i++) {
+                row.insertCell();
+            }
+
             for (let day = 1; day <= 31; day++) {
                 let cell = row.insertCell();
                 cell.textContent = day;
@@ -77,11 +92,11 @@
                 }
 
                 cell.addEventListener("click", () => toggleDay(cell));
-                if (day % 7 === 0) row = table.insertRow();
+
+                if ((firstDay + day) % 7 === 0) row = table.insertRow();
             }
         }
 
-        // 切換選擇的日期
         function toggleDay(cell) {
             const day = Number(cell.dataset.day);
             if (selectedDays.has(day)) {
@@ -93,38 +108,34 @@
             }
         }
 
-        // 確認排休
-        function confirmSchedule() {
+        function showConfirmDialog() {
             if (!name) {
                 name = prompt("請輸入你的名字：");
                 if (!name) return;
             }
 
             let remainingDays = maxDays - selectedDays.size;
-            let resultText = `${name} - 目前排班 ${selectedDays.size} 天 - ${Array.from(selectedDays).map(d => `${d}日`).join(", ")} - 還有 ${remainingDays} 天可以排班`;
-            document.getElementById("result").textContent = resultText;
+            document.getElementById("result").textContent = `${name} - 目前排班 ${selectedDays.size} 天 - ${Array.from(selectedDays).map(d => `${d}日`).join(", ")} - 還有 ${remainingDays} 天可以排班`;
 
-            saveToGoogleSheet(name, selectedDays);
+            document.getElementById("confirmation-dialog").style.display = "block";
+            document.getElementById("final-confirm-btn").style.display = "inline-block";
+            document.getElementById("think-again-btn").style.display = "inline-block";
         }
 
-        // 清除已選的日期
+        function hideConfirmDialog() {
+            document.getElementById("confirmation-dialog").style.display = "none";
+        }
+
+        function finalSubmit() {
+            alert("排班已提交！");
+            hideConfirmDialog();
+            // 這裡要加入儲存 Google Sheets & 發送 Telegram 的功能
+        }
+
         function clearSelection() {
             selectedDays.clear();
             document.querySelectorAll(".selected").forEach(cell => cell.classList.remove("selected"));
             document.getElementById("result").textContent = "已取消選擇，請重新選擇排休日期";
-        }
-
-        // 儲存到 Google Sheets
-        async function saveToGoogleSheet(name, selectedDays) {
-            const scriptUrl = "https://script.google.com/macros/s/你的GoogleAppsScript網址/exec"; 
-            const data = { name, dates: Array.from(selectedDays), month };
-
-            try {
-                await axios.post(scriptUrl, data);
-                alert("排休已儲存！");
-            } catch (error) {
-                alert("儲存失敗，請重試");
-            }
         }
 
         loadGoogleSheet();
