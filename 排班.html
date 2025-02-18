@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -51,8 +52,8 @@
         let selectedDays = new Set();
         let name = "";
         const sheetId = "1-WvZ2HG57mG7xl9iVP7gtVZdy94FmF_RiQcSsuXIqB0";
+        const scriptUrl = "https://script.google.com/macros/s/你的GoogleAppsScript網址/exec"; 
 
-        // 讀取 Google Sheets
         async function loadGoogleSheet() {
             const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
             const response = await fetch(url);
@@ -62,7 +63,7 @@
             const rows = json.table.rows;
             maxDays = parseInt(rows[0].c[0].v);
             month = rows[0].c[1].v;
-            blockedDays = rows[0].c[2].v.split('.').map(Number).filter(n => n > 0); // 過濾掉 0
+            blockedDays = rows[0].c[2].v.split('.').map(Number).filter(n => n > 0); 
             dailyLimit = parseInt(rows[0].c[3].v);
 
             document.getElementById("month-title").textContent = `${month}月排班`;
@@ -126,10 +127,15 @@
             document.getElementById("confirmation-dialog").style.display = "none";
         }
 
-        function finalSubmit() {
-            alert("排班已提交！");
+        async function finalSubmit() {
+            const data = { name, dates: Array.from(selectedDays), month };
+            try {
+                const res = await axios.post(scriptUrl, data);
+                alert("排班已提交！請稍候檢查 Google Sheets 是否成功記錄。");
+            } catch (error) {
+                alert("提交失敗，請重試！");
+            }
             hideConfirmDialog();
-            // 這裡要加入儲存 Google Sheets & 發送 Telegram 的功能
         }
 
         function clearSelection() {
