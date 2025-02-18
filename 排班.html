@@ -6,12 +6,16 @@
     <title>手機版排班系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.2/axios.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        table { width: 100%; max-width: 400px; margin: 20px auto; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        h1, h2 { color: #333; }
+        table { width: 100%; max-width: 400px; margin: 20px auto; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; font-size: 18px; }
         .disabled { background-color: red !important; color: white; pointer-events: none; }
         .selected { background-color: gray; color: white; }
-        button { font-size: 16px; padding: 10px 20px; margin: 10px; }
+        button { font-size: 18px; padding: 12px 24px; margin: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        #confirm-btn { background: #28a745; color: white; }
+        #cancel-btn { background: #dc3545; color: white; }
+        #result { font-size: 18px; font-weight: bold; color: #333; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -24,8 +28,8 @@
 
     <table id="calendar"></table>
 
-    <button onclick="confirmSchedule()">確認排休</button>
-    <button onclick="clearSelection()">取消</button>
+    <button id="confirm-btn" onclick="confirmSchedule()">確認排休</button>
+    <button id="cancel-btn" onclick="clearSelection()">取消</button>
 
     <h2>排休結果</h2>
     <p id="result"></p>
@@ -97,7 +101,7 @@
             }
 
             let remainingDays = maxDays - selectedDays.size;
-            let resultText = `${name} - ${selectedDays.size} 天 - ${Array.from(selectedDays).map(d => `${d}日`).join(", ")}\n還有 ${remainingDays} 天可排`;
+            let resultText = `${name} - 目前排班 ${selectedDays.size} 天 - ${Array.from(selectedDays).map(d => `${d}日`).join(", ")} - 還有 ${remainingDays} 天可以排班`;
             document.getElementById("result").textContent = resultText;
 
             saveToGoogleSheet(name, selectedDays);
@@ -112,12 +116,8 @@
 
         // 儲存到 Google Sheets
         async function saveToGoogleSheet(name, selectedDays) {
-            const scriptUrl = "https://script.google.com/macros/s/你的GoogleAppsScript網址/exec"; // 需要 Google Apps Script API
-            const data = {
-                name: name,
-                dates: Array.from(selectedDays),
-                month: month
-            };
+            const scriptUrl = "https://script.google.com/macros/s/你的GoogleAppsScript網址/exec"; 
+            const data = { name, dates: Array.from(selectedDays), month };
 
             try {
                 await axios.post(scriptUrl, data);
