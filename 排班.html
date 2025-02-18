@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手機版排班系統</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.2/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 100%; max-width: 400px; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; }
+        .disabled { background-color: red !important; color: white; pointer-events: none; }
+        .selected { background-color: gray; color: white; }
+        button { font-size: 16px; padding: 10px 20px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>排班系統</h1>
+    <h2 id="month-title"></h2>
+    <p>可排休天數: <span id="max-days"></span></p>
+    <p>不可排休日期: <span id="blocked-dates"></span></p>
+    <p>每日排休人數上限: <span id="max-per-day"></span></p>
+
+    <table id="calendar"></table>
+
+    <button onclick="confirmSchedule()">確認排休</button>
+
+    <h2>排休結果</h2>
+    <p id="result"></p>
+
+    <script>
+        let maxDays = 0, month = "", blockedDays = [], dailyLimit = 0;
+        let selectedDays = new Set();
+        let name = "";
+        const sheetId = "1-WvZ2HG57mG7xl9iVP7gtVZdy94FmF_RiQcSsuXIqB0";
+
+        // 讀取 Google Sheets
+        async function loadGoogleSheet() {
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+            const response = await fetch(url);
+            const text = await response.text();
+            const json = JSON.parse(text.substring(47, text.length - 2));
+
+            // 解析「數據設定」分頁
+            const rows = json.table.rows;
+            maxDays = parseInt(rows[0].c[0].v);
+            month = rows[0].c[1].v;
+            blockedDays = rows[0].c[2].v.split('.').map(Number);
+            dailyLimit = parseInt(rows[0].c[3].v);
+
+            document.getElementById("month-title").textContent = `${month}月排班`;
+            document.getElementById("max-days").textContent = maxDays;
+            document.getElementById("blocked-dates").textContent = blockedDays.join(", ");
+            document.getElementById("max-per-day").textContent = dailyLimit;
+
+            generateCalendar();
+        }
+
+        // 產生月曆
+        function generateCalendar() {
+            const table = document.getElementById("calendar");
+            table.innerHTML = "";
+            let row = table.insertRow();
+            for (let day = 1; day <= 31; day++) {
+                let cell = row.insertCell();
+                cell.textContent = day;
+                cell.dataset.day = day;
+
+                if (blockedDays.includes(day)) {
+                    cell.classList.add("disabled");
+                }
+
+                cell.addEventListener("click", () => toggleDay(cell));
+                if (day % 7 === 0) row = table.insertRow();
+            }
+        }
+
+        // 切換選擇的日期
+        function toggleDay(cell) {
+            const day = Number(cell.dataset.day);
+            if (selectedDays.has(day)) {
+                selectedDays.delete(day);
+                cell.classList.remove("selected");
+            } else if (selectedDays.size < maxDays) {
+                selectedDays.add(day);
+                cell.classList.add("selected");
+            }
+        }
+
+        // 確認排休
+        function confirmSchedule() {
+            if (!name) {
+                name = prompt("請輸入你的名字：");
+                if (!name) return;
+            }
+
+            let remainingDays = maxDays - selectedDays.size;
+            let resultText = `${name} - ${selectedDays.size} 天 - ${Array.from(selectedDays).map(d => `${d}日`).join(", ")}\n還有 ${remainingDays} 天可排`;
+            document.getElementById("result").textContent = resultText;
+
+            saveToGoogleSheet(name, selectedDays);
+        }
+
+        // 儲存到 Google Sheets
+        async function saveToGoogleSheet(name, selectedDays) {
+            const scriptUrl = "https://script.google.com/macros/s/你的GoogleAppsScript網址/exec"; // 需要 Google Apps Script API
+            const data = {
+                name: name,
+                dates: Array.from(selectedDays),
+                month: month
+            };
+
+            try {
+                await axios.post(scriptUrl, data);
+                alert("排休已儲存！");
+            } catch (error) {
+                alert("儲存失敗，請重試");
+            }
+        }
+
+        loadGoogleSheet();
+    </script>
+</body>
+</html>
