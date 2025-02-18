@@ -11,7 +11,7 @@
         th, td { border: 1px solid black; padding: 10px; width: 14%; height: 50px; text-align: center; cursor: pointer; }
         .disabled { background-color: red !important; color: white; pointer-events: none; }
         .selected { background-color: gray; color: white; }
-        button { font-size: 16px; padding: 10px 20px; margin-top: 20px; }
+        button { font-size: 16px; padding: 10px 20px; margin: 10px; }
     </style>
 </head>
 <body>
@@ -25,6 +25,7 @@
     <table id="calendar"></table>
 
     <button onclick="confirmSchedule()">確認排休</button>
+    <button onclick="clearSelection()">取消</button>
 
     <h2>排休結果</h2>
     <p id="result"></p>
@@ -100,6 +101,13 @@
             document.getElementById("result").textContent = resultText;
 
             saveToGoogleSheet(name, selectedDays);
+        }
+
+        // 清除已選的日期
+        function clearSelection() {
+            selectedDays.clear();
+            document.querySelectorAll(".selected").forEach(cell => cell.classList.remove("selected"));
+            document.getElementById("result").textContent = "已取消選擇，請重新選擇排休日期";
         }
 
         // 儲存到 Google Sheets
