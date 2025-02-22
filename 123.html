@@ -1,134 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>利潤計算器</title>
+    <title>台股当冲分析 (纯前端版)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 20px;
+        .progress-bar {
+            min-width: 40px; /* 确保低概率值仍可阅读 */
         }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        label {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        input, select, button {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f1f1f1;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .result p {
-            margin: 5px 0;
-            font-size: 16px;
-            color: #333;
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>利潤計算器</h2>
-
-        <label for="commission">抽成趴數 (%)</label>
-        <input type="number" id="commission" value="35" step="0.01" placeholder="輸入抽成趴數">
-
-        <label for="cost">食材成本 (元)</label>
-        <input type="number" id="cost" value="27" step="0.01" placeholder="輸入食材成本">
-
-        <label for="price">平台售價 (元)</label>
-        <input type="number" id="price" value="150" step="0.01" placeholder="輸入平台售價">
-
-        <label for="activity">活動</label>
-        <select id="activity">
-            <option value="none">無</option>
-            <option value="buy1get1">買1送1</option>
-            <option value="95">95折</option>
-            <option value="90">9折</option>
-        </select>
-
-        <button onclick="calculateProfit()">計算利潤</button>
-
-        <div class="result" id="result">
-            <p>請輸入數據並點擊計算。</p>
+    <div class="container mt-4">
+        <h1 class="mb-4">台股当日可当冲股票分析</h1>
+        
+        <!-- 控制栏 -->
+        <div class="mb-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="输入股票代码或名称...">
+            <button onclick="loadData()" class="btn btn-primary mt-2">重新加载数据</button>
         </div>
+
+        <!-- 数据表格 -->
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>股票代码</th>
+                    <th>股票名称</th>
+                    <th>前日收盘价</th>
+                    <th>当日开盘价</th>
+                    <th>上涨概率</th>
+                </tr>
+            </thead>
+            <tbody id="dataBody"></tbody>
+        </table>
+
+        <!-- 加载提示 -->
+        <div id="loading" class="spinner-border text-primary"></div>
     </div>
 
     <script>
-        function calculateProfit() {
-            // 獲取輸入數據
-            const commission = parseFloat(document.getElementById("commission").value) / 100;
-            const cost = parseFloat(document.getElementById("cost").value);
-            const price = parseFloat(document.getElementById("price").value);
-            const activity = document.getElementById("activity").value;
-
-            let effectivePrice; // 實際售價
-            let totalCost; // 總成本
-
-            // 計算不同活動的實際售價和總成本
-            if (activity === "none") {
-                effectivePrice = price; // 無活動，售價不變
-                totalCost = cost;      // 成本只算一份
-            } else if (activity === "buy1get1") {
-                effectivePrice = price; // 買1送1售價不變
-                totalCost = cost * 2;  // 買1送1需要2份成本
-            } else if (activity === "95") {
-                effectivePrice = price * 0.95; // 95折
-                totalCost = cost;
-            } else if (activity === "90") {
-                effectivePrice = price * 0.9; // 9折
-                totalCost = cost;
-            }
-
-            // 扣除抽成後的實際收入
-            const netIncome = effectivePrice * (1 - commission);
-
-            // 計算利潤
-            const profit = netIncome - totalCost;
-
-            // 顯示結果
-            document.getElementById("result").innerHTML = `
-                <p>抽成後收入: ${netIncome.toFixed(2)} 元</p>
-                <p>總成本: ${totalCost.toFixed(2)} 元</p>
-                <p>利潤: ${profit.toFixed(2)} 元</p>
-            `;
+        // 获取台湾日期格式 (YYYYMMDD)
+        function getTWDate(date) {
+            return date.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\//g, '');
         }
+
+        // 核心数据处理函数
+        async function loadData() {
+            showLoading(true);
+            
+            try {
+                // 获取前一日日期
+                const today = new Date();
+                const prevDay = new Date(today);
+                prevDay.setDate(today.getDate() - 1);
+                const prevDate = getTWDate(prevDay);
+
+                // 并行获取融资融券名单与前日交易数据
+                const [marginStocks, tradeData] = await Promise.all([
+                    fetch(`https://cors-anywhere.herokuapp.com/https://www.twse.com.tw/exchangeReport/MI_MARGN?date=${prevDate}`)
+                        .then(res => res.json())
+                        .then(data => data.data.map(row => row[0])),
+                    
+                    fetch(`https://cors-anywhere.herokuapp.com/https://www.twse.com.tw/exchangeReport/MI_INDEX?date=${prevDate}&type=ALL`)
+                        .then(res => res.json())
+                        .then(data => data.data)
+                ]);
+
+                // 数据清洗与筛选
+                const filteredStocks = tradeData
+                    .filter(row => 
+                        marginStocks.includes(row[0]) && 
+                        parseFloat(row[2].replace(/,/g, '')) > 1000000
+                    )
+                    .map(row => ({
+                        code: row[0],
+                        name: row[1],
+                        prevClose: parseFloat(row[8].replace(/,/g, '')),
+                        todayOpen: parseFloat(row[8].replace(/,/g, '')) * (1 + (Math.random() * 0.04 - 0.02)), // 模拟开盘价
+                    }))
+                    .map(stock => ({
+                        ...stock,
+                        probUp: stock.todayOpen > stock.prevClose ? 0.6 : 0.4 // 简单概率模型
+                    }));
+
+                renderTable(filteredStocks);
+            } catch (error) {
+                alert('数据加载失败，请稍后重试');
+                console.error(error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 渲染表格
+        function renderTable(stocks) {
+            const tbody = document.getElementById('dataBody');
+            tbody.innerHTML = stocks.map(stock => `
+                <tr>
+                    <td>${stock.code}</td>
+                    <td>${stock.name}</td>
+                    <td>${stock.prevClose.toFixed(2)}</td>
+                    <td>${stock.todayOpen.toFixed(2)}</td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" 
+                                 style="width: ${stock.probUp * 100}%">
+                                ${(stock.probUp * 100).toFixed(1)}%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // 动态绑定搜索功能
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const keyword = e.target.value.toLowerCase();
+                const filtered = stocks.filter(stock => 
+                    stock.code.toLowerCase().includes(keyword) || 
+                    stock.name.toLowerCase().includes(keyword)
+                );
+                tbody.innerHTML = filtered.map(stock => `
+                    <tr>
+                        <td>${stock.code}</td>
+                        <td>${stock.name}</td>
+                        <td>${stock.prevClose.toFixed(2)}</td>
+                        <td>${stock.todayOpen.toFixed(2)}</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" 
+                                     style="width: ${stock.probUp * 100}%">
+                                    ${(stock.probUp * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+        }
+
+        // 加载状态控制
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // 页面加载时自动获取数据
+        window.onload = loadData;
     </script>
 </body>
 </html>
