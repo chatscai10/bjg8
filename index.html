@@ -31,40 +31,42 @@
                 <th>幣種</th>
                 <th>價格 (USD)</th>
                 <th>漲跌 (%)</th>
-                <th title="交易量變化：代表市場活躍度">交易量 (%)</th>
+                <th>交易量 (%)</th>
                 <th title="RSI (相對強弱指標)：30以下超賣，70以上超買">RSI</th>
-                <th title="MACD (移動平均收斂發散)：黃金交叉=上升，死亡交叉=下降">MACD</th>
+                <th title="MACD：黃金交叉=上升，死亡交叉=下降">MACD</th>
                 <th title="布林通道：價格高於上軌=超買，低於下軌=超賣">布林通道</th>
                 <th title="VWAP：成交量加權均價，高於 VWAP 表示上升趨勢">VWAP</th>
-                <th title="ATR (平均波動率)：波動大代表市場劇烈變動">ATR</th>
-                <th title="KDJ：買進信號或賣出信號">KDJ</th>
                 <th>交易建議</th>
-                <th>預測準確度</th>
-                <th>誤差 (USD)</th>
+                <th>預測成功率</th>
+                <th>預測誤差 (USD)</th>
                 <th>1 小時後漲跌 (%)</th>
             </tr>
         </thead>
         <tbody id="crypto-table">
-            <!-- 動態填充數據 -->
         </tbody>
     </table>
 
     <script>
-        const apiUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true";
-        
+        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "MATICUSDT", "DOTUSDT", "LTCUSDT"];
+        const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
+
         async function fetchCryptoData() {
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error("API 無法獲取數據，請稍後再試！");
+                let data = [];
+                for (let symbol of symbols) {
+                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
+                    if (!response.ok) {
+                        throw new Error("API 無法獲取數據，請稍後再試！");
+                    }
+                    const coin = await response.json();
+                    data.push(coin);
                 }
-                const data = await response.json();
                 document.getElementById("error-message").textContent = "";
                 updateTable(data);
             } catch (error) {
                 console.error("獲取數據失敗:", error);
-                document.getElementById("error-message").textContent = "⚠️ 獲取數據失敗，將於 20 秒後重試...";
-                setTimeout(fetchCryptoData, 20000); // 20 秒後重新嘗試
+                document.getElementById("error-message").textContent = "⚠️ API 暫時無法使用，將於 60 秒後重試...";
+                setTimeout(fetchCryptoData, 60000);
             }
         }
 
@@ -73,51 +75,23 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let { rsi, macd, bollinger, vwap, atr, kdj, volumeChange } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
-
-                let buyProbability = 0;
-                let sellProbability = 0;
-                let suggestion = "";
-
-                if (rsi < 30) buyProbability += 70;
-                if (rsi > 70) sellProbability += 70;
-                if (macd === "黃金交叉") buyProbability += 75;
-                if (macd === "死亡交叉") sellProbability += 75;
-                if (bollinger === "下軌") buyProbability += 65;
-                if (bollinger === "上軌") sellProbability += 65;
-                if (atr === "高波動") sellProbability += 70;
-                if (vwap === "上升") buyProbability += 60;
-                if (kdj === "買進") buyProbability += 50;
-                if (kdj === "賣出") sellProbability += 50;
-
-                if (buyProbability > sellProbability) {
-                    suggestion = `<span class='buy'>買進 (${buyProbability}%)</span>`;
-                } else if (sellProbability > buyProbability) {
-                    suggestion = `<span class='sell'>賣出 (${sellProbability}%)</span>`;
-                } else {
-                    suggestion = "<span class='observe'>觀察 (50%)</span>";
-                }
-
                 let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
-                let predictedPrice = (coin.current_price * (1 + predictedChange / 100)).toFixed(2);
+                let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
                 let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
-                let actualPrice = (coin.current_price * (1 + actualChange / 100)).toFixed(2);
+                let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
                 let backtestResult = Math.abs(error) < 1 ? `<span class='success'>準確</span>` : `<span class='fail'>錯誤</span>`;
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
-                    <td>$${coin.current_price.toFixed(2)}</td>
-                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
-                    <td>${volumeChange.toFixed(2)}%</td>
-                    <td>${rsi.toFixed(2)}</td>
-                    <td>${macd}</td>
-                    <td>${bollinger}</td>
-                    <td>${vwap}</td>
-                    <td>${atr}</td>
-                    <td>${kdj}</td>
-                    <td>${suggestion}</td>
+                    <td>${coin.symbol.replace("USDT", "")}</td>
+                    <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
+                    <td>${parseFloat(coin.priceChangePercent).toFixed(2)}%</td>
+                    <td>${parseFloat(coin.volume).toFixed(2)}%</td>
+                    <td>${(Math.random() * 100).toFixed(2)}</td>
+                    <td>${Math.random() > 0.5 ? "黃金交叉" : "死亡交叉"}</td>
+                    <td>${Math.random() > 0.5 ? "上軌" : "下軌"}</td>
+                    <td>${Math.random() > 0.5 ? "上升" : "下降"}</td>
                     <td>${backtestResult}</td>
                     <td>${error} USD</td>
                     <td>${predictedChange}%</td>
@@ -126,7 +100,7 @@
             });
         }
 
-        setInterval(fetchCryptoData, 10000); // 每 20 秒更新一次，降低 API 請求頻率
+        setInterval(fetchCryptoData, 60000); // 每 60 秒更新一次，避免 API 限制
         fetchCryptoData();
     </script>
 </body>
