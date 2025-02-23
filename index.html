@@ -17,6 +17,7 @@
 <body>
     <h1>📈 AI 交易技術分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
+    <p id="error-message" class="error" style="color: red;"></p>
     <div id="history-log">
         <strong>📌 技術指標校正歷史：</strong>
         <ul id="history-list"></ul>
@@ -30,13 +31,9 @@
                 <th>MACD</th>
                 <th>布林通道</th>
                 <th>VWAP</th>
-                <th>ATR</th>
-                <th>KDJ</th>
-                <th>CCI</th>
-                <th>交易量變化 (%)</th>
                 <th>預估 10 分鐘後價格</th>
                 <th>預測誤差 (USD)</th>
-                <th>技術指標成功率 (%)</th>
+                <th>成功率 (%)</th>
                 <th>交易建議</th>
             </tr>
         </thead>
@@ -45,10 +42,10 @@
 
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
+        const coingeckoApiUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple,cardano&vs_currencies=usd";
         const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
 
-        let indicatorsHistory = {};  // 記錄技術指標的成功/失敗次數
-        let adjustments = {}; // 記錄校正次數與微調的數據
+        let indicatorsHistory = {}; // 記錄技術指標成功/失敗次數
 
         async function fetchCryptoData() {
             try {
@@ -57,14 +54,29 @@
                     const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
                     if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
                     const coin = await response.json();
-                    data.push(coin);
+                    data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
                 }
-                console.log("成功獲取數據:", data);
                 updateTable(data);
                 document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
-                console.error("獲取數據失敗:", error);
-                document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
+                console.error("Binance API 失敗，嘗試使用 CoinGecko:", error);
+                try {
+                    const response = await fetch(coingeckoApiUrl);
+                    if (!response.ok) throw new Error(`CoinGecko API 錯誤: ${response.status}`);
+                    const coinData = await response.json();
+                    data = [
+                        { symbol: "BTCUSDT", price: coinData.bitcoin.usd },
+                        { symbol: "ETHUSDT", price: coinData.ethereum.usd },
+                        { symbol: "BNBUSDT", price: coinData.binancecoin.usd },
+                        { symbol: "SOLUSDT", price: coinData.solana.usd },
+                        { symbol: "XRPUSDT", price: coinData.ripple.usd },
+                        { symbol: "ADAUSDT", price: coinData.cardano.usd }
+                    ];
+                    updateTable(data);
+                } catch (error) {
+                    console.error("CoinGecko API 也失敗:", error);
+                    document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
+                }
             }
         }
 
@@ -74,36 +86,26 @@
 
             data.forEach(coin => {
                 let symbol = coin.symbol.replace("USDT", "");
-                let rsi = adjustIndicator(symbol, "RSI", getRandomValue(0, 100));
-                let macd = adjustIndicator(symbol, "MACD", getRandomChoice(["黃金交叉", "死亡交叉"]));
-                let bollinger = adjustIndicator(symbol, "布林通道", getRandomChoice(["上軌", "下軌"]));
-                let vwap = adjustIndicator(symbol, "VWAP", getRandomChoice(["上升", "下降"]));
-                let atr = adjustIndicator(symbol, "ATR", getRandomChoice(["高波動", "低波動"]));
-                let kdj = adjustIndicator(symbol, "KDJ", getRandomChoice(["買進", "賣出"]));
-                let cci = adjustIndicator(symbol, "CCI", getRandomChoice(["超買", "超賣"]));
-                let volumeChange = adjustIndicator(symbol, "交易量變化", getRandomValue(-10, 10).toFixed(2));
-
+                let rsi = getRandomValue(0, 100);
+                let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
+                let bollinger = getRandomChoice(["上軌", "下軌"]);
+                let vwap = getRandomChoice(["上升", "下降"]);
                 let predictedChange = getRandomValue(-1.5, 1.5).toFixed(2);
-                let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
+                let predictedPrice = (coin.price * (1 + predictedChange / 100)).toFixed(2);
                 let actualChange = getRandomValue(-1.5, 1.5).toFixed(2);
-                let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
+                let actualPrice = (coin.price * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
-
                 let successRate = updateIndicatorHistory(symbol, error);
-                let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci, successRate);
+                let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, successRate);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${symbol}</td>
-                    <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
+                    <td>$${coin.price.toFixed(2)}</td>
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
                     <td>${bollinger}</td>
                     <td>${vwap}</td>
-                    <td>${atr}</td>
-                    <td>${kdj}</td>
-                    <td>${cci}</td>
-                    <td>${volumeChange}%</td>
                     <td>$${predictedPrice}</td>
                     <td>${error} USD</td>
                     <td>${successRate.toFixed(2)}%</td>
@@ -111,27 +113,30 @@
                 `;
                 tableBody.appendChild(row);
             });
-
-            updateHistoryLog();
         }
 
-        function adjustIndicator(symbol, indicator, value) {
-            if (!adjustments[symbol]) adjustments[symbol] = {};
-            if (!adjustments[symbol][indicator]) adjustments[symbol][indicator] = { count: 0, value: value };
-            adjustments[symbol][indicator].count++;
-            adjustments[symbol][indicator].value = value;
-            return value;
-        }
-
-        function updateHistoryLog() {
-            let logList = document.getElementById("history-list");
-            logList.innerHTML = "";
-            for (let symbol in adjustments) {
-                for (let indicator in adjustments[symbol]) {
-                    let logEntry = `<li>${symbol} - ${indicator}: 校正 ${adjustments[symbol][indicator].count} 次, 最新值: ${adjustments[symbol][indicator].value}</li>`;
-                    logList.innerHTML += logEntry;
-                }
+        function updateIndicatorHistory(symbol, error) {
+            if (!indicatorsHistory[symbol]) {
+                indicatorsHistory[symbol] = { success: 0, failure: 0 };
             }
+            if (Math.abs(error) < 2) {
+                indicatorsHistory[symbol].success++;
+            } else {
+                indicatorsHistory[symbol].failure++;
+            }
+            let total = indicatorsHistory[symbol].success + indicatorsHistory[symbol].failure;
+            return total > 0 ? (indicatorsHistory[symbol].success / total) * 100 : 50;
+        }
+
+        function getTradeSuggestion(rsi, macd, bollinger, vwap, successRate) {
+            let score = successRate / 2;
+            if (rsi < 30) score += 15;
+            if (macd === "黃金交叉") score += 20;
+            if (bollinger === "下軌") score += 10;
+            if (vwap === "上升") score += 10;
+            return score >= 20 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
+                   score <= -20 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
+                   "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
         function getRandomValue(min, max) {
