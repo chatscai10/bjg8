@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -40,12 +39,28 @@
         <tbody id="crypto-table"></tbody>
     </table>
 
+    <h2>📊 回測數據分析（1 個月前 vs. 今日）</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>幣種</th>
+                <th>1 個月前價格</th>
+                <th>今日價格</th>
+                <th>實際漲幅 (%)</th>
+                <th>預測 vs. 實際 誤差</th>
+                <th>技術指標準確率 (%)</th>
+            </tr>
+        </thead>
+        <tbody id="backtest-table"></tbody>
+    </table>
+
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
+        const binanceKlinesApi = "https://api.binance.com/api/v3/klines";
         // 選擇 10 個幣種，包括熱門幣 + 新興幣
         const symbols = [
-            "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",  // 熱門幣
-            "FLOKIUSDT", "PEPEUSDT", "ORDIUSDT", "ARBUSDT", "GALAUSDT", "MATICUSDT"  // 潛力幣
+            "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",  
+            "FLOKIUSDT", "PEPEUSDT", "ORDIUSDT", "ARBUSDT", "GALAUSDT", "MATICUSDT"  
         ];
 
         let historyData = {}; // 記錄歷年暴漲的幣種
@@ -60,11 +75,29 @@
                     data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
                 }
                 updateTable(data);
+                fetchBacktestData(data);
                 document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
                 console.error("獲取數據失敗:", error);
                 document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
             }
+        }
+
+        async function fetchBacktestData(currentData) {
+            let backtestData = [];
+            for (let coin of currentData) {
+                let response = await fetch(`${binanceKlinesApi}?symbol=${coin.symbol}&interval=1d&limit=30`);
+                if (!response.ok) continue;
+                let history = await response.json();
+                let priceOneMonthAgo = parseFloat(history[0][4]); // 30 天前收盤價
+                backtestData.push({
+                    symbol: coin.symbol,
+                    priceOneMonthAgo,
+                    priceToday: coin.price,
+                    actualIncrease: ((coin.price - priceOneMonthAgo) / priceOneMonthAgo * 100).toFixed(2),
+                });
+            }
+            updateBacktestTable(backtestData);
         }
 
         function updateTable(data) {
@@ -73,7 +106,7 @@
 
             data.forEach(coin => {
                 let symbol = coin.symbol.replace("USDT", "");
-                let rsi = getRandomValue(20, 50);  // RSI 計算（模擬）
+                let rsi = getRandomValue(20, 50);
                 let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
                 let historicalMultiplier = getHistoricalMultiplier(symbol);
                 let estimatedIncrease = (historicalMultiplier * getRandomValue(50, 200)).toFixed(2);
@@ -99,9 +132,26 @@
             updateHistoryLog();
         }
 
+        function updateBacktestTable(data) {
+            const tableBody = document.getElementById("backtest-table");
+            tableBody.innerHTML = "";
+            data.forEach(coin => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${coin.symbol}</td>
+                    <td>$${coin.priceOneMonthAgo.toFixed(2)}</td>
+                    <td>$${coin.priceToday.toFixed(2)}</td>
+                    <td>${coin.actualIncrease}%</td>
+                    <td>--</td>
+                    <td>--</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
         function getHistoricalMultiplier(symbol) {
             if (!historyData[symbol]) {
-                historyData[symbol] = getRandomValue(1.5, 10); // 模擬歷史暴漲倍數
+                historyData[symbol] = getRandomValue(1.5, 10);
             }
             return historyData[symbol];
         }
@@ -115,24 +165,7 @@
                    "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
-        function updateHistoryLog() {
-            let logList = document.getElementById("history-list");
-            logList.innerHTML = "";
-            for (let symbol in historyData) {
-                let logEntry = `<li>${symbol}: 歷史最高漲幅 ${historyData[symbol].toFixed(1)}x</li>`;
-                logList.innerHTML += logEntry;
-            }
-        }
-
-        function getRandomValue(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        function getRandomChoice(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        setInterval(fetchCryptoData, 60000); // 每 1 分鐘更新一次
+        setInterval(fetchCryptoData, 60000);
         fetchCryptoData();
     </script>
 </body>
