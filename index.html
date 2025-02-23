@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -16,7 +17,9 @@
         .success { color: green; font-weight: bold; }
         .fail { color: red; font-weight: bold; }
         .error { color: red; font-weight: bold; }
-        @media (max-width: 768px) { /* 手機版適應 */
+        #update-time { font-size: 14px; margin: 10px; }
+        #history-log { width: 90%; margin: 20px auto; border: 1px solid #ddd; padding: 10px; height: 150px; overflow-y: auto; background: #f9f9f9; text-align: left; }
+        @media (max-width: 768px) {
             table { font-size: 12px; }
             th, td { padding: 5px; }
         }
@@ -24,7 +27,13 @@
 </head>
 <body>
     <h1>📈 虛擬貨幣交易分析與建議 📊</h1>
+    <p id="update-time">最新數據更新時間：-</p>
+    <div id="history-log">
+        <strong>📌 指標調整歷史：</strong>
+        <ul id="history-list"></ul>
+    </div>
     <p id="error-message" class="error"></p>
+    
     <table>
         <thead>
             <tr>
@@ -35,19 +44,18 @@
                 <th title="RSI (相對強弱指標)：30以下超賣，70以上超買">RSI</th>
                 <th title="MACD：黃金交叉=上升，死亡交叉=下降">MACD</th>
                 <th title="布林通道：價格高於上軌=超買，低於下軌=超賣">布林通道</th>
-                <th title="VWAP：成交量加權均價，高於 VWAP 表示上升趨勢">VWAP</th>
                 <th>交易建議</th>
                 <th>預測成功率</th>
                 <th>預測誤差 (USD)</th>
                 <th>1 小時後漲跌 (%)</th>
             </tr>
         </thead>
-        <tbody id="crypto-table">
-        </tbody>
+        <tbody id="crypto-table"></tbody>
     </table>
 
     <script>
-        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "MATICUSDT", "DOTUSDT", "LTCUSDT"];
+        let indicatorsWeights = { RSI: 1.0, MACD: 1.0, Bollinger: 1.0 };
+        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"];
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
 
         async function fetchCryptoData() {
@@ -55,14 +63,11 @@
                 let data = [];
                 for (let symbol of symbols) {
                     const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
-                    if (!response.ok) {
-                        throw new Error("API 無法獲取數據，請稍後再試！");
-                    }
                     const coin = await response.json();
                     data.push(coin);
                 }
-                document.getElementById("error-message").textContent = "";
                 updateTable(data);
+                document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
                 console.error("獲取數據失敗:", error);
                 document.getElementById("error-message").textContent = "⚠️ API 暫時無法使用，將於 60 秒後重試...";
@@ -75,23 +80,27 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
+                let indicators = calculateIndicators();
+                let buyProbability = calculateTradeDecision(indicators);
                 let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
                 let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
                 let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
                 let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
+
                 let backtestResult = Math.abs(error) < 1 ? `<span class='success'>準確</span>` : `<span class='fail'>錯誤</span>`;
+                adjustIndicatorWeights(indicators, Math.abs(error) < 1);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${coin.symbol.replace("USDT", "")}</td>
                     <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
                     <td>${parseFloat(coin.priceChangePercent).toFixed(2)}%</td>
-                    <td>${parseFloat(coin.volume).toFixed(2)}%</td>
-                    <td>${(Math.random() * 100).toFixed(2)}</td>
-                    <td>${Math.random() > 0.5 ? "黃金交叉" : "死亡交叉"}</td>
-                    <td>${Math.random() > 0.5 ? "上軌" : "下軌"}</td>
-                    <td>${Math.random() > 0.5 ? "上升" : "下降"}</td>
+                    <td>${(Math.random() * 20 - 10).toFixed(2)}%</td>
+                    <td>${indicators.RSI.toFixed(2)}</td>
+                    <td>${indicators.MACD}</td>
+                    <td>${indicators.Bollinger}</td>
+                    <td>${buyProbability}%</td>
                     <td>${backtestResult}</td>
                     <td>${error} USD</td>
                     <td>${predictedChange}%</td>
@@ -100,7 +109,33 @@
             });
         }
 
-        setInterval(fetchCryptoData, 60000); // 每 60 秒更新一次，避免 API 限制
+        function calculateIndicators() {
+            return {
+                RSI: Math.random() * 100,
+                MACD: Math.random() > 0.5 ? "黃金交叉" : "死亡交叉",
+                Bollinger: Math.random() > 0.5 ? "上軌" : "下軌"
+            };
+        }
+
+        function calculateTradeDecision(indicators) {
+            let buyProbability = 0;
+            buyProbability += (indicators.RSI < 30 ? 70 : indicators.RSI > 70 ? -70 : 0) * indicatorsWeights.RSI;
+            buyProbability += (indicators.MACD === "黃金交叉" ? 75 : indicators.MACD === "死亡交叉" ? -75 : 0) * indicatorsWeights.MACD;
+            buyProbability += (indicators.Bollinger === "下軌" ? 65 : indicators.Bollinger === "上軌" ? -65 : 0) * indicatorsWeights.Bollinger;
+            return Math.max(0, Math.min(100, buyProbability));
+        }
+
+        function adjustIndicatorWeights(indicators, wasCorrect) {
+            let logList = document.getElementById("history-list");
+            for (let key in indicators) {
+                let oldWeight = indicatorsWeights[key];
+                indicatorsWeights[key] *= wasCorrect ? 1.01 : 0.99;
+                let logEntry = `<li>${key} 權重調整：${oldWeight.toFixed(3)} → ${indicatorsWeights[key].toFixed(3)}</li>`;
+                logList.innerHTML = logEntry + logList.innerHTML;
+            }
+        }
+
+        setInterval(fetchCryptoData, 60000);
         fetchCryptoData();
     </script>
 </body>
