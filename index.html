@@ -57,45 +57,67 @@
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
         const binanceKlinesApi = "https://api.binance.com/api/v3/klines";
-        // 選擇 10 個幣種，包括熱門幣 + 新興幣
+        const coingeckoApiUrl = "https://api.coingecko.com/api/v3/simple/price";
+        
         const symbols = [
             "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",  
-            "FLOKIUSDT", "PEPEUSDT", "ORDIUSDT", "ARBUSDT", "GALAUSDT", "MATICUSDT"  
+            "FLOKIUSDT", "PEPEUSDT", "ORDIUSDT", "ARBUSDT", "GALAUSDT", "MATICUSDT"
         ];
 
         let historyData = {}; // 記錄歷年暴漲的幣種
 
         async function fetchCryptoData() {
+            let data = [];
             try {
-                let data = [];
                 for (let symbol of symbols) {
                     const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
                     if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
                     const coin = await response.json();
                     data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
                 }
-                updateTable(data);
-                fetchBacktestData(data);
-                document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
-                console.error("獲取數據失敗:", error);
+                console.warn("Binance API 無法獲取數據，改用 CoinGecko API...");
+                data = await fetchFromCoinGecko();
+            }
+            updateTable(data);
+            fetchBacktestData(data);
+            document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
+        }
+
+        async function fetchFromCoinGecko() {
+            try {
+                let ids = "bitcoin,ethereum,binancecoin,solana,ripple,cardano,floki,pepe,ordi,arbitrum,gala,matic-network";
+                let response = await fetch(`${coingeckoApiUrl}?ids=${ids}&vs_currencies=usd`);
+                if (!response.ok) throw new Error("CoinGecko API 失敗");
+                let data = await response.json();
+                return Object.keys(data).map(key => ({
+                    symbol: key.toUpperCase() + "USDT",
+                    price: data[key].usd
+                }));
+            } catch (error) {
+                console.error("CoinGecko API 也失敗:", error);
                 document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
+                return [];
             }
         }
 
         async function fetchBacktestData(currentData) {
             let backtestData = [];
             for (let coin of currentData) {
-                let response = await fetch(`${binanceKlinesApi}?symbol=${coin.symbol}&interval=1d&limit=30`);
-                if (!response.ok) continue;
-                let history = await response.json();
-                let priceOneMonthAgo = parseFloat(history[0][4]); // 30 天前收盤價
-                backtestData.push({
-                    symbol: coin.symbol,
-                    priceOneMonthAgo,
-                    priceToday: coin.price,
-                    actualIncrease: ((coin.price - priceOneMonthAgo) / priceOneMonthAgo * 100).toFixed(2),
-                });
+                try {
+                    let response = await fetch(`${binanceKlinesApi}?symbol=${coin.symbol}&interval=1d&limit=30`);
+                    if (!response.ok) continue;
+                    let history = await response.json();
+                    let priceOneMonthAgo = parseFloat(history[0][4]);
+                    backtestData.push({
+                        symbol: coin.symbol,
+                        priceOneMonthAgo,
+                        priceToday: coin.price,
+                        actualIncrease: ((coin.price - priceOneMonthAgo) / priceOneMonthAgo * 100).toFixed(2),
+                    });
+                } catch (error) {
+                    console.warn(`無法獲取 ${coin.symbol} 的回測數據`);
+                }
             }
             updateBacktestTable(backtestData);
         }
@@ -128,41 +150,6 @@
                 `;
                 tableBody.appendChild(row);
             });
-
-            updateHistoryLog();
-        }
-
-        function updateBacktestTable(data) {
-            const tableBody = document.getElementById("backtest-table");
-            tableBody.innerHTML = "";
-            data.forEach(coin => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${coin.symbol}</td>
-                    <td>$${coin.priceOneMonthAgo.toFixed(2)}</td>
-                    <td>$${coin.priceToday.toFixed(2)}</td>
-                    <td>${coin.actualIncrease}%</td>
-                    <td>--</td>
-                    <td>--</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function getHistoricalMultiplier(symbol) {
-            if (!historyData[symbol]) {
-                historyData[symbol] = getRandomValue(1.5, 10);
-            }
-            return historyData[symbol];
-        }
-
-        function getTradeSuggestion(rsi, macd, probability) {
-            let score = probability / 2;
-            if (rsi < 30) score += 15;
-            if (macd === "黃金交叉") score += 20;
-            return score >= 60 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
-                   score <= 40 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
-                   "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
         setInterval(fetchCryptoData, 60000);
