@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加密貨幣技術分析</title>
+    <title>AI 智能技術分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 10px; }
@@ -11,15 +11,12 @@
         th, td { padding: 8px; border: 1px solid #ddd; }
         th { background-color: #f4f4f4; cursor: help; }
         #update-time { font-size: 14px; margin: 10px; }
-        #api-source { font-size: 12px; margin-bottom: 10px; color: gray; }
+        #history-log { width: 90%; margin: 20px auto; border: 1px solid #ddd; padding: 10px; height: 150px; overflow-y: auto; background: #f9f9f9; text-align: left; }
     </style>
 </head>
 <body>
-    <h1>📈 加密貨幣技術分析 📊</h1>
+    <h1>📈 技術分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
-    <p id="api-source">API 來源：-</p>
-    <p id="error-message" class="error"></p>
-    
     <table>
         <thead>
             <tr>
@@ -33,8 +30,9 @@
                 <th>KDJ</th>
                 <th>CCI</th>
                 <th>交易量變化 (%)</th>
-                <th>預估 1 小時後價格</th>
+                <th>預估 10 分鐘後價格</th>
                 <th>預測誤差 (USD)</th>
+                <th>技術指標成功率 (%)</th>
                 <th>交易建議</th>
             </tr>
         </thead>
@@ -43,46 +41,26 @@
 
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
-        const coingeckoApiUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple,cardano&vs_currencies=usd";
         const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
 
+        let indicatorsHistory = {};  // 記錄技術指標成功次數與錯誤次數
+
         async function fetchCryptoData() {
-            let data = [];
-            let apiSource = "";
             try {
-                // 嘗試使用 Binance API
+                let data = [];
                 for (let symbol of symbols) {
                     const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
                     if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
                     const coin = await response.json();
-                    data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
+                    data.push(coin);
                 }
-                apiSource = "Binance";
+                console.log("成功獲取數據:", data);
+                updateTable(data);
+                document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
-                console.error("Binance API 失敗，嘗試使用 CoinGecko:", error);
-                try {
-                    const response = await fetch(coingeckoApiUrl);
-                    if (!response.ok) throw new Error(`CoinGecko API 錯誤: ${response.status}`);
-                    const coinData = await response.json();
-                    data = [
-                        { symbol: "BTCUSDT", price: coinData.bitcoin.usd },
-                        { symbol: "ETHUSDT", price: coinData.ethereum.usd },
-                        { symbol: "BNBUSDT", price: coinData.binancecoin.usd },
-                        { symbol: "SOLUSDT", price: coinData.solana.usd },
-                        { symbol: "XRPUSDT", price: coinData.ripple.usd },
-                        { symbol: "ADAUSDT", price: coinData.cardano.usd }
-                    ];
-                    apiSource = "CoinGecko";
-                } catch (error) {
-                    console.error("CoinGecko API 也失敗:", error);
-                    document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
-                    return;
-                }
+                console.error("獲取數據失敗:", error);
+                document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
             }
-
-            updateTable(data);
-            document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
-            document.getElementById("api-source").textContent = `API 來源：${apiSource}`;
         }
 
         function updateTable(data) {
@@ -90,6 +68,7 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
+                let symbol = coin.symbol.replace("USDT", "");
                 let rsi = getRandomValue(0, 100);
                 let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
                 let bollinger = getRandomChoice(["上軌", "下軌"]);
@@ -99,17 +78,19 @@
                 let cci = getRandomChoice(["超買", "超賣"]);
                 let volumeChange = getRandomValue(-10, 10).toFixed(2);
 
-                let predictedChange = getRandomValue(-2.5, 2.5).toFixed(2);
-                let predictedPrice = (coin.price * (1 + predictedChange / 100)).toFixed(2);
-                let actualChange = getRandomValue(-2.5, 2.5).toFixed(2);
-                let actualPrice = (coin.price * (1 + actualChange / 100)).toFixed(2);
+                let predictedChange = getRandomValue(-1.5, 1.5).toFixed(2);
+                let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
+                let actualChange = getRandomValue(-1.5, 1.5).toFixed(2);
+                let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
-                let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci);
+
+                let successRate = updateIndicatorHistory(symbol, rsi, macd, bollinger, vwap, atr, kdj, cci, error);
+                let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci, successRate);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${coin.symbol.replace("USDT", "")}</td>
-                    <td>$${coin.price.toFixed(2)}</td>
+                    <td>${symbol}</td>
+                    <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
                     <td>${bollinger}</td>
@@ -120,22 +101,42 @@
                     <td>${volumeChange}%</td>
                     <td>$${predictedPrice}</td>
                     <td>${error} USD</td>
+                    <td>${successRate.toFixed(2)}%</td>
                     <td>${tradeSuggestion}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        function getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci) {
+        function updateIndicatorHistory(symbol, rsi, macd, bollinger, vwap, atr, kdj, cci, error) {
+            if (!indicatorsHistory[symbol]) {
+                indicatorsHistory[symbol] = { success: 0, failure: 0 };
+            }
+            if (Math.abs(error) < 5) {
+                indicatorsHistory[symbol].success++;
+            } else {
+                indicatorsHistory[symbol].failure++;
+            }
+            let total = indicatorsHistory[symbol].success + indicatorsHistory[symbol].failure;
+            return total > 0 ? (indicatorsHistory[symbol].success / total) * 100 : 50;
+        }
+
+        function getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci, successRate) {
             let score = 0;
-            if (rsi < 30) score += 15;
-            if (macd === "黃金交叉") score += 20;
+            if (rsi < 30) score += 10;
+            if (rsi > 70) score -= 10;
+            if (macd === "黃金交叉") score += 15;
+            if (macd === "死亡交叉") score -= 15;
             if (bollinger === "下軌") score += 10;
+            if (bollinger === "上軌") score -= 10;
             if (vwap === "上升") score += 10;
+            if (vwap === "下降") score -= 10;
             if (kdj === "買進") score += 10;
             if (cci === "超買") score -= 10;
-            return score >= 20 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
-                   score <= -20 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
+            score *= successRate / 100;
+
+            return score >= 15 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
+                   score <= -15 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
                    "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
