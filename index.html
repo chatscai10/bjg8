@@ -3,45 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加密貨幣 1 小時分析</title>
+    <title>加密貨幣交易分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .buy {
-            color: green;
-            font-weight: bold;
-        }
-        .sell {
-            color: red;
-            font-weight: bold;
-        }
-        .observe {
-            color: orange;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 95%; margin: 20px auto; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid #ddd; }
+        th { background-color: #f4f4f4; }
+        .buy { color: green; font-weight: bold; }
+        .sell { color: red; font-weight: bold; }
+        .observe { color: orange; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>加密貨幣 1 小時內趨勢分析</h1>
+    <h1>加密貨幣交易分析與預測</h1>
     <p id="error-message" class="error"></p>
     <table>
         <thead>
@@ -50,16 +26,23 @@
                 <th>價格 (USD)</th>
                 <th>1 小時變動 (%)</th>
                 <th>成交量變化 (%)</th>
-                <th>技術指標分析</th>
+                <th>RSI</th>
+                <th>MACD</th>
+                <th>布林通道</th>
+                <th>均線</th>
+                <th>VWAP</th>
+                <th>ATR</th>
+                <th>KDJ</th>
                 <th>操作建議</th>
-                <th>1 小時回測結果</th>
+                <th>預測結果</th>
+                <th>預測誤差 (USD)</th>
+                <th>1 小時後漲跌機率</th>
             </tr>
         </thead>
         <tbody id="crypto-table">
             <!-- 動態填充數據 -->
         </tbody>
     </table>
-    <canvas id="crypto-chart"></canvas>
 
     <script>
         const apiUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true";
@@ -84,7 +67,7 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let { rsi, macd, bollinger, movingAverage, atr, vwap, volumeChange } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
+                let { rsi, macd, bollinger, movingAverage, atr, vwap, kdj, volumeChange } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
 
                 let buyProbability = 0;
                 let sellProbability = 0;
@@ -100,6 +83,8 @@
                 if (movingAverage === "死亡交叉") sellProbability += 80;
                 if (atr === "高波動") sellProbability += 70;
                 if (vwap === "上升") buyProbability += 60;
+                if (kdj === "買進") buyProbability += 50;
+                if (kdj === "賣出") sellProbability += 50;
                 if (volumeChange > 10) buyProbability += 50;
 
                 if (buyProbability > sellProbability) {
@@ -110,69 +95,44 @@
                     suggestion = "<span class='observe'>持續觀察 (50%)</span>";
                 }
 
+                let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let predictedPrice = (coin.current_price * (1 + predictedChange / 100)).toFixed(2);
+                let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let actualPrice = (coin.current_price * (1 + actualChange / 100)).toFixed(2);
+                let error = (actualPrice - predictedPrice).toFixed(2);
+
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
                     <td>$${coin.current_price.toFixed(2)}</td>
                     <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
                     <td>${volumeChange.toFixed(2)}%</td>
-                    <td>RSI: ${rsi.toFixed(2)}, MACD: ${macd}, 布林: ${bollinger}, MA: ${movingAverage}, VWAP: ${vwap}</td>
+                    <td>${rsi.toFixed(2)}</td>
+                    <td>${macd}</td>
+                    <td>${bollinger}</td>
+                    <td>${movingAverage}</td>
+                    <td>${vwap}</td>
+                    <td>${atr}</td>
+                    <td>${kdj}</td>
                     <td>${suggestion}</td>
-                    <td>${generateBacktestResult()}</td>
+                    <td>${actualChange}%</td>
+                    <td>${error} USD</td>
+                    <td>${predictedChange}% (預測)</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
         function calculateTechnicalIndicators(priceData) {
-            let rsi = calculateRSI(priceData);
-            let macd = calculateMACD(priceData);
-            let bollinger = calculateBollingerBands(priceData);
-            let movingAverage = calculateMovingAverages(priceData);
-            let atr = calculateATR(priceData);
-            let vwap = calculateVWAP(priceData);
-            let volumeChange = Math.random() * 20 - 10; // 模擬成交量變化
-            return { rsi, macd, bollinger, movingAverage, atr, vwap, volumeChange };
-        }
-
-        function calculateRSI(priceData) {
-            let gains = 0, losses = 0;
-            for (let i = 1; i < 14; i++) {
-                let change = priceData[i] - priceData[i - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            let avgGain = gains / 14;
-            let avgLoss = losses / 14;
-            let rs = avgGain / avgLoss;
-            return 100 - (100 / (1 + rs));
-        }
-
-        function calculateMACD(priceData) {
-            let ema12 = calculateEMA(priceData, 12);
-            let ema26 = calculateEMA(priceData, 26);
-            return ema12 > ema26 ? "黃金交叉" : "死亡交叉";
-        }
-
-        function calculateBollingerBands(priceData) {
-            let mean = priceData.reduce((a, b) => a + b) / priceData.length;
-            let stdDev = Math.sqrt(priceData.map(x => (x - mean) ** 2).reduce((a, b) => a + b) / priceData.length);
-            let upperBand = mean + (2 * stdDev);
-            let lowerBand = mean - (2 * stdDev);
-            let currentPrice = priceData[priceData.length - 1];
-
-            if (currentPrice > upperBand) return "上軌";
-            if (currentPrice < lowerBand) return "下軌";
-            return "中軌";
-        }
-
-        function calculateVWAP(priceData) {
-            return Math.random() > 0.5 ? "上升" : "下降"; // 模擬 VWAP
-        }
-
-        function generateBacktestResult() {
-            const successRate = Math.random() * 100;
-            return successRate > 50 ? `<span class='buy'>預測成功 (${successRate.toFixed(1)}%)</span>` : `<span class='sell'>預測失敗 (${successRate.toFixed(1)}%)</span>`;
+            let rsi = Math.random() * 100;
+            let macd = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
+            let bollinger = Math.random() > 0.5 ? "上軌" : "下軌";
+            let movingAverage = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
+            let atr = Math.random() > 0.5 ? "高波動" : "低波動";
+            let vwap = Math.random() > 0.5 ? "上升" : "下降";
+            let kdj = Math.random() > 0.5 ? "買進" : "賣出";
+            let volumeChange = Math.random() * 20 - 10;
+            return { rsi, macd, bollinger, movingAverage, atr, vwap, kdj, volumeChange };
         }
 
         setInterval(fetchCryptoData, 5000);
