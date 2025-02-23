@@ -1,0 +1,34 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.buy {
+    color: green;
+    font-weight: bold;
+}
+
+.sell {
+    color: red;
+    font-weight: bold;
+}
+
+.observe {
+    color: orange;
+    font-weight: bold;
+}
