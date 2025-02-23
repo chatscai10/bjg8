@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>虛擬貨幣交易分析</title>
+    <title>加密貨幣技術分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 10px; }
@@ -15,12 +16,8 @@
     </style>
 </head>
 <body>
-    <h1>📈 虛擬貨幣技術分析 📊</h1>
+    <h1>📈 數據分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
-    <div id="history-log">
-        <strong>📌 技術指標調整歷史：</strong>
-        <ul id="history-list"></ul>
-    </div>
     <p id="error-message" class="error"></p>
     
     <table>
@@ -38,8 +35,6 @@
                 <th>交易量變化 (%)</th>
                 <th>預估 1 小時後價格</th>
                 <th>預測誤差 (USD)</th>
-                <th>校正次數</th>
-                <th>成功機率 (%)</th>
                 <th>交易建議</th>
             </tr>
         </thead>
@@ -49,17 +44,23 @@
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
         const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
-        let indicatorsHistory = {};
 
         async function fetchCryptoData() {
-            let data = [];
-            for (let symbol of symbols) {
-                const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
-                const coin = await response.json();
-                data.push(coin);
+            try {
+                let data = [];
+                for (let symbol of symbols) {
+                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
+                    if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
+                    const coin = await response.json();
+                    data.push(coin);
+                }
+                console.log("成功獲取數據:", data);
+                updateTable(data);
+                document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error("獲取數據失敗:", error);
+                document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
             }
-            updateTable(data);
-            document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
         }
 
         function updateTable(data) {
@@ -67,19 +68,18 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let rsi = Math.random() * 100;
-                let macd = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
-                let bollinger = Math.random() > 0.5 ? "上軌" : "下軌";
-                let vwap = Math.random() > 0.5 ? "上升" : "下降";
-                let atr = Math.random() > 0.5 ? "高波動" : "低波動";
-                let kdj = Math.random() > 0.5 ? "買進" : "賣出";
-                let cci = Math.random() > 0.5 ? "超買" : "超賣";
-                let volumeChange = (Math.random() * 20 - 10).toFixed(2);
-                let correctionCount = updateIndicatorHistory(coin.symbol.replace("USDT", ""), rsi, macd, bollinger, vwap, atr, kdj, cci);
-                let successRate = calculateSuccessRate(coin.symbol.replace("USDT", ""), rsi, macd, bollinger);
-                let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let rsi = getRandomValue(0, 100);
+                let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
+                let bollinger = getRandomChoice(["上軌", "下軌"]);
+                let vwap = getRandomChoice(["上升", "下降"]);
+                let atr = getRandomChoice(["高波動", "低波動"]);
+                let kdj = getRandomChoice(["買進", "賣出"]);
+                let cci = getRandomChoice(["超買", "超賣"]);
+                let volumeChange = getRandomValue(-10, 10).toFixed(2);
+
+                let predictedChange = getRandomValue(-2.5, 2.5).toFixed(2);
                 let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
-                let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let actualChange = getRandomValue(-2.5, 2.5).toFixed(2);
                 let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
                 let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci);
@@ -98,8 +98,6 @@
                     <td>${volumeChange}%</td>
                     <td>$${predictedPrice}</td>
                     <td>${error} USD</td>
-                    <td>${correctionCount}</td>
-                    <td>${successRate.toFixed(2)}%</td>
                     <td>${tradeSuggestion}</td>
                 `;
                 tableBody.appendChild(row);
@@ -124,7 +122,15 @@
                    "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
-        setInterval(fetchCryptoData, 60000);
+        function getRandomValue(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function getRandomChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        setInterval(fetchCryptoData, 10000);
         fetchCryptoData();
     </script>
 </body>
