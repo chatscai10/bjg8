@@ -33,7 +33,7 @@
                 <th>VWAP</th>
                 <th>預估 10 分鐘後價格</th>
                 <th>預測誤差 (USD)</th>
-                <th>成功率 (%)</th>
+                <th>技術指標成功率 (%)</th>
                 <th>交易建議</th>
             </tr>
         </thead>
@@ -41,42 +41,24 @@
     </table>
 
     <script>
-        const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
-        const coingeckoApiUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple,cardano&vs_currencies=usd";
+        const binanceApiUrl = "https://api.binance.com/api/v3/klines";
         const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
-
-        let indicatorsHistory = {}; // 記錄技術指標成功/失敗次數
+        const indicatorsHistory = {};  // 記錄技術指標成功/失敗次數
 
         async function fetchCryptoData() {
             try {
                 let data = [];
                 for (let symbol of symbols) {
-                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
+                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}&interval=10m&limit=144`);
                     if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
                     const coin = await response.json();
-                    data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
+                    data.push({ symbol: symbol, history: coin });
                 }
                 updateTable(data);
                 document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
             } catch (error) {
-                console.error("Binance API 失敗，嘗試使用 CoinGecko:", error);
-                try {
-                    const response = await fetch(coingeckoApiUrl);
-                    if (!response.ok) throw new Error(`CoinGecko API 錯誤: ${response.status}`);
-                    const coinData = await response.json();
-                    data = [
-                        { symbol: "BTCUSDT", price: coinData.bitcoin.usd },
-                        { symbol: "ETHUSDT", price: coinData.ethereum.usd },
-                        { symbol: "BNBUSDT", price: coinData.binancecoin.usd },
-                        { symbol: "SOLUSDT", price: coinData.solana.usd },
-                        { symbol: "XRPUSDT", price: coinData.ripple.usd },
-                        { symbol: "ADAUSDT", price: coinData.cardano.usd }
-                    ];
-                    updateTable(data);
-                } catch (error) {
-                    console.error("CoinGecko API 也失敗:", error);
-                    document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
-                }
+                console.error("獲取數據失敗:", error);
+                document.getElementById("error-message").textContent = "⚠️ 無法獲取數據，請稍後再試...";
             }
         }
 
@@ -85,28 +67,28 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let symbol = coin.symbol.replace("USDT", "");
-                let rsi = getRandomValue(0, 100);
+                let symbol = coin.symbol;
+                let latestPrice = parseFloat(coin.history[coin.history.length - 1][4]); // 最新收盤價
+                let previousPrice = parseFloat(coin.history[coin.history.length - 2][4]); // 10 分鐘前價格
+
+                let rsi = calculateRSI(coin.history);
                 let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
                 let bollinger = getRandomChoice(["上軌", "下軌"]);
                 let vwap = getRandomChoice(["上升", "下降"]);
-                let predictedChange = getRandomValue(-1.5, 1.5).toFixed(2);
-                let predictedPrice = (coin.price * (1 + predictedChange / 100)).toFixed(2);
-                let actualChange = getRandomValue(-1.5, 1.5).toFixed(2);
-                let actualPrice = (coin.price * (1 + actualChange / 100)).toFixed(2);
-                let error = (actualPrice - predictedPrice).toFixed(2);
+                let predictedPrice = latestPrice * (1 + getRandomValue(-0.5, 0.5) / 100);
+                let error = (previousPrice - predictedPrice).toFixed(2);
                 let successRate = updateIndicatorHistory(symbol, error);
                 let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, successRate);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${symbol}</td>
-                    <td>$${coin.price.toFixed(2)}</td>
+                    <td>$${latestPrice.toFixed(2)}</td>
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
                     <td>${bollinger}</td>
                     <td>${vwap}</td>
-                    <td>$${predictedPrice}</td>
+                    <td>$${predictedPrice.toFixed(2)}</td>
                     <td>${error} USD</td>
                     <td>${successRate.toFixed(2)}%</td>
                     <td>${tradeSuggestion}</td>
@@ -115,11 +97,24 @@
             });
         }
 
+        function calculateRSI(history) {
+            let gains = 0, losses = 0;
+            for (let i = history.length - 14; i < history.length; i++) {
+                let change = parseFloat(history[i][4]) - parseFloat(history[i - 1][4]);
+                if (change > 0) gains += change;
+                else losses -= change;
+            }
+            let avgGain = gains / 14;
+            let avgLoss = losses / 14;
+            let rs = avgGain / avgLoss;
+            return 100 - (100 / (1 + rs));
+        }
+
         function updateIndicatorHistory(symbol, error) {
             if (!indicatorsHistory[symbol]) {
                 indicatorsHistory[symbol] = { success: 0, failure: 0 };
             }
-            if (Math.abs(error) < 2) {
+            if (Math.abs(error) < 1) {
                 indicatorsHistory[symbol].success++;
             } else {
                 indicatorsHistory[symbol].failure++;
