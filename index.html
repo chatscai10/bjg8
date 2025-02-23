@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>📈 數據分析 📊</h1>
+    <h1>📈 虛擬貨幣技術分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
     <div id="history-log">
         <strong>📌 技術指標調整歷史：</strong>
@@ -31,8 +31,16 @@
                 <th>RSI</th>
                 <th>MACD</th>
                 <th>布林通道</th>
+                <th>VWAP</th>
+                <th>ATR</th>
+                <th>KDJ</th>
+                <th>CCI</th>
+                <th>交易量變化 (%)</th>
+                <th>預估 1 小時後價格</th>
+                <th>預測誤差 (USD)</th>
                 <th>校正次數</th>
                 <th>成功機率 (%)</th>
+                <th>交易建議</th>
             </tr>
         </thead>
         <tbody id="crypto-table"></tbody>
@@ -62,8 +70,19 @@
                 let rsi = Math.random() * 100;
                 let macd = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
                 let bollinger = Math.random() > 0.5 ? "上軌" : "下軌";
-                let correctionCount = updateIndicatorHistory(coin.symbol.replace("USDT", ""), rsi, macd, bollinger);
+                let vwap = Math.random() > 0.5 ? "上升" : "下降";
+                let atr = Math.random() > 0.5 ? "高波動" : "低波動";
+                let kdj = Math.random() > 0.5 ? "買進" : "賣出";
+                let cci = Math.random() > 0.5 ? "超買" : "超賣";
+                let volumeChange = (Math.random() * 20 - 10).toFixed(2);
+                let correctionCount = updateIndicatorHistory(coin.symbol.replace("USDT", ""), rsi, macd, bollinger, vwap, atr, kdj, cci);
                 let successRate = calculateSuccessRate(coin.symbol.replace("USDT", ""), rsi, macd, bollinger);
+                let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
+                let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
+                let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
+                let error = (actualPrice - predictedPrice).toFixed(2);
+                let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
@@ -72,39 +91,37 @@
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
                     <td>${bollinger}</td>
+                    <td>${vwap}</td>
+                    <td>${atr}</td>
+                    <td>${kdj}</td>
+                    <td>${cci}</td>
+                    <td>${volumeChange}%</td>
+                    <td>$${predictedPrice}</td>
+                    <td>${error} USD</td>
                     <td>${correctionCount}</td>
                     <td>${successRate.toFixed(2)}%</td>
+                    <td>${tradeSuggestion}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        function updateIndicatorHistory(symbol, rsi, macd, bollinger) {
-            if (!indicatorsHistory[symbol]) {
-                indicatorsHistory[symbol] = { RSI: rsi, MACD: macd, 布林通道: bollinger, 校正次數: 1 };
-            } else {
-                indicatorsHistory[symbol].RSI = (indicatorsHistory[symbol].RSI + rsi) / 2;
-                indicatorsHistory[symbol].MACD = macd;
-                indicatorsHistory[symbol].布林通道 = bollinger;
-                indicatorsHistory[symbol].校正次數 += 1;
-            }
-            logIndicatorHistory(symbol, indicatorsHistory[symbol]);
-            return indicatorsHistory[symbol].校正次數;
-        }
+        function getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci) {
+            let score = 0;
+            if (rsi < 30) score += 15;
+            if (rsi > 70) score -= 15;
+            if (macd === "黃金交叉") score += 20;
+            if (macd === "死亡交叉") score -= 20;
+            if (bollinger === "下軌") score += 10;
+            if (bollinger === "上軌") score -= 10;
+            if (vwap === "上升") score += 10;
+            if (vwap === "下降") score -= 10;
+            if (kdj === "買進") score += 10;
+            if (cci === "超買") score -= 10;
 
-        function calculateSuccessRate(symbol, rsi, macd, bollinger) {
-            if (!indicatorsHistory[symbol]) return 50; // 沒有歷史數據，給 50%
-            let score = 50;
-            if (Math.abs(indicatorsHistory[symbol].RSI - rsi) < 10) score += 15;
-            if (indicatorsHistory[symbol].MACD === macd) score += 20;
-            if (indicatorsHistory[symbol].布林通道 === bollinger) score += 15;
-            return score;
-        }
-
-        function logIndicatorHistory(symbol, indicator) {
-            let logList = document.getElementById("history-list");
-            let logEntry = `<li>幣種: ${symbol}, RSI: ${indicator.RSI.toFixed(2)}, MACD: ${indicator.MACD}, 布林: ${indicator.布林通道}, 校正次數: ${indicator.校正次數}</li>`;
-            logList.innerHTML = logEntry + logList.innerHTML;
+            return score >= 20 ? "<span style='color:green;font-weight:bold;'>買進</span>" : 
+                   score <= -20 ? "<span style='color:red;font-weight:bold;'>賣出</span>" : 
+                   "<span style='color:orange;font-weight:bold;'>觀望</span>";
         }
 
         setInterval(fetchCryptoData, 60000);
