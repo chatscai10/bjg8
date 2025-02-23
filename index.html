@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -16,8 +15,12 @@
     </style>
 </head>
 <body>
-    <h1>📈 數據分析 📊</h1>
+    <h1>📈 加密貨幣技術分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
+    <div id="history-log">
+        <strong>📌 技術指標調整歷史：</strong>
+        <ul id="history-list"></ul>
+    </div>
     <p id="error-message" class="error"></p>
     
     <table>
@@ -35,6 +38,8 @@
                 <th>交易量變化 (%)</th>
                 <th>預估 1 小時後價格</th>
                 <th>預測誤差 (USD)</th>
+                <th>校正次數</th>
+                <th>成功機率 (%)</th>
                 <th>交易建議</th>
             </tr>
         </thead>
@@ -44,6 +49,7 @@
     <script>
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
         const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
+        let indicatorsHistory = {};
 
         async function fetchCryptoData() {
             try {
@@ -68,6 +74,7 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
+                let symbol = coin.symbol.replace("USDT", "");
                 let rsi = getRandomValue(0, 100);
                 let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
                 let bollinger = getRandomChoice(["上軌", "下軌"]);
@@ -82,11 +89,14 @@
                 let actualChange = getRandomValue(-2.5, 2.5).toFixed(2);
                 let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
+
+                let correctionCount = updateIndicatorHistory(symbol, rsi, macd, bollinger, vwap, atr, kdj, cci);
+                let successRate = calculateSuccessRate(symbol, rsi, macd, bollinger);
                 let tradeSuggestion = getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${coin.symbol.replace("USDT", "")}</td>
+                    <td>${symbol}</td>
                     <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
@@ -98,36 +108,44 @@
                     <td>${volumeChange}%</td>
                     <td>$${predictedPrice}</td>
                     <td>${error} USD</td>
+                    <td>${correctionCount}</td>
+                    <td>${successRate.toFixed(2)}%</td>
                     <td>${tradeSuggestion}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
+        function updateIndicatorHistory(symbol, rsi, macd, bollinger, vwap, atr, kdj, cci) {
+            if (!indicatorsHistory[symbol]) {
+                indicatorsHistory[symbol] = { RSI: rsi, MACD: macd, 布林通道: bollinger, 校正次數: 1 };
+            } else {
+                indicatorsHistory[symbol].RSI = (indicatorsHistory[symbol].RSI + rsi) / 2;
+                indicatorsHistory[symbol].校正次數 += 1;
+            }
+            return indicatorsHistory[symbol].校正次數;
+        }
+
+        function calculateSuccessRate(symbol, rsi, macd, bollinger) {
+            if (!indicatorsHistory[symbol]) return 50;
+            let score = 50;
+            if (Math.abs(indicatorsHistory[symbol].RSI - rsi) < 10) score += 15;
+            if (indicatorsHistory[symbol].MACD === macd) score += 20;
+            if (indicatorsHistory[symbol].布林通道 === bollinger) score += 15;
+            return score;
+        }
+
         function getTradeSuggestion(rsi, macd, bollinger, vwap, atr, kdj, cci) {
             let score = 0;
             if (rsi < 30) score += 15;
-            if (rsi > 70) score -= 15;
             if (macd === "黃金交叉") score += 20;
-            if (macd === "死亡交叉") score -= 20;
             if (bollinger === "下軌") score += 10;
-            if (bollinger === "上軌") score -= 10;
             if (vwap === "上升") score += 10;
-            if (vwap === "下降") score -= 10;
             if (kdj === "買進") score += 10;
             if (cci === "超買") score -= 10;
-
-            return score >= 20 ? "<span style='color:green;font-weight:bold;'>買進</span>" : 
-                   score <= -20 ? "<span style='color:red;font-weight:bold;'>賣出</span>" : 
+            return score >= 20 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
+                   score <= -20 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
                    "<span style='color:orange;font-weight:bold;'>觀望</span>";
-        }
-
-        function getRandomValue(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        function getRandomChoice(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
         }
 
         setInterval(fetchCryptoData, 10000);
