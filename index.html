@@ -34,10 +34,15 @@
             color: orange;
             font-weight: bold;
         }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>加密貨幣即時分析系統</h1>
+    <p id="error-message" class="error"></p>
     <table>
         <thead>
             <tr>
@@ -61,10 +66,15 @@
         async function fetchCryptoData() {
             try {
                 const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error("API 無法獲取數據，請稍後再試！");
+                }
                 const data = await response.json();
+                document.getElementById("error-message").textContent = "";  // 清空錯誤訊息
                 updateTable(data);
             } catch (error) {
                 console.error("獲取數據失敗:", error);
+                document.getElementById("error-message").textContent = "⚠️ 獲取數據失敗，請稍後再試！";
             }
         }
 
@@ -73,29 +83,11 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let { rsi, macd, bollinger, movingAverage, atr } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
-
-                let buyProbability = 0;
-                let sellProbability = 0;
-                let suggestion = "";
-
-                if (rsi < 30) buyProbability += 70;
-                if (rsi > 70) sellProbability += 70;
-                if (macd === "黃金交叉") buyProbability += 75;
-                if (macd === "死亡交叉") sellProbability += 75;
-                if (bollinger === "下軌") buyProbability += 65;
-                if (bollinger === "上軌") sellProbability += 65;
-                if (movingAverage === "黃金交叉") buyProbability += 80;
-                if (movingAverage === "死亡交叉") sellProbability += 80;
-                if (atr === "高波動") sellProbability += 70;
-
-                if (buyProbability > sellProbability) {
-                    suggestion = `<span class='buy'>買進 (${buyProbability}%)</span>`;
-                } else if (sellProbability > buyProbability) {
-                    suggestion = `<span class='sell'>賣出 (${sellProbability}%)</span>`;
-                } else {
-                    suggestion = "<span class='observe'>持續觀察 (50%)</span>";
-                }
+                let suggestion = coin.price_change_percentage_24h > 5 
+                    ? `<span class='buy'>強烈買進</span>` 
+                    : coin.price_change_percentage_24h < -5 
+                    ? `<span class='sell'>強烈賣出</span>` 
+                    : `<span class='observe'>持續觀察</span>`;
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
@@ -110,65 +102,11 @@
             });
         }
 
-        function calculateTechnicalIndicators(priceData) {
-            let rsi = calculateRSI(priceData);
-            let macd = calculateMACD(priceData);
-            let bollinger = calculateBollingerBands(priceData);
-            let movingAverage = calculateMovingAverages(priceData);
-            let atr = calculateATR(priceData);
-            return { rsi, macd, bollinger, movingAverage, atr };
-        }
-
-        function calculateRSI(priceData) {
-            let gains = 0, losses = 0;
-            for (let i = 1; i < 14; i++) {
-                let change = priceData[i] - priceData[i - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            let avgGain = gains / 14;
-            let avgLoss = losses / 14;
-            let rs = avgGain / avgLoss;
-            return 100 - (100 / (1 + rs));
-        }
-
-        function calculateMACD(priceData) {
-            let ema12 = calculateEMA(priceData, 12);
-            let ema26 = calculateEMA(priceData, 26);
-            return ema12 > ema26 ? "黃金交叉" : "死亡交叉";
-        }
-
-        function calculateBollingerBands(priceData) {
-            let mean = priceData.reduce((a, b) => a + b) / priceData.length;
-            let stdDev = Math.sqrt(priceData.map(x => (x - mean) ** 2).reduce((a, b) => a + b) / priceData.length);
-            let upperBand = mean + (2 * stdDev);
-            let lowerBand = mean - (2 * stdDev);
-            let currentPrice = priceData[priceData.length - 1];
-
-            if (currentPrice > upperBand) return "上軌";
-            if (currentPrice < lowerBand) return "下軌";
-            return "中軌";
-        }
-
-        function calculateMovingAverages(priceData) {
-            let shortMA = priceData.slice(-20).reduce((a, b) => a + b) / 20;
-            let longMA = priceData.slice(-50).reduce((a, b) => a + b) / 50;
-            return shortMA > longMA ? "黃金交叉" : "死亡交叉";
-        }
-
-        function calculateATR(priceData) {
-            let trValues = [];
-            for (let i = 1; i < priceData.length; i++) {
-                let tr = Math.max(priceData[i] - priceData[i - 1], Math.abs(priceData[i] - priceData[0]));
-                trValues.push(tr);
-            }
-            let atr = trValues.reduce((a, b) => a + b) / trValues.length;
-            return atr > priceData.reduce((a, b) => a + b) / priceData.length ? "高波動" : "低波動";
-        }
-
         function generateBacktestResult() {
             const successRate = Math.random() * 100;
-            return successRate > 50 ? `<span class='buy'>預測成功 (${successRate.toFixed(1)}%)</span>` : `<span class='sell'>預測失敗 (${successRate.toFixed(1)}%)</span>`;
+            return successRate > 50 
+                ? `<span class='buy'>預測成功 (${successRate.toFixed(1)}%)</span>` 
+                : `<span class='sell'>預測失敗 (${successRate.toFixed(1)}%)</span>`;
         }
 
         setInterval(fetchCryptoData, 10000);
