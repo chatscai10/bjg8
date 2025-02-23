@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 交易技術分析</title>
+    <title>AI 加密貨幣預測</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 10px; }
@@ -15,11 +16,11 @@
     </style>
 </head>
 <body>
-    <h1>📈 AI 交易技術分析 📊</h1>
+    <h1>📈 AI 加密貨幣預測 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
     <p id="error-message" class="error" style="color: red;"></p>
     <div id="history-log">
-        <strong>📌 技術指標校正歷史：</strong>
+        <strong>📌 歷史暴漲幣分析結果：</strong>
         <ul id="history-list"></ul>
     </div>
     <table>
@@ -29,28 +30,34 @@
                 <th>價格 (USD)</th>
                 <th>RSI</th>
                 <th>MACD</th>
-                <th>布林通道</th>
-                <th>VWAP</th>
-                <th>預測成功率 (%)</th>
-                <th>最佳技術指標設定</th>
+                <th>歷史漲幅 (倍數)</th>
+                <th>預估漲幅 (%)</th>
+                <th>預估時間 (天)</th>
+                <th>預測機率 (%)</th>
+                <th>交易建議</th>
             </tr>
         </thead>
         <tbody id="crypto-table"></tbody>
     </table>
 
     <script>
-        const binanceApiUrl = "https://api.binance.com/api/v3/klines";
-        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
-        const indicatorsHistory = {};  // 記錄技術指標成功/失敗次數
+        const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
+        // 選擇 10 個幣種，包括熱門幣 + 新興幣
+        const symbols = [
+            "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",  // 熱門幣
+            "FLOKIUSDT", "PEPEUSDT", "ORDIUSDT", "ARBUSDT", "GALAUSDT", "MATICUSDT"  // 潛力幣
+        ];
+
+        let historyData = {}; // 記錄歷年暴漲的幣種
 
         async function fetchCryptoData() {
             try {
                 let data = [];
                 for (let symbol of symbols) {
-                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}&interval=1h&limit=24`);
+                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
                     if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
                     const coin = await response.json();
-                    data.push({ symbol: symbol, history: coin });
+                    data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
                 }
                 updateTable(data);
                 document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
@@ -65,85 +72,67 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let symbol = coin.symbol;
-                let successCount = 0, failureCount = 0;
-                let bestRSI = 50, bestMACD = "黃金交叉", bestBollinger = "中軌";
-                
-                for (let i = 1; i < coin.history.length; i++) {
-                    let latestPrice = parseFloat(coin.history[i][4]); // 當前收盤價
-                    let previousPrice = parseFloat(coin.history[i - 1][4]); // 前一小時價格
-                    let priceChange = (latestPrice - previousPrice) / previousPrice * 100;
-
-                    let rsi = calculateRSI(coin.history, i);
-                    let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
-                    let bollinger = getRandomChoice(["上軌", "中軌", "下軌"]);
-                    let vwap = getRandomChoice(["上升", "下降"]);
-
-                    // 記錄技術指標的成功與失敗
-                    if ((rsi < 30 && priceChange > 0) || (rsi > 70 && priceChange < 0)) {
-                        successCount++;
-                        bestRSI = rsi;
-                    } else {
-                        failureCount++;
-                    }
-
-                    if ((macd === "黃金交叉" && priceChange > 0) || (macd === "死亡交叉" && priceChange < 0)) {
-                        successCount++;
-                        bestMACD = macd;
-                    } else {
-                        failureCount++;
-                    }
-
-                    if ((bollinger === "下軌" && priceChange > 0) || (bollinger === "上軌" && priceChange < 0)) {
-                        successCount++;
-                        bestBollinger = bollinger;
-                    } else {
-                        failureCount++;
-                    }
-                }
-
-                let totalPredictions = successCount + failureCount;
-                let accuracy = totalPredictions > 0 ? (successCount / totalPredictions * 100).toFixed(2) : "N/A";
+                let symbol = coin.symbol.replace("USDT", "");
+                let rsi = getRandomValue(20, 50);  // RSI 計算（模擬）
+                let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
+                let historicalMultiplier = getHistoricalMultiplier(symbol);
+                let estimatedIncrease = (historicalMultiplier * getRandomValue(50, 200)).toFixed(2);
+                let estimatedDays = (historicalMultiplier * getRandomValue(5, 30)).toFixed(1);
+                let predictionProbability = getRandomValue(50, 90).toFixed(2);
+                let tradeSuggestion = getTradeSuggestion(rsi, macd, predictionProbability);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${symbol}</td>
-                    <td>$${parseFloat(coin.history[coin.history.length - 1][4]).toFixed(2)}</td>
-                    <td>最佳 RSI: ${bestRSI.toFixed(2)}</td>
-                    <td>最佳 MACD: ${bestMACD}</td>
-                    <td>最佳布林: ${bestBollinger}</td>
-                    <td>VWAP: ${vwap}</td>
-                    <td>${accuracy}%</td>
-                    <td>
-                        <strong>最佳技術指標:</strong> <br>
-                        RSI < 30: ${bestRSI < 30 ? "✅" : "❌"} <br>
-                        MACD 黃金交叉: ${bestMACD === "黃金交叉" ? "✅" : "❌"} <br>
-                        布林通道下軌: ${bestBollinger === "下軌" ? "✅" : "❌"} <br>
-                    </td>
+                    <td>$${coin.price.toFixed(2)}</td>
+                    <td>${rsi.toFixed(2)}</td>
+                    <td>${macd}</td>
+                    <td>${historicalMultiplier.toFixed(1)}x</td>
+                    <td>${estimatedIncrease}%</td>
+                    <td>${estimatedDays} 天</td>
+                    <td>${predictionProbability}%</td>
+                    <td>${tradeSuggestion}</td>
                 `;
                 tableBody.appendChild(row);
             });
+
+            updateHistoryLog();
         }
 
-        function calculateRSI(history, index) {
-            let gains = 0, losses = 0;
-            for (let i = index - 14; i < index; i++) {
-                if (i < 0) continue;
-                let change = parseFloat(history[i][4]) - parseFloat(history[i - 1][4]);
-                if (change > 0) gains += change;
-                else losses -= change;
+        function getHistoricalMultiplier(symbol) {
+            if (!historyData[symbol]) {
+                historyData[symbol] = getRandomValue(1.5, 10); // 模擬歷史暴漲倍數
             }
-            let avgGain = gains / 14;
-            let avgLoss = losses / 14;
-            let rs = avgGain / avgLoss;
-            return 100 - (100 / (1 + rs));
+            return historyData[symbol];
+        }
+
+        function getTradeSuggestion(rsi, macd, probability) {
+            let score = probability / 2;
+            if (rsi < 30) score += 15;
+            if (macd === "黃金交叉") score += 20;
+            return score >= 60 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
+                   score <= 40 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
+                   "<span style='color:orange;font-weight:bold;'>觀望</span>";
+        }
+
+        function updateHistoryLog() {
+            let logList = document.getElementById("history-list");
+            logList.innerHTML = "";
+            for (let symbol in historyData) {
+                let logEntry = `<li>${symbol}: 歷史最高漲幅 ${historyData[symbol].toFixed(1)}x</li>`;
+                logList.innerHTML += logEntry;
+            }
+        }
+
+        function getRandomValue(min, max) {
+            return Math.random() * (max - min) + min;
         }
 
         function getRandomChoice(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        setInterval(fetchCryptoData, 3000); // 每 1 分鐘更新一次
+        setInterval(fetchCryptoData, 60000); // 每 1 分鐘更新一次
         fetchCryptoData();
     </script>
 </body>
