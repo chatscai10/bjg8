@@ -3,40 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加密貨幣交易分析</title>
+    <title>虛擬貨幣交易分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         table { width: 95%; margin: 20px auto; border-collapse: collapse; }
         th, td { padding: 10px; border: 1px solid #ddd; }
-        th { background-color: #f4f4f4; }
+        th { background-color: #f4f4f4; cursor: help; }
         .buy { color: green; font-weight: bold; }
         .sell { color: red; font-weight: bold; }
         .observe { color: orange; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
         .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>加密貨幣交易分析與預測</h1>
+    <h1>虛擬貨幣技術分析與交易建議</h1>
     <p id="error-message" class="error"></p>
     <table>
         <thead>
             <tr>
-                <th>名稱</th>
-                <th>價格 (USD)</th>
-                <th>1 小時變動 (%)</th>
-                <th>成交量變化 (%)</th>
-                <th>RSI</th>
-                <th>MACD</th>
-                <th>布林通道</th>
-                <th>均線</th>
-                <th>VWAP</th>
-                <th>ATR</th>
-                <th>KDJ</th>
-                <th>操作建議</th>
-                <th>預測結果</th>
+                <th>幣種</th>
+                <th>當前價格 (USD)</th>
+                <th>1 小時內漲跌 (%)</th>
+                <th>交易量變化 (%)</th>
+                <th title="RSI (相對強弱指標)：當 RSI 低於 30 表示超賣，適合買入；高於 70 表示超買，可能下跌">RSI</th>
+                <th title="MACD (移動平均收斂發散)：黃金交叉代表趨勢向上，死亡交叉代表趨勢向下">MACD</th>
+                <th title="布林通道：價格超過上軌可能回落，價格低於下軌可能反彈">布林通道</th>
+                <th title="移動均線：均線上升表示趨勢向上，下降表示趨勢向下">SMA/EMA</th>
+                <th title="VWAP (成交量加權均價)：價格高於 VWAP 代表上升趨勢，低於 VWAP 代表下降趨勢">VWAP</th>
+                <th title="ATR (平均真實波動)：波動率高代表市場活躍，波動率低代表市場穩定">ATR</th>
+                <th title="KDJ 指標：當 K 線高於 D 線，趨勢向上；K 線低於 D 線，趨勢向下">KDJ</th>
+                <th>交易建議</th>
+                <th>預測準確度</th>
                 <th>預測誤差 (USD)</th>
-                <th>1 小時後漲跌機率</th>
+                <th>1 小時後可能漲跌 (%)</th>
             </tr>
         </thead>
         <tbody id="crypto-table">
@@ -100,6 +102,7 @@
                 let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
                 let actualPrice = (coin.current_price * (1 + actualChange / 100)).toFixed(2);
                 let error = (actualPrice - predictedPrice).toFixed(2);
+                let backtestResult = Math.abs(error) < 1 ? `<span class='success'>準確</span>` : `<span class='fail'>錯誤</span>`;
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
@@ -115,24 +118,12 @@
                     <td>${atr}</td>
                     <td>${kdj}</td>
                     <td>${suggestion}</td>
-                    <td>${actualChange}%</td>
+                    <td>${backtestResult}</td>
                     <td>${error} USD</td>
                     <td>${predictedChange}% (預測)</td>
                 `;
                 tableBody.appendChild(row);
             });
-        }
-
-        function calculateTechnicalIndicators(priceData) {
-            let rsi = Math.random() * 100;
-            let macd = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
-            let bollinger = Math.random() > 0.5 ? "上軌" : "下軌";
-            let movingAverage = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
-            let atr = Math.random() > 0.5 ? "高波動" : "低波動";
-            let vwap = Math.random() > 0.5 ? "上升" : "下降";
-            let kdj = Math.random() > 0.5 ? "買進" : "賣出";
-            let volumeChange = Math.random() * 20 - 10;
-            return { rsi, macd, bollinger, movingAverage, atr, vwap, kdj, volumeChange };
         }
 
         setInterval(fetchCryptoData, 5000);
