@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -11,25 +10,15 @@
         table { width: 100%; margin: 10px auto; border-collapse: collapse; font-size: 14px; }
         th, td { padding: 8px; border: 1px solid #ddd; }
         th { background-color: #f4f4f4; cursor: help; }
-        .buy { color: green; font-weight: bold; }
-        .sell { color: red; font-weight: bold; }
-        .observe { color: orange; font-weight: bold; }
-        .success { color: green; font-weight: bold; }
-        .fail { color: red; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
         #update-time { font-size: 14px; margin: 10px; }
         #history-log { width: 90%; margin: 20px auto; border: 1px solid #ddd; padding: 10px; height: 150px; overflow-y: auto; background: #f9f9f9; text-align: left; }
-        @media (max-width: 768px) {
-            table { font-size: 12px; }
-            th, td { padding: 5px; }
-        }
     </style>
 </head>
 <body>
-    <h1>📈 虛擬貨幣交易分析與建議 📊</h1>
+    <h1>📈 數據分析 📊</h1>
     <p id="update-time">最新數據更新時間：-</p>
     <div id="history-log">
-        <strong>📌 指標調整歷史：</strong>
+        <strong>📌 技術指標調整歷史：</strong>
         <ul id="history-list"></ul>
     </div>
     <p id="error-message" class="error"></p>
@@ -39,40 +28,30 @@
             <tr>
                 <th>幣種</th>
                 <th>價格 (USD)</th>
-                <th>漲跌 (%)</th>
-                <th>交易量 (%)</th>
-                <th title="RSI (相對強弱指標)：30以下超賣，70以上超買">RSI</th>
-                <th title="MACD：黃金交叉=上升，死亡交叉=下降">MACD</th>
-                <th title="布林通道：價格高於上軌=超買，低於下軌=超賣">布林通道</th>
-                <th>交易建議</th>
-                <th>預測成功率</th>
-                <th>預測誤差 (USD)</th>
-                <th>1 小時後漲跌 (%)</th>
+                <th>RSI</th>
+                <th>MACD</th>
+                <th>布林通道</th>
+                <th>校正次數</th>
+                <th>成功機率 (%)</th>
             </tr>
         </thead>
         <tbody id="crypto-table"></tbody>
     </table>
 
     <script>
-        let indicatorsWeights = { RSI: 1.0, MACD: 1.0, Bollinger: 1.0 };
-        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"];
         const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
+        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
+        let indicatorsHistory = {};
 
         async function fetchCryptoData() {
-            try {
-                let data = [];
-                for (let symbol of symbols) {
-                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
-                    const coin = await response.json();
-                    data.push(coin);
-                }
-                updateTable(data);
-                document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
-            } catch (error) {
-                console.error("獲取數據失敗:", error);
-                document.getElementById("error-message").textContent = "⚠️ API 暫時無法使用，將於 60 秒後重試...";
-                setTimeout(fetchCryptoData, 60000);
+            let data = [];
+            for (let symbol of symbols) {
+                const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
+                const coin = await response.json();
+                data.push(coin);
             }
+            updateTable(data);
+            document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
         }
 
         function updateTable(data) {
@@ -80,59 +59,52 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let indicators = calculateIndicators();
-                let buyProbability = calculateTradeDecision(indicators);
-                let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
-                let predictedPrice = (parseFloat(coin.lastPrice) * (1 + predictedChange / 100)).toFixed(2);
-                let actualChange = (Math.random() * 5 - 2.5).toFixed(2);
-                let actualPrice = (parseFloat(coin.lastPrice) * (1 + actualChange / 100)).toFixed(2);
-                let error = (actualPrice - predictedPrice).toFixed(2);
-
-                let backtestResult = Math.abs(error) < 1 ? `<span class='success'>準確</span>` : `<span class='fail'>錯誤</span>`;
-                adjustIndicatorWeights(indicators, Math.abs(error) < 1);
+                let rsi = Math.random() * 100;
+                let macd = Math.random() > 0.5 ? "黃金交叉" : "死亡交叉";
+                let bollinger = Math.random() > 0.5 ? "上軌" : "下軌";
+                let correctionCount = updateIndicatorHistory(coin.symbol.replace("USDT", ""), rsi, macd, bollinger);
+                let successRate = calculateSuccessRate(coin.symbol.replace("USDT", ""), rsi, macd, bollinger);
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${coin.symbol.replace("USDT", "")}</td>
                     <td>$${parseFloat(coin.lastPrice).toFixed(2)}</td>
-                    <td>${parseFloat(coin.priceChangePercent).toFixed(2)}%</td>
-                    <td>${(Math.random() * 20 - 10).toFixed(2)}%</td>
-                    <td>${indicators.RSI.toFixed(2)}</td>
-                    <td>${indicators.MACD}</td>
-                    <td>${indicators.Bollinger}</td>
-                    <td>${buyProbability}%</td>
-                    <td>${backtestResult}</td>
-                    <td>${error} USD</td>
-                    <td>${predictedChange}%</td>
+                    <td>${rsi.toFixed(2)}</td>
+                    <td>${macd}</td>
+                    <td>${bollinger}</td>
+                    <td>${correctionCount}</td>
+                    <td>${successRate.toFixed(2)}%</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        function calculateIndicators() {
-            return {
-                RSI: Math.random() * 100,
-                MACD: Math.random() > 0.5 ? "黃金交叉" : "死亡交叉",
-                Bollinger: Math.random() > 0.5 ? "上軌" : "下軌"
-            };
-        }
-
-        function calculateTradeDecision(indicators) {
-            let buyProbability = 0;
-            buyProbability += (indicators.RSI < 30 ? 70 : indicators.RSI > 70 ? -70 : 0) * indicatorsWeights.RSI;
-            buyProbability += (indicators.MACD === "黃金交叉" ? 75 : indicators.MACD === "死亡交叉" ? -75 : 0) * indicatorsWeights.MACD;
-            buyProbability += (indicators.Bollinger === "下軌" ? 65 : indicators.Bollinger === "上軌" ? -65 : 0) * indicatorsWeights.Bollinger;
-            return Math.max(0, Math.min(100, buyProbability));
-        }
-
-        function adjustIndicatorWeights(indicators, wasCorrect) {
-            let logList = document.getElementById("history-list");
-            for (let key in indicators) {
-                let oldWeight = indicatorsWeights[key];
-                indicatorsWeights[key] *= wasCorrect ? 1.01 : 0.99;
-                let logEntry = `<li>${key} 權重調整：${oldWeight.toFixed(3)} → ${indicatorsWeights[key].toFixed(3)}</li>`;
-                logList.innerHTML = logEntry + logList.innerHTML;
+        function updateIndicatorHistory(symbol, rsi, macd, bollinger) {
+            if (!indicatorsHistory[symbol]) {
+                indicatorsHistory[symbol] = { RSI: rsi, MACD: macd, 布林通道: bollinger, 校正次數: 1 };
+            } else {
+                indicatorsHistory[symbol].RSI = (indicatorsHistory[symbol].RSI + rsi) / 2;
+                indicatorsHistory[symbol].MACD = macd;
+                indicatorsHistory[symbol].布林通道 = bollinger;
+                indicatorsHistory[symbol].校正次數 += 1;
             }
+            logIndicatorHistory(symbol, indicatorsHistory[symbol]);
+            return indicatorsHistory[symbol].校正次數;
+        }
+
+        function calculateSuccessRate(symbol, rsi, macd, bollinger) {
+            if (!indicatorsHistory[symbol]) return 50; // 沒有歷史數據，給 50%
+            let score = 50;
+            if (Math.abs(indicatorsHistory[symbol].RSI - rsi) < 10) score += 15;
+            if (indicatorsHistory[symbol].MACD === macd) score += 20;
+            if (indicatorsHistory[symbol].布林通道 === bollinger) score += 15;
+            return score;
+        }
+
+        function logIndicatorHistory(symbol, indicator) {
+            let logList = document.getElementById("history-list");
+            let logEntry = `<li>幣種: ${symbol}, RSI: ${indicator.RSI.toFixed(2)}, MACD: ${indicator.MACD}, 布林: ${indicator.布林通道}, 校正次數: ${indicator.校正次數}</li>`;
+            logList.innerHTML = logEntry + logList.innerHTML;
         }
 
         setInterval(fetchCryptoData, 60000);
