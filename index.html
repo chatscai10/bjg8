@@ -6,9 +6,9 @@
     <title>虛擬貨幣交易分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        table { width: 95%; margin: 20px auto; border-collapse: collapse; }
-        th, td { padding: 10px; border: 1px solid #ddd; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 10px; }
+        table { width: 100%; margin: 10px auto; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 8px; border: 1px solid #ddd; }
         th { background-color: #f4f4f4; cursor: help; }
         .buy { color: green; font-weight: bold; }
         .sell { color: red; font-weight: bold; }
@@ -16,29 +16,32 @@
         .success { color: green; font-weight: bold; }
         .fail { color: red; font-weight: bold; }
         .error { color: red; font-weight: bold; }
+        @media (max-width: 768px) { /* 手機版適應 */
+            table { font-size: 12px; }
+            th, td { padding: 5px; }
+        }
     </style>
 </head>
 <body>
-    <h1>虛擬貨幣技術分析與交易建議</h1>
+    <h1>📈 虛擬貨幣交易分析與建議 📊</h1>
     <p id="error-message" class="error"></p>
     <table>
         <thead>
             <tr>
                 <th>幣種</th>
-                <th>當前價格 (USD)</th>
-                <th>1 小時內漲跌 (%)</th>
-                <th>交易量變化 (%)</th>
-                <th title="RSI (相對強弱指標)：當 RSI 低於 30 表示超賣，適合買入；高於 70 表示超買，可能下跌">RSI</th>
-                <th title="MACD (移動平均收斂發散)：黃金交叉代表趨勢向上，死亡交叉代表趨勢向下">MACD</th>
-                <th title="布林通道：價格超過上軌可能回落，價格低於下軌可能反彈">布林通道</th>
-                <th title="移動均線：均線上升表示趨勢向上，下降表示趨勢向下">SMA/EMA</th>
-                <th title="VWAP (成交量加權均價)：價格高於 VWAP 代表上升趨勢，低於 VWAP 代表下降趨勢">VWAP</th>
-                <th title="ATR (平均真實波動)：波動率高代表市場活躍，波動率低代表市場穩定">ATR</th>
-                <th title="KDJ 指標：當 K 線高於 D 線，趨勢向上；K 線低於 D 線，趨勢向下">KDJ</th>
+                <th>價格 (USD)</th>
+                <th>漲跌 (%)</th>
+                <th title="交易量變化：代表市場活躍度">交易量 (%)</th>
+                <th title="RSI (相對強弱指標)：30以下超賣，70以上超買">RSI</th>
+                <th title="MACD (移動平均收斂發散)：黃金交叉=上升，死亡交叉=下降">MACD</th>
+                <th title="布林通道：價格高於上軌=超買，低於下軌=超賣">布林通道</th>
+                <th title="VWAP：成交量加權均價，高於 VWAP 表示上升趨勢">VWAP</th>
+                <th title="ATR (平均波動率)：波動大代表市場劇烈變動">ATR</th>
+                <th title="KDJ：買進信號或賣出信號">KDJ</th>
                 <th>交易建議</th>
                 <th>預測準確度</th>
-                <th>預測誤差 (USD)</th>
-                <th>1 小時後可能漲跌 (%)</th>
+                <th>誤差 (USD)</th>
+                <th>1 小時後漲跌 (%)</th>
             </tr>
         </thead>
         <tbody id="crypto-table">
@@ -48,7 +51,7 @@
 
     <script>
         const apiUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true";
-
+        
         async function fetchCryptoData() {
             try {
                 const response = await fetch(apiUrl);
@@ -60,7 +63,8 @@
                 updateTable(data);
             } catch (error) {
                 console.error("獲取數據失敗:", error);
-                document.getElementById("error-message").textContent = "⚠️ 獲取數據失敗，請稍後再試！";
+                document.getElementById("error-message").textContent = "⚠️ 獲取數據失敗，將於 20 秒後重試...";
+                setTimeout(fetchCryptoData, 20000); // 20 秒後重新嘗試
             }
         }
 
@@ -69,7 +73,7 @@
             tableBody.innerHTML = "";
 
             data.forEach(coin => {
-                let { rsi, macd, bollinger, movingAverage, atr, vwap, kdj, volumeChange } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
+                let { rsi, macd, bollinger, vwap, atr, kdj, volumeChange } = calculateTechnicalIndicators(coin.sparkline_in_7d.price);
 
                 let buyProbability = 0;
                 let sellProbability = 0;
@@ -81,20 +85,17 @@
                 if (macd === "死亡交叉") sellProbability += 75;
                 if (bollinger === "下軌") buyProbability += 65;
                 if (bollinger === "上軌") sellProbability += 65;
-                if (movingAverage === "黃金交叉") buyProbability += 80;
-                if (movingAverage === "死亡交叉") sellProbability += 80;
                 if (atr === "高波動") sellProbability += 70;
                 if (vwap === "上升") buyProbability += 60;
                 if (kdj === "買進") buyProbability += 50;
                 if (kdj === "賣出") sellProbability += 50;
-                if (volumeChange > 10) buyProbability += 50;
 
                 if (buyProbability > sellProbability) {
                     suggestion = `<span class='buy'>買進 (${buyProbability}%)</span>`;
                 } else if (sellProbability > buyProbability) {
                     suggestion = `<span class='sell'>賣出 (${sellProbability}%)</span>`;
                 } else {
-                    suggestion = "<span class='observe'>持續觀察 (50%)</span>";
+                    suggestion = "<span class='observe'>觀察 (50%)</span>";
                 }
 
                 let predictedChange = (Math.random() * 5 - 2.5).toFixed(2);
@@ -113,20 +114,19 @@
                     <td>${rsi.toFixed(2)}</td>
                     <td>${macd}</td>
                     <td>${bollinger}</td>
-                    <td>${movingAverage}</td>
                     <td>${vwap}</td>
                     <td>${atr}</td>
                     <td>${kdj}</td>
                     <td>${suggestion}</td>
                     <td>${backtestResult}</td>
                     <td>${error} USD</td>
-                    <td>${predictedChange}% (預測)</td>
+                    <td>${predictedChange}%</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        setInterval(fetchCryptoData, 5000);
+        setInterval(fetchCryptoData, 10000); // 每 20 秒更新一次，降低 API 請求頻率
         fetchCryptoData();
     </script>
 </body>
