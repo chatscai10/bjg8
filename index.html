@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -10,6 +11,7 @@
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
         h2 { text-align: center; color: #007bff; }
+        .status { text-align: center; font-size: 16px; margin: 10px 0; color: red; }
         .chart-container { width: 100%; height: 400px; }
         .result-table { width: 100%; border-collapse: collapse; margin-top: 20px; width: 100%; }
         .result-table th, .result-table td { border: 1px solid black; padding: 8px; text-align: center; font-size: 14px; }
@@ -26,6 +28,7 @@
     <div class="container">
         <h2>📈 AI 股票預測分析 📊</h2>
         <h3>🔥 今日最有潛力的 10 檔股票</h3>
+        <div class="status" id="statusMessage">📡 正在獲取數據...</div>
         <table class="result-table">
             <thead>
                 <tr>
@@ -45,54 +48,57 @@
     </div>
 
     <script>
-        /**
-         * 從台股市場 API 獲取數據，篩選成交量前 100 名的股票
-         */
         async function fetchTopStocks() {
-            let marketApiUrl = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"; // 台灣證交所 API
-            let response = await fetch(marketApiUrl);
-            let data = await response.json();
-            if (!data) {
-                console.warn("無法獲取市場數據");
-                return;
-            }
-
-            let stocks = data.slice(0, 100); // 取成交量前 100 名
-            let topStocks = [];
-
-            for (let stock of stocks) {
-                let stockSymbol = stock.Code;
-                let stockName = stock.Name;
-                let apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}.TW?range=1y&interval=1d`;
-                
-                try {
-                    let stockResponse = await fetch(apiUrl);
-                    let stockData = await stockResponse.json();
-                    if (!stockData.chart || !stockData.chart.result) continue;
-
-                    let closingPrices = stockData.chart.result[0].indicators.quote[0].close;
-                    let analysis = analyzeStock(stockSymbol, stockName, closingPrices);
-                    if (analysis) topStocks.push(analysis);
-                } catch (error) {
-                    console.warn(`股票 ${stockSymbol} 無法獲取數據`);
+            try {
+                let marketApiUrl = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"; // 台灣證交所 API
+                let response = await fetch(marketApiUrl);
+                let data = await response.json();
+                if (!data || !Array.isArray(data)) {
+                    showError("⚠️ 市場數據獲取失敗，請稍後再試！");
+                    return;
                 }
-            }
 
-            // 🔥 根據上漲機率排序，取前 10 名
-            topStocks.sort((a, b) => b.upProbability - a.upProbability);
-            displayTopStocks(topStocks.slice(0, 10));
+                let stocks = data.slice(0, 100); // 取成交量前 100 名
+                let topStocks = [];
+
+                for (let stock of stocks) {
+                    let stockSymbol = stock.Code;
+                    let stockName = stock.Name;
+                    let apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}.TW?range=1y&interval=1d`;
+                    
+                    try {
+                        let stockResponse = await fetch(apiUrl);
+                        let stockData = await stockResponse.json();
+                        if (!stockData.chart || !stockData.chart.result) continue;
+
+                        let closingPrices = stockData.chart.result[0].indicators.quote[0].close;
+                        let analysis = analyzeStock(stockSymbol, stockName, closingPrices);
+                        if (analysis) topStocks.push(analysis);
+                    } catch (error) {
+                        console.warn(`股票 ${stockSymbol} 無法獲取數據`);
+                    }
+                }
+
+                if (topStocks.length === 0) {
+                    showError("⚠️ 沒有找到合適的股票，請稍後再試！");
+                    return;
+                }
+
+                // 🔥 根據上漲機率排序，取前 10 名
+                topStocks.sort((a, b) => b.upProbability - a.upProbability);
+                displayTopStocks(topStocks.slice(0, 10));
+                updateStatus("✅ 數據獲取成功！");
+            } catch (error) {
+                showError("⚠️ 獲取數據時發生錯誤，請檢查 API 或網路連線！");
+            }
         }
 
-        /**
-         * 分析股票數據，計算 RSI 並預測未來價格
-         */
         function analyzeStock(stockSymbol, stockName, closingPrices) {
-            let recentPrices = closingPrices.slice(-50);
-            if (recentPrices.length < 10) return null;
+            if (!closingPrices || closingPrices.length < 10) return null;
 
             let avgGain = 0, avgLoss = 0;
-            for (let i = 1; i < recentPrices.length; i++) {
-                let diff = recentPrices[i] - recentPrices[i - 1];
+            for (let i = 1; i < closingPrices.length; i++) {
+                let diff = closingPrices[i] - closingPrices[i - 1];
                 if (diff > 0) avgGain += diff;
                 else avgLoss -= diff;
             }
@@ -100,7 +106,7 @@
             let rsi = 100 - (100 / (1 + (avgGain / avgLoss))); // RSI 指標
             let lastClose = closingPrices[closingPrices.length - 1];
 
-            // 📈 預測未來價格（基於 RSI）
+            // 📈 預測未來價格
             let predicted3D  = (lastClose * (1 + (rsi / 100) * 1)).toFixed(2);
             let predicted1W  = (lastClose * (1 + (rsi / 100) * 2)).toFixed(2);
             let predicted2W  = (lastClose * (1 + (rsi / 100) * 4)).toFixed(2);
@@ -127,9 +133,6 @@
             };
         }
 
-        /**
-         * 顯示篩選出的前 10 檔最佳股票
-         */
         function displayTopStocks(topStocks) {
             let resultTable = document.getElementById("topStockResults");
             resultTable.innerHTML = "";
@@ -150,7 +153,16 @@
             });
         }
 
-        // 🚀 啟動分析
+        function updateStatus(message) {
+            document.getElementById("statusMessage").textContent = message;
+            document.getElementById("statusMessage").style.color = "green";
+        }
+
+        function showError(message) {
+            document.getElementById("statusMessage").textContent = message;
+            document.getElementById("statusMessage").style.color = "red";
+        }
+
         fetchTopStocks();
     </script>
 
