@@ -1,176 +1,158 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 加密貨幣預測</title>
+    <title>AI 股票預測分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 10px; }
-        table { width: 100%; margin: 10px auto; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 8px; border: 1px solid #ddd; }
-        th { background-color: #f4f4f4; cursor: help; }
-        #update-time { font-size: 14px; margin: 10px; }
-        #error-message { color: red; font-weight: bold; }
-        button { padding: 10px; margin: 10px; cursor: pointer; background: #28a745; color: white; border: none; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { text-align: center; color: #007bff; }
+        .chart-container { width: 100%; height: 400px; }
+        .result-table { width: 100%; border-collapse: collapse; margin-top: 20px; width: 100%; }
+        .result-table th, .result-table td { border: 1px solid black; padding: 8px; text-align: center; font-size: 14px; }
+        .buy { color: green; font-weight: bold; }
+        .sell { color: red; font-weight: bold; }
+        .hold { color: orange; font-weight: bold; }
+        @media (max-width: 768px) {
+            .result-table th, .result-table td { font-size: 12px; padding: 5px; }
+        }
     </style>
 </head>
 <body>
-    <h1>📈 AI 加密貨幣預測 📊</h1>
-    <p id="update-time">最新數據更新時間：-</p>
-    <p id="error-message"></p>
-    <button onclick="fetchCryptoData()">手動獲取最新數據</button>
-    
-    <h2>📊 即時技術分析（10 分鐘平均）</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>幣種</th>
-                <th>價格 (USD)</th>
-                <th>RSI</th>
-                <th>MACD</th>
-                <th>預估漲幅 (%)</th>
-                <th>預估時間 (天)</th>
-                <th>交易建議</th>
-            </tr>
-        </thead>
-        <tbody id="crypto-table"></tbody>
-    </table>
 
-    <h2>📊 回測數據分析（1 個月前 vs. 今日）</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>幣種</th>
-                <th>1 個月前價格</th>
-                <th>今日價格</th>
-                <th>實際漲幅 (%)</th>
-                <th>預測 vs. 實際 誤差</th>
-                <th>技術指標準確率 (%)</th>
-            </tr>
-        </thead>
-        <tbody id="backtest-table"></tbody>
-    </table>
+    <div class="container">
+        <h2>📈 AI 股票預測分析 📊</h2>
+        <h3>🔥 今日最有潛力的 10 檔股票</h3>
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>股票代號</th>
+                    <th>名稱</th>
+                    <th>預測 3 天</th>
+                    <th>預測 1 週</th>
+                    <th>預測 2 週</th>
+                    <th>預測 1 個月</th>
+                    <th>預測半年</th>
+                    <th>上漲機率</th>
+                    <th>建議操作</th>
+                </tr>
+            </thead>
+            <tbody id="topStockResults"></tbody>
+        </table>
+    </div>
 
     <script>
-        const binanceApiUrl = "https://api.binance.com/api/v3/ticker/24hr";
-        const binanceKlinesApi = "https://api.binance.com/api/v3/klines";
-        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "FLOKIUSDT", "PEPEUSDT"];
-
-        async function fetchCryptoData() {
-            let data = [];
-            document.getElementById("error-message").textContent = "";
-            
-            try {
-                for (let symbol of symbols) {
-                    const response = await fetch(`${binanceApiUrl}?symbol=${symbol}`);
-                    if (!response.ok) throw new Error(`Binance API 錯誤: ${response.status}`);
-                    const coin = await response.json();
-                    data.push({ symbol: coin.symbol, price: parseFloat(coin.lastPrice) });
-                }
-            } catch (error) {
-                document.getElementById("error-message").textContent = "⚠️ Binance API 失敗，請稍後再試...";
+        /**
+         * 從台股市場 API 獲取數據，篩選成交量前 100 名的股票
+         */
+        async function fetchTopStocks() {
+            let marketApiUrl = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"; // 台灣證交所 API
+            let response = await fetch(marketApiUrl);
+            let data = await response.json();
+            if (!data) {
+                console.warn("無法獲取市場數據");
                 return;
             }
 
-            updateTable(data);
-            fetchBacktestData(data);
-            document.getElementById("update-time").textContent = `最新數據更新時間：${new Date().toLocaleString()}`;
-        }
+            let stocks = data.slice(0, 100); // 取成交量前 100 名
+            let topStocks = [];
 
-        async function fetchBacktestData(currentData) {
-            let backtestData = [];
-            for (let coin of currentData) {
+            for (let stock of stocks) {
+                let stockSymbol = stock.Code;
+                let stockName = stock.Name;
+                let apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}.TW?range=1y&interval=1d`;
+                
                 try {
-                    let response = await fetch(`${binanceKlinesApi}?symbol=${coin.symbol}&interval=1d&limit=30`);
-                    if (!response.ok) continue;
-                    let history = await response.json();
-                    let priceOneMonthAgo = parseFloat(history[0][4]);
-                    let actualIncrease = ((coin.price - priceOneMonthAgo) / priceOneMonthAgo * 100).toFixed(2);
-                    let predictionError = getRandomValue(-5, 5).toFixed(2);  // 模擬誤差
-                    let successRate = getRandomValue(60, 90).toFixed(2);  // 模擬準確率
+                    let stockResponse = await fetch(apiUrl);
+                    let stockData = await stockResponse.json();
+                    if (!stockData.chart || !stockData.chart.result) continue;
 
-                    backtestData.push({
-                        symbol: coin.symbol,
-                        priceOneMonthAgo,
-                        priceToday: coin.price,
-                        actualIncrease,
-                        predictionError,
-                        successRate
-                    });
+                    let closingPrices = stockData.chart.result[0].indicators.quote[0].close;
+                    let analysis = analyzeStock(stockSymbol, stockName, closingPrices);
+                    if (analysis) topStocks.push(analysis);
                 } catch (error) {
-                    console.warn(`無法獲取 ${coin.symbol} 的回測數據`);
+                    console.warn(`股票 ${stockSymbol} 無法獲取數據`);
                 }
             }
-            updateBacktestTable(backtestData);
+
+            // 🔥 根據上漲機率排序，取前 10 名
+            topStocks.sort((a, b) => b.upProbability - a.upProbability);
+            displayTopStocks(topStocks.slice(0, 10));
         }
 
-        function updateTable(data) {
-            const tableBody = document.getElementById("crypto-table");
-            tableBody.innerHTML = "";
+        /**
+         * 分析股票數據，計算 RSI 並預測未來價格
+         */
+        function analyzeStock(stockSymbol, stockName, closingPrices) {
+            let recentPrices = closingPrices.slice(-50);
+            if (recentPrices.length < 10) return null;
 
-            data.forEach(coin => {
-                let symbol = coin.symbol.replace("USDT", "");
-                let rsi = calculateRSI();
-                let macd = getRandomChoice(["黃金交叉", "死亡交叉"]);
-                let estimatedIncrease = getRandomValue(50, 200).toFixed(2);
-                let estimatedDays = getRandomValue(5, 30).toFixed(1);
-                let tradeSuggestion = getTradeSuggestion(rsi, macd);
+            let avgGain = 0, avgLoss = 0;
+            for (let i = 1; i < recentPrices.length; i++) {
+                let diff = recentPrices[i] - recentPrices[i - 1];
+                if (diff > 0) avgGain += diff;
+                else avgLoss -= diff;
+            }
 
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${symbol}</td>
-                    <td>$${coin.price.toFixed(2)}</td>
-                    <td>${rsi.toFixed(2)}</td>
-                    <td>${macd}</td>
-                    <td>${estimatedIncrease}%</td>
-                    <td>${estimatedDays} 天</td>
-                    <td>${tradeSuggestion}</td>
-                `;
-                tableBody.appendChild(row);
+            let rsi = 100 - (100 / (1 + (avgGain / avgLoss))); // RSI 指標
+            let lastClose = closingPrices[closingPrices.length - 1];
+
+            // 📈 預測未來價格（基於 RSI）
+            let predicted3D  = (lastClose * (1 + (rsi / 100) * 1)).toFixed(2);
+            let predicted1W  = (lastClose * (1 + (rsi / 100) * 2)).toFixed(2);
+            let predicted2W  = (lastClose * (1 + (rsi / 100) * 4)).toFixed(2);
+            let predicted1M  = (lastClose * (1 + (rsi / 100) * 6)).toFixed(2);
+            let predicted6M  = (lastClose * (1 + (rsi / 100) * 15)).toFixed(2);
+            
+            // 🔥 建議操作
+            let action = "觀望";
+            let actionClass = "hold";
+            if (rsi < 30) { action = "買進"; actionClass = "buy"; }
+            if (rsi > 70) { action = "賣出"; actionClass = "sell"; }
+
+            return {
+                stockSymbol,
+                stockName,
+                predicted3D,
+                predicted1W,
+                predicted2W,
+                predicted1M,
+                predicted6M,
+                upProbability: rsi.toFixed(1),
+                action,
+                actionClass
+            };
+        }
+
+        /**
+         * 顯示篩選出的前 10 檔最佳股票
+         */
+        function displayTopStocks(topStocks) {
+            let resultTable = document.getElementById("topStockResults");
+            resultTable.innerHTML = "";
+
+            topStocks.forEach(stock => {
+                let row = `<tr>
+                    <td>${stock.stockSymbol}</td>
+                    <td>${stock.stockName}</td>
+                    <td>${stock.predicted3D}</td>
+                    <td>${stock.predicted1W}</td>
+                    <td>${stock.predicted2W}</td>
+                    <td>${stock.predicted1M}</td>
+                    <td>${stock.predicted6M}</td>
+                    <td>${stock.upProbability}%</td>
+                    <td class="${stock.actionClass}">${stock.action}</td>
+                </tr>`;
+                resultTable.innerHTML += row;
             });
         }
 
-        function updateBacktestTable(data) {
-            const tableBody = document.getElementById("backtest-table");
-            tableBody.innerHTML = "";
-            data.forEach(coin => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${coin.symbol}</td>
-                    <td>$${coin.priceOneMonthAgo.toFixed(2)}</td>
-                    <td>$${coin.priceToday.toFixed(2)}</td>
-                    <td>${coin.actualIncrease}%</td>
-                    <td>${coin.predictionError}%</td>
-                    <td>${coin.successRate}%</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function calculateRSI() {
-            return getRandomValue(20, 50);  // 模擬 RSI 10 分鐘平均
-        }
-
-        function getTradeSuggestion(rsi, macd) {
-            let score = 50;
-            if (rsi < 30) score += 15;
-            if (macd === "黃金交叉") score += 20;
-            return score >= 60 ? "<span style='color:green;font-weight:bold;'>買進</span>" :
-                   score <= 40 ? "<span style='color:red;font-weight:bold;'>賣出</span>" :
-                   "<span style='color:orange;font-weight:bold;'>觀望</span>";
-        }
-
-        function getRandomValue(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        function getRandomChoice(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        setInterval(fetchCryptoData, 120000);
-        fetchCryptoData();
+        // 🚀 啟動分析
+        fetchTopStocks();
     </script>
+
 </body>
 </html>
