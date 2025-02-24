@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -14,7 +15,6 @@
         .input-container { text-align: center; margin: 15px 0; }
         .input-container input { padding: 8px; width: 200px; border: 1px solid #ccc; border-radius: 4px; }
         .input-container button { padding: 8px 12px; margin-left: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .chart-container { width: 100%; height: 400px; }
         .result-table { width: 100%; border-collapse: collapse; margin-top: 20px; width: 100%; }
         .result-table th, .result-table td { border: 1px solid black; padding: 8px; text-align: center; font-size: 14px; }
         .buy { color: green; font-weight: bold; }
@@ -61,6 +61,8 @@
             try {
                 let marketApiUrl = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"; // 台灣證交所 API
                 let response = await fetch(marketApiUrl);
+                if (!response.ok) throw new Error("TWSE API 無法取得數據");
+                
                 let data = await response.json();
                 if (!data || !Array.isArray(data)) {
                     showError("⚠️ 市場數據獲取失敗，請稍後再試！");
@@ -87,7 +89,7 @@
                 displayTopStocks(topStocks.slice(0, 10));
                 updateStatus("✅ 數據獲取成功！");
             } catch (error) {
-                showError("⚠️ 獲取數據時發生錯誤，請檢查 API 或網路連線！");
+                showError("⚠️ 獲取數據時發生錯誤：" + error.message);
             }
         }
 
@@ -95,6 +97,8 @@
             try {
                 let apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}.TW?range=1y&interval=1d`;
                 let response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Yahoo Finance API 無法獲取數據");
+
                 let data = await response.json();
                 if (!data.chart || !data.chart.result) return null;
 
@@ -131,15 +135,6 @@
             if (rsi > 70) { action = "賣出"; actionClass = "sell"; }
 
             return { stockSymbol, stockName, predicted3D, predicted1W, predicted2W, predicted1M, predicted6M, upProbability: rsi.toFixed(1), action, actionClass };
-        }
-
-        function displayTopStocks(topStocks) {
-            let resultTable = document.getElementById("topStockResults");
-            resultTable.innerHTML = "";
-            topStocks.forEach(stock => {
-                let row = `<tr><td>${stock.stockSymbol}</td><td>${stock.stockName}</td><td>${stock.predicted3D}</td><td>${stock.predicted1W}</td><td>${stock.predicted2W}</td><td>${stock.predicted1M}</td><td>${stock.predicted6M}</td><td>${stock.upProbability}%</td><td class="${stock.actionClass}">${stock.action}</td></tr>`;
-                resultTable.innerHTML += row;
-            });
         }
 
         function updateStatus(msg) { document.getElementById("statusMessage").textContent = msg; }
