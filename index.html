@@ -125,7 +125,7 @@
         }
 
         function analyzeStock(stockSymbol, stockName, openPrice, closePrice, analysisDate) {
-            let rsi = Math.random() * 100; // 這裡應該用 RSI 計算，但暫時用隨機數模擬
+            let rsi = Math.random() * 100; // RSI 計算應該用技術分析公式，這裡暫時用隨機數模擬
             let predicted3D  = (closePrice * (1 + (rsi / 100) * 1)).toFixed(2);
             let predicted1W  = (closePrice * (1 + (rsi / 100) * 2)).toFixed(2);
             let predicted2W  = (closePrice * (1 + (rsi / 100) * 4)).toFixed(2);
