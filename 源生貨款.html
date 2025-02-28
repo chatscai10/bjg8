@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>員工叫貨系統</title>
+    <title>廠商貨款計算</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 10px;
+            max-width: 600px;
+            margin: auto;
+        }
+        .store-info {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            text-align: center;
+            margin-bottom: 15px;
         }
         table {
             width: 100%;
@@ -24,18 +34,18 @@
             background-color: #f4f4f4;
         }
         input[type="number"] {
-            width: 60px;
+            width: 50px;
             text-align: center;
         }
         textarea {
             width: 100%;
-            height: 150px;
+            height: 100px;
             margin-top: 10px;
             font-size: 1em;
         }
         button {
             margin-top: 10px;
-            padding: 10px;
+            padding: 8px;
             cursor: pointer;
             width: 100%;
             font-size: 1em;
@@ -47,31 +57,31 @@
         button:hover {
             background-color: #45a049;
         }
-        .result {
-            margin-top: 10px;
-            font-size: 1.2em;
+        .result, .order-summary {
+            margin-top: 15px;
+            font-size: 1.1em;
             font-weight: bold;
+            text-align: center;
         }
-        /* 手機適應 */
-        @media (max-width: 600px) {
-            table, th, td {
-                font-size: 0.9em;
-            }
-            input[type="number"] {
-                width: 50px;
-            }
+        .small-text {
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
 </head>
 <body>
 
-    <h2>員工叫貨系統</h2>
+    <div class="store-info">
+        <p><strong>最低送貨金額：</strong>內壢 $3000 | 龍崗 $3000 | 龍安 $4000</p>
+    </div>
+
+    <h2 style="text-align: center;">廠商貨款計算</h2>
 
     <table>
         <thead>
             <tr>
                 <th>品項</th>
-                <th>單價 (NTD)</th>
+                <th>單價</th>
                 <th>數量</th>
             </tr>
         </thead>
@@ -81,7 +91,8 @@
     </table>
 
     <button onclick="calculateTotal()">計算總金額</button>
-    <div class="result" id="orderedItems">目前叫貨品項：</div>
+
+    <div class="order-summary" id="orderSummary">已叫貨品項：無</div>
     <div class="result" id="totalPrice">總金額: 0 元</div>
 
     <h3>貼上叫貨紀錄</h3>
@@ -127,22 +138,21 @@
             }
         }
 
-        // 計算總金額並顯示目前叫貨品項
+        // 計算總金額並顯示叫貨品項
         function calculateTotal() {
             let total = 0;
-            let orderedItemsText = "目前叫貨品項：";
-            let hasOrder = false;
+            let orderedItems = [];
 
             for (let item in itemPrices) {
                 let qty = parseInt(document.getElementById(`qty-${item}`).value || 0);
                 if (qty > 0) {
-                    orderedItemsText += `${item.replace("*", "")} x ${qty}, `;
+                    let cleanItem = item.replace("*", ""); // 移除 *
+                    orderedItems.push(`${cleanItem} x ${qty}`);
                     total += itemPrices[item] * qty;
-                    hasOrder = true;
                 }
             }
 
-            document.getElementById("orderedItems").innerText = hasOrder ? orderedItemsText.slice(0, -2) : "目前沒有叫貨";
+            document.getElementById("orderSummary").innerText = orderedItems.length > 0 ? `已叫貨品項：${orderedItems.join(", ")}` : "已叫貨品項：無";
             document.getElementById("totalPrice").innerText = `總金額: ${total.toLocaleString()} 元`;
         }
 
@@ -152,7 +162,6 @@
             const lines = inputText.split("\n");
             const parsedItems = {};
             let total = 0;
-            let orderedItemsText = "目前叫貨品項：";
 
             lines.forEach(line => {
                 let match = line.match(/(\*[\u4E00-\u9FA5A-Za-z0-9]+)：?(\d+)包?/);
@@ -162,7 +171,6 @@
                     if (itemPrices[item]) {
                         parsedItems[item] = qty;
                         total += itemPrices[item] * qty;
-                        orderedItemsText += `${item.replace("*", "")} x ${qty}, `;
                     }
                 }
             });
@@ -174,18 +182,22 @@
                 resultDiv.innerHTML += "<p>沒有匹配的叫貨品項。</p>";
             } else {
                 let tableHTML = "<table><tr><th>品項</th><th>數量</th><th>總金額</th></tr>";
+                let orderedItems = [];
+
                 for (let item in parsedItems) {
                     let cleanItem = item.replace("*", ""); // 移除 *
                     let qty = parsedItems[item];
                     let cost = itemPrices[item] * qty;
+                    orderedItems.push(`${cleanItem} x ${qty}`);
                     tableHTML += `<tr><td>${cleanItem}</td><td>${qty}</td><td>${cost.toLocaleString()} 元</td></tr>`;
                 }
+
                 tableHTML += "</table>";
                 resultDiv.innerHTML += tableHTML;
+                document.getElementById("orderSummary").innerText = `已叫貨品項：${orderedItems.join(", ")}`;
             }
 
-            document.getElementById("orderedItems").innerText = orderedItemsText.slice(0, -2);
-            document.getElementById("totalPrice").innerText = `總金額: ${total.toLocaleString()} 元`;
+            resultDiv.innerHTML += `<div class="result">應付總金額: ${total.toLocaleString()} 元</div>`;
         }
 
         // 初始化表格
