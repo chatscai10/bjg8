@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>員工叫貨系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        input[type="number"] {
+            width: 60px;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            font-size: 1em;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        /* 手機適應 */
+        @media (max-width: 600px) {
+            table, th, td {
+                font-size: 0.9em;
+            }
+            input[type="number"] {
+                width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>員工叫貨系統</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>品項</th>
+                <th>單價 (NTD)</th>
+                <th>數量</th>
+            </tr>
+        </thead>
+        <tbody id="orderTable">
+            <!-- JS 生成表格 -->
+        </tbody>
+    </table>
+
+    <button onclick="calculateTotal()">計算總金額</button>
+    <div class="result" id="orderedItems">目前叫貨品項：</div>
+    <div class="result" id="totalPrice">總金額: 0 元</div>
+
+    <h3>貼上叫貨紀錄</h3>
+    <textarea id="orderInput" placeholder="請貼上叫貨紀錄"></textarea>
+    <button onclick="parseOrder()">解析叫貨紀錄</button>
+
+    <h3>解析結果</h3>
+    <div id="parsedOrders"></div>
+
+    <script>
+        const itemPrices = {
+            "*甜不辣": 170,
+            "*米腸": 250,
+            "*芋簽": 70,
+            "*芋巧": 40,
+            "*豬血糕": 120,
+            "*銀絲卷": 45,
+            "*馬鈴薯條": 150,
+            "*地瓜": 270,
+            "*貢丸": 540,
+            "*花枝丸": 490,
+            "*百頁豆腐": 180,
+            "*鑫鑫腸": 120,
+            "*大熱狗": 95,
+            "*薯餅": 140,
+            "*麥克雞塊": 330,
+            "*章魚腳": 500,
+            "*炸油": 850
+        };
+
+        // 初始化表格
+        function initTable() {
+            const table = document.getElementById("orderTable");
+            for (let item in itemPrices) {
+                const cleanItem = item.replace("*", ""); // 移除 *
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${cleanItem}</td>
+                    <td>${itemPrices[item]}</td>
+                    <td><input type="number" id="qty-${item}" value="0" min="0" onchange="calculateTotal()"></td>
+                `;
+                table.appendChild(row);
+            }
+        }
+
+        // 計算總金額並顯示目前叫貨品項
+        function calculateTotal() {
+            let total = 0;
+            let orderedItemsText = "目前叫貨品項：";
+            let hasOrder = false;
+
+            for (let item in itemPrices) {
+                let qty = parseInt(document.getElementById(`qty-${item}`).value || 0);
+                if (qty > 0) {
+                    orderedItemsText += `${item.replace("*", "")} x ${qty}, `;
+                    total += itemPrices[item] * qty;
+                    hasOrder = true;
+                }
+            }
+
+            document.getElementById("orderedItems").innerText = hasOrder ? orderedItemsText.slice(0, -2) : "目前沒有叫貨";
+            document.getElementById("totalPrice").innerText = `總金額: ${total.toLocaleString()} 元`;
+        }
+
+        // 解析叫貨紀錄
+        function parseOrder() {
+            const inputText = document.getElementById("orderInput").value;
+            const lines = inputText.split("\n");
+            const parsedItems = {};
+            let total = 0;
+            let orderedItemsText = "目前叫貨品項：";
+
+            lines.forEach(line => {
+                let match = line.match(/(\*[\u4E00-\u9FA5A-Za-z0-9]+)：?(\d+)包?/);
+                if (match) {
+                    let item = match[1];
+                    let qty = parseInt(match[2]);
+                    if (itemPrices[item]) {
+                        parsedItems[item] = qty;
+                        total += itemPrices[item] * qty;
+                        orderedItemsText += `${item.replace("*", "")} x ${qty}, `;
+                    }
+                }
+            });
+
+            // 顯示解析結果
+            const resultDiv = document.getElementById("parsedOrders");
+            resultDiv.innerHTML = "<h4>叫貨明細</h4>";
+            if (Object.keys(parsedItems).length === 0) {
+                resultDiv.innerHTML += "<p>沒有匹配的叫貨品項。</p>";
+            } else {
+                let tableHTML = "<table><tr><th>品項</th><th>數量</th><th>總金額</th></tr>";
+                for (let item in parsedItems) {
+                    let cleanItem = item.replace("*", ""); // 移除 *
+                    let qty = parsedItems[item];
+                    let cost = itemPrices[item] * qty;
+                    tableHTML += `<tr><td>${cleanItem}</td><td>${qty}</td><td>${cost.toLocaleString()} 元</td></tr>`;
+                }
+                tableHTML += "</table>";
+                resultDiv.innerHTML += tableHTML;
+            }
+
+            document.getElementById("orderedItems").innerText = orderedItemsText.slice(0, -2);
+            document.getElementById("totalPrice").innerText = `總金額: ${total.toLocaleString()} 元`;
+        }
+
+        // 初始化表格
+        initTable();
+    </script>
+
+</body>
+</html>
