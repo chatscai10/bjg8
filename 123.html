@@ -1,243 +1,119 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>台股当冲分析 (强化除错版)</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8">
+    <title>一鍵安裝分店回報捷徑</title>
     <style>
-        #loading {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-        }
-        .debug-info {
-            font-family: monospace;
-            background: #f8f9fa;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
+      body { font-family: sans-serif; margin: 20px; }
+      button {
+        background-color: #1d4ed8; color: white; padding: 10px 20px;
+        border: none; border-radius: 4px; cursor: pointer; font-size: 16px;
+      }
+      button:hover { background-color: #2563eb; }
+      select, input[type="text"] {
+        font-size: 16px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;
+      }
+      label { font-weight: bold; }
     </style>
-</head>
-<body>
-<div class="container mt-4">
-    <h3 class="mb-3">可当冲股票监控</h3>
-    
-    <!-- 控制面板 -->
-    <div class="mb-4">
-        <button onclick="loadData()" class="btn btn-primary">立即更新</button>
-        <div id="statusMessage" class="mt-2"></div>
-    </div>
+    <script>
+      // 這個函式把字串做 UTF-8 -> Base64 編碼
+      function toBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
 
-    <!-- 数据表格 -->
-    <div id="dataSection" style="display: none;">
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>代码</th>
-                    <th>名称</th>
-                    <th>昨收</th>
-                    <th>今开</th>
-                    <th>机率</th>
-                </tr>
-            </thead>
-            <tbody id="dataBody"></tbody>
-        </table>
-    </div>
+      // 初始化：您可在這裡定義分店清單
+      function init() {
+        var storeSelect = document.getElementById("storeSelect");
+        var stores = ["忠孝", "龍安", "龍崗"]; // 可自行調整
+        stores.forEach(function(name) {
+          var option = document.createElement("option");
+          option.value = name;
+          option.text = name;
+          storeSelect.add(option);
+        });
+      }
 
-    <!-- 调试信息 -->
-    <div id="debugArea" class="debug-info"></div>
-
-    <!-- 加载动画 -->
-    <div id="loading" class="spinner-border text-primary"></div>
-</div>
-
-<script>
-// 配置参数
-const CONFIG = {
-    CORS_PROXY: 'https://cors.convertapi.com/', // 备用代理列表可自行添加
-    MIN_VOLUME: 1000000, // 最低成交量
-    RETRY_TIMES: 3,       // API重试次数
-    SHOW_DEBUG: true      // 显示调试信息
-};
-
-// 状态管理器
-let appState = {
-    isLoading: false,
-    lastUpdate: null,
-    error: null
-};
-
-// 主加载函数
-async function loadData() {
-    try {
-        // 状态重置
-        appState.isLoading = true;
-        appState.error = null;
-        updateUI();
-        
-        // 获取有效日期
-        const targetDate = calculateTargetDate();
-        logDebug(`目标日期: ${targetDate}`);
-        
-        // 获取数据
-        const [marginData, tradeData] = await Promise.all([
-            fetchAPI(`https://www.twse.com.tw/exchangeReport/MI_MARGN?date=${targetDate}`),
-            fetchAPI(`https://www.twse.com.tw/exchangeReport/MI_INDEX?date=${targetDate}&type=ALL`)
-        ]);
-        
-        // 数据验证
-        if (!validateAPIData(marginData, tradeData)) return;
-        
-        // 数据处理
-        const stocks = processData(marginData, tradeData);
-        if (stocks.length === 0) throw new Error('无符合筛选条件的股票');
-        
-        // 渲染结果
-        render(stocks);
-        appState.lastUpdate = new Date();
-    } catch (error) {
-        appState.error = error;
-        showError(error.message);
-    } finally {
-        appState.isLoading = false;
-        updateUI();
-    }
-}
-
-// 工具函数：计算目标日期
-function calculateTargetDate() {
-    const now = new Date();
-    const isBeforeMarketClose = now.getHours() < 14; // 下午2点前
-    const dayOffset = isBeforeMarketClose ? 2 : 1;
-    
-    const target = new Date(now);
-    target.setDate(target.getDate() - dayOffset);
-    
-    // 排除周末
-    while (target.getDay() === 0 || target.getDay() === 6) {
-        target.setDate(target.getDate() - 1);
-    }
-    
-    return target.toISOString().slice(0,10).replace(/-/g, '');
-}
-
-// 工具函数：API请求
-async function fetchAPI(url) {
-    let retry = CONFIG.RETRY_TIMES;
-    while (retry > 0) {
-        try {
-            const fullUrl = CONFIG.CORS_PROXY + encodeURIComponent(url);
-            logDebug(`请求API: ${fullUrl}`);
-            
-            const res = await fetch(fullUrl);
-            if (!res.ok) throw new Error(`HTTP错误: ${res.status}`);
-            
-            const data = await res.json();
-            if (data.stat !== 'OK') throw new Error('API返回状态异常');
-            
-            return data;
-        } catch (error) {
-            if (--retry === 0) throw error;
-            await new Promise(r => setTimeout(r, 1000));
+      // 產生符合 iOS 捷徑格式的 JSON，僅回傳 deviceName
+      function generateShortcut() {
+        var selectedStore = document.getElementById("storeSelect").value;
+        var apiUrl = document.getElementById("apiUrl").value.trim();
+        if (!selectedStore) {
+          alert("請選擇分店！");
+          return;
         }
-    }
-}
-
-// 数据验证
-function validateAPIData(marginData, tradeData) {
-    const checks = {
-        '融资数据': marginData?.data,
-        '交易数据': tradeData?.data9,
-        '字段完整性': marginData.data?.[0]?.[0] && tradeData.data9?.[0]?.[8]
-    };
-    
-    for (const [name, valid] of Object.entries(checks)) {
-        if (!valid) {
-            throw new Error(`数据验证失败: ${name}`);
+        if (!apiUrl) {
+          alert("請輸入 API 網址！");
+          return;
         }
-    }
-    return true;
-}
 
-// 数据处理
-function processData(marginData, tradeData) {
-    const marginCodes = new Set(marginData.data.map(row => row[0]));
-    
-    return tradeData.data9
-        .filter(row => {
-            const code = row[0];
-            const volume = parseFloat(row[2].replace(/,/g, ''));
-            return marginCodes.has(code) && volume > CONFIG.MIN_VOLUME;
-        })
-        .map(row => ({
-            code: row[0],
-            name: row[1],
-            prevClose: parseFloat(row[8].replace(/,/g, '')),
-            todayOpen: (parseFloat(row[8].replace(/,/g, '')) * 1.02).toFixed(2), // 模拟开盘涨2%
-            probUp: 0.7 // 模拟概率
-        }));
-}
+        // 這裡只回傳 { deviceName }
+        // iOS 端無需使用者輸入 -> 直接寫死 deviceName
+        // 若您想要 "Ask for Input"，可自行修改
+        var shortcutJson = {
+          "WFWorkflowClientVersion": "871",
+          "WFWorkflowMinimumClientVersion": "871",
+          "WFWorkflowName": "分店回報 - " + selectedStore,
+          "WFWorkflowIcon": {
+            "WFWorkflowIconStartColor": "53C1FF",
+            "WFWorkflowIconGlyphNumber": 600
+          },
+          "WFWorkflowActions": [
+            {
+              "WFWorkflowActionIdentifier": "is.workflow.actions.url",
+              "WFWorkflowActionParameters": {
+                "WFURLActionURL": apiUrl
+              },
+              "WFWorkflowActionUUID": "UUID-1"
+            },
+            {
+              "WFWorkflowActionIdentifier": "is.workflow.actions.getcontentsofurl",
+              "WFWorkflowActionParameters": {
+                "WFGetContentsOfURLActionMethod": "POST",
+                "WFGetContentsOfURLActionRequestBody": {
+                  "WFSerializationType": "WFDictionary",
+                  "WFDictionaryValue": {
+                    "deviceName": {
+                      "WFSerializationType": "WFTextTokenAttachment",
+                      "Value": selectedStore
+                    }
+                  }
+                }
+              },
+              "WFWorkflowActionUUID": "UUID-2"
+            }
+          ],
+          "WFWorkflowInputContentItemClasses": []
+        };
 
-// UI更新
-function updateUI() {
-    // 控制加载动画
-    document.getElementById('loading').style.display = 
-        appState.isLoading ? 'block' : 'none';
-        
-    // 显示/隐藏数据区域
-    document.getElementById('dataSection').style.display = 
-        appState.lastUpdate ? 'block' : 'none';
-        
-    // 状态信息
-    const statusElement = document.getElementById('statusMessage');
-    if (appState.error) {
-        statusElement.innerHTML = `<span class="text-danger">⚠️ 错误: ${appState.error.message}</span>`;
-    } else if (appState.lastUpdate) {
-        statusElement.textContent = `最后更新: ${appState.lastUpdate.toLocaleString()}`;
-    } else {
-        statusElement.textContent = '';
-    }
-}
+        // Base64 編碼捷徑 JSON
+        var base64Shortcut = toBase64(JSON.stringify(shortcutJson));
 
-// 表格渲染
-function render(stocks) {
-    const tbody = document.getElementById('dataBody');
-    tbody.innerHTML = stocks.map(stock => `
-        <tr>
-            <td>${stock.code}</td>
-            <td>${stock.name}</td>
-            <td>${stock.prevClose}</td>
-            <td>${stock.todayOpen}</td>
-            <td>
-                <div class="progress" style="height: 25px;">
-                    <div class="progress-bar bg-success" 
-                         style="width: ${stock.probUp * 100}%">
-                        ${(stock.probUp * 100).toFixed(1)}%
-                    </div>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
+        // 產生 shortcuts://shortcuts/install?shortcut=BASE64
+        var importUrl = "shortcuts://shortcuts/install"
+                      + "?name=" + encodeURIComponent("分店回報-" + selectedStore)
+                      + "&shortcut=" + encodeURIComponent(base64Shortcut);
 
-// 调试工具
-function logDebug(message) {
-    if (!CONFIG.SHOW_DEBUG) return;
-    const debugArea = document.getElementById('debugArea');
-    debugArea.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
-}
+        // Safari 中開啟此連結，嘗試匯入捷徑
+        window.open(importUrl, "_blank");
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <h1>一鍵安裝分店回報捷徑</h1>
+    <p>此捷徑只會回傳 <code>deviceName</code> 至您指定的 API URL。</p>
 
-// 错误处理
-function showError(message) {
-    console.error('应用程序错误:', message);
-    logDebug(`错误: ${message}`);
-}
+    <label>API 網址 (Google Apps Script):</label><br>
+    <input type="text" id="apiUrl" style="width: 100%;"
+      placeholder="例如 https://script.google.com/macros/s/1L2plb_2ZU_fFT8oomr28eMbo6yDJ_GKuDukcZNQCkWU/exec"
+      value="https://script.google.com/macros/s/AKfycbyyuVdpP9SWcATU-Zfvk9kgVdzSaJLfInQdNMoPVibYhvOALMRhpZtmQ267j4rQTm66/exec">
+    <br><br>
 
-// 初始化
-loadData();
-</script>
-</body>
+    <label>選擇分店:</label><br>
+    <select id="storeSelect">
+      <option value="">請選擇</option>
+    </select>
+    <br><br>
+
+    <button onclick="generateShortcut()">安裝捷徑</button>
+  </body>
 </html>
