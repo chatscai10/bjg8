@@ -2,63 +2,111 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>跨裝置 - 最近分店地圖示範</title>
+  <title>跨裝置 - 最近分店地圖示範 (美化 + 導航)</title>
   <!-- 行動裝置 RWD 必備 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Leaflet CSS (不使用 SRI, 避免被擋) -->
+  <!-- Leaflet CSS (無 SRI, 避免被擋) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
 
   <style>
+    /* 全域樣式 */
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
+      background: #f0f0f0; /* 淺色背景 */
     }
+
     h1 {
       text-align: center;
-      font-size: 1.2em;
-      margin-top: 10px;
+      font-size: 1.3em;
+      margin: 0;
+      padding: 15px 0;
+      background: #004080; /* 深色標題背景 */
+      color: #fff;         /* 白色字 */
     }
-    /* 地圖佔 50% 螢幕高度，可依需求調整 */
+
+    /* 地圖區塊：佔螢幕的一半高度，可調整 */
     #map {
       width: 100%;
       height: 50vh;
     }
+
+    /* 分店列表容器 */
     #storeList {
       padding: 10px;
+      max-width: 800px; /* 讓電腦大螢幕時列表不要太寬 */
+      margin: 0 auto;   /* 置中 */
     }
+
+    /* 單一店家的卡片樣式 */
     .store-item {
-      border-bottom: 1px solid #ccc;
-      padding: 8px 0;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      margin-bottom: 10px;
     }
-    .store-item:last-child {
-      border-bottom: none;
+
+    .store-item h2 {
+      margin: 0 0 5px 0;
+      font-size: 1.1em;
     }
+
     .distance {
       color: #666;
       font-size: 0.9em;
+      margin: 5px 0;
     }
+
+    .btn-navigate {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 6px 12px;
+      background-color: #0066cc;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .btn-navigate:hover {
+      background-color: #004f9e; /* hover 效果 */
+    }
+
     .alert {
       color: red;
       margin-bottom: 10px;
     }
+
+    /* RWD：在螢幕 <= 600px 時，調小一些字體 */
     @media screen and (max-width: 600px) {
       h1 {
+        font-size: 1.1em;
+      }
+      .store-item h2 {
         font-size: 1em;
+      }
+      .btn-navigate {
+        font-size: 0.8em;
       }
     }
   </style>
 </head>
 <body>
-  <h1>最近分店地圖示範 (跨裝置)</h1>
+  <h1>最近分店地圖示範 (美化 + 導航)</h1>
+
+  <!-- 地圖容器 -->
   <div id="map"></div>
+
+  <!-- 分店列表 -->
   <div id="storeList"></div>
 
-  <!-- Leaflet JS (不使用 SRI, 避免被擋) -->
+  <!-- Leaflet JS (無 SRI, 避免被擋) -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   ></script>
@@ -70,27 +118,24 @@
         name: "店家 A",
         lat: 25.0340,
         lon: 121.5645,
-        address: "台北市某處 A",
-        link: "https://goo.gl/maps/xxxxA"
+        address: "台北市某處 A"
       },
       {
         name: "店家 B",
         lat: 25.0478,
         lon: 121.5319,
-        address: "台北市某處 B",
-        link: "https://goo.gl/maps/xxxxB"
+        address: "台北市某處 B"
       },
       {
         name: "店家 C",
         lat: 24.9934,
         lon: 121.3016,
-        address: "桃園市某處 C",
-        link: "https://goo.gl/maps/xxxxC"
+        address: "桃園市某處 C"
       }
       // ...可持續擴增
     ];
 
-    // 2. 初始化 Leaflet 地圖 (設定台灣為初始中心)
+    // 2. 初始化 Leaflet 地圖 (台灣為中心)
     var map = L.map("map").setView([23.5, 121], 7);
 
     // 3. 載入 OSM 圖磚
@@ -99,7 +144,7 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // 4. 計算兩組經緯度之間的距離 (km)
+    // 4. 計算距離 (km)
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       var R = 6371; // 地球半徑
       var dLat = deg2rad(lat2 - lat1);
@@ -128,9 +173,8 @@
       }
     }
 
-    // 6. 依距離排序分店
+    // 6. 依距離排序
     function sortStoresByDistance(userLat, userLon, storeArr) {
-      // 用 map 產生一個新陣列，裡面包含 distance
       var newArr = [];
       for (var i = 0; i < storeArr.length; i++) {
         var store = storeArr[i];
@@ -140,43 +184,57 @@
           lat: store.lat,
           lon: store.lon,
           address: store.address,
-          link: store.link,
           distance: dist
         };
         newArr.push(newStore);
       }
-      // 排序
       newArr.sort(function(a, b) {
         return a.distance - b.distance;
       });
       return newArr;
     }
 
-    // 7. 將分店列表顯示在下方
-    function renderStoreList(sortedStores) {
+    // 7. 產生 Google Maps 導航連結
+    //    https://www.google.com/maps/dir/?api=1&destination=lat,lon
+    function getNavigationLink(lat, lon) {
+      return (
+        "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lon
+      );
+    }
+
+    // 8. 顯示分店列表
+    function renderStoreList(storeArray) {
       var storeListDiv = document.getElementById("storeList");
       storeListDiv.innerHTML = "";
 
-      for (var i = 0; i < sortedStores.length; i++) {
-        var s = sortedStores[i];
-        var distanceText = s.distance ? "距離約 " + s.distance.toFixed(2) + " 公里" : "";
+      for (var i = 0; i < storeArray.length; i++) {
+        var s = storeArray[i];
+        // 如果有距離資訊，顯示「距離約 xx 公里」，沒有則留空白
+        var distanceText = s.distance
+          ? "距離約 " + s.distance.toFixed(2) + " 公里"
+          : "";
+
+        // 導航連結
+        var navLink = getNavigationLink(s.lat, s.lon);
+
         var itemHtml =
           '<div class="store-item">' +
-            "<div><strong>" + s.name + "</strong></div>" +
-            "<div>" + s.address + "</div>" +
-            '<div class="distance">' + distanceText + "</div>" +
-            '<div><a href="' + s.link + '" target="_blank">查看連結</a></div>' +
-          "</div>";
+            '<h2>' + s.name + '</h2>' +
+            '<div>' + s.address + '</div>' +
+            '<div class="distance">' + distanceText + '</div>' +
+            '<a class="btn-navigate" href="' + navLink + '" target="_blank">導航</a>' +
+          '</div>';
+
         storeListDiv.innerHTML += itemHtml;
       }
     }
 
-    // 8. 若定位成功
+    // 9. 若定位成功
     function onLocationFound(pos) {
       var userLat = pos.coords.latitude;
       var userLon = pos.coords.longitude;
 
-      // 在地圖上標註使用者位置
+      // 使用者位置標註
       var userMarker = L.marker([userLat, userLon]).addTo(map);
       userMarker.bindPopup("您目前在這裡").openPopup();
 
@@ -189,18 +247,18 @@
       renderStoreList(sortedStores);
     }
 
-    // 9. 若定位失敗
+    // 10. 若定位失敗
     function onLocationError(err) {
       var storeListDiv = document.getElementById("storeList");
       storeListDiv.innerHTML =
         '<div class="alert">定位未開啟或被拒絕，無法判斷哪家店最近。</div>';
 
-      // 直接顯示所有分店
+      // 顯示全部分店 (無距離排序)
       showStoreMarkers(stores);
       renderStoreList(stores);
     }
 
-    // 10. 嘗試取得定位
+    // 11. 開啟頁面即嘗試定位
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError, {
         enableHighAccuracy: true,
@@ -208,7 +266,6 @@
         maximumAge: 0
       });
     } else {
-      // 瀏覽器不支援 Geolocation
       onLocationError({ message: "Geolocation is not supported." });
     }
   </script>
