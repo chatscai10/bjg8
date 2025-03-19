@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>內壢 忠孝店 點餐系統</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #ffcc00;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #d10000;
+            white-space: nowrap;  /* 防止換行 */
+            overflow: hidden;
+            text-overflow: ellipsis; /* 超出範圍時顯示省略號 */
+        }
+        iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        目前是使用 <span style="font-weight: bold; color: #d10000;">內壢 忠孝店</span> 的點餐系統。
+    </div>
+
+    <iframe src="https://customer.posky.net/store/2c0d4d7f-3a74-44ae-9517-8c305d73c0fb/menu?openExternalBrowser=1"></iframe>
+
+</body>
+</html>
