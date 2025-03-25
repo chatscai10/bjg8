@@ -1,8 +1,0 @@
-your-pwa-project/
-├── index.html            ← 員工登入頁面
-├── new_register.html     ← 新人資料登錄頁面
-├── main.html             ← 登入後主頁選單
-├── manifest.json         ← PWA manifest 設定
-├── service-worker.js     ← 簡單的離線快取（選用）
-└── css/
-    └── style.css         ← 共用樣式表（可選）
