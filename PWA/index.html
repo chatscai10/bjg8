@@ -21,7 +21,7 @@
   <input type="text" id="name">
   <label for="id">身分證：</label>
   <input type="text" id="id">
-  <button onclick="login()">登入</button>
+<button id="loginBtn">登入</button>
   <br>
   <button onclick="location.href='new_register.html'">新人資料登錄</button>
 
@@ -41,6 +41,13 @@
     });
   </script>
   <script type="module">
+// 假設這段在 main.js 或同一個 <script type="module">
+function login() {
+  // 你的登入程式碼
+}
+
+document.getElementById("loginBtn").addEventListener("click", login);
+
 
     // 請將下面的 API_URL 換成你部署好的 URL
     const API_URL = "https://script.google.com/macros/s/AKfycbx8zp4GGnZMeXZc_ORfWk2S8Dsbm33MZz2iLyv7XEkFBmsrIfKl2EhQyPKPdhAvyuG8/exec";
