@@ -24,8 +24,18 @@
   <button onclick="login()">登入</button>
   <br>
   <button onclick="location.href='new_register.html'">新人資料登錄</button>
-
+  <h1>通知授權示範</h1>
+  <button id="askNotificationBtn">允許通知</button>
   <script>
+    // 確保這段程式碼在按鈕標籤之後執行
+    document.getElementById("askNotificationBtn").addEventListener("click", () => {
+      Notification.requestPermission().then((permission) => {
+        console.log("使用者選擇:", permission); // 'granted', 'denied', 或 'default'
+      });
+    });
+  </script>
+  <script type="module">
+
     // 請將下面的 API_URL 換成你部署好的 URL
     const API_URL = "https://script.google.com/macros/s/AKfycbx8zp4GGnZMeXZc_ORfWk2S8Dsbm33MZz2iLyv7XEkFBmsrIfKl2EhQyPKPdhAvyuG8/exec";
 
