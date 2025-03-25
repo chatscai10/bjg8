@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>員工登入</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 若你有 PWA manifest 或樣式表，可在此引入 -->
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -15,85 +16,29 @@
   </style>
 </head>
 <body>
-  <h1>員工登入1</h1>
+  <h1>員工登入</h1>
   <div id="notification"></div>
+  
+  <!-- 登入表單 -->
   <label for="name">姓名：</label>
   <input type="text" id="name">
   <label for="id">身分證：</label>
   <input type="text" id="id">
-<button id="loginBtn">登入</button>
+  <button id="loginBtn">登入</button>
   <br>
-  <button onclick="location.href='new_register.html'">新人資料登錄</button>
+  <button id="newRegisterBtn">新人資料登錄</button>
+
+  <hr>
 
   <h1>PWA + Firebase 推播範例</h1>
-  <button onclick="requestPermissionAndGetToken()">允許通知並取得 Token</button>
-  <script type="module" src="main.js"></script>
+  <button id="getTokenBtn">允許通知並取得 Token</button>
 
+  <hr>
 
   <h1>通知授權示範</h1>
   <button id="askNotificationBtn">允許通知</button>
-  <script>
-    // 確保這段程式碼在按鈕標籤之後執行
-    document.getElementById("askNotificationBtn").addEventListener("click", () => {
-      Notification.requestPermission().then((permission) => {
-        console.log("使用者選擇:", permission); // 'granted', 'denied', 或 'default'
-      });
-    });
-  </script>
-  <script type="module">
-// 假設這段在 main.js 或同一個 <script type="module">
-function login() {
-  // 你的登入程式碼
-}
 
-document.getElementById("loginBtn").addEventListener("click", login);
-
-
-    // 請將下面的 API_URL 換成你部署好的 URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbx8zp4GGnZMeXZc_ORfWk2S8Dsbm33MZz2iLyv7XEkFBmsrIfKl2EhQyPKPdhAvyuG8/exec";
-
-    function showNotification(msg, isError = false) {
-      const n = document.getElementById("notification");
-      n.innerText = msg;
-      n.className = "notification" + (isError ? " error" : "");
-    }
-
-    function login() {
-      const name = document.getElementById("name").value.trim();
-      const id = document.getElementById("id").value.trim();
-      if (!name || !id) {
-        showNotification("請填寫姓名與身分證", true);
-        return;
-      }
-      // 呼叫後端 API 查詢員工名單
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "findEmployeeById",
-          data: { identity: id }
-        })
-      })
-      .then(response => response.json())
-      .then(result => {
-        if (result.success) {
-          // 可選擇比對姓名
-          const emp = result.data;
-          if (emp['姓名'] !== name) {
-            showNotification("姓名與身份證不匹配", true);
-            return;
-          }
-          // 儲存登入資訊到 localStorage
-          localStorage.setItem("employee", JSON.stringify(emp));
-          showNotification("登入成功！");
-          setTimeout(() => { window.location.href = "main.html"; }, 1000);
-        } else {
-          showNotification(result.message, true);
-        }
-      })
-      .catch(err => {
-        showNotification("系統錯誤：" + err, true);
-      });
-    }
-  </script>
+  <!-- 以 ES Module 方式載入 main.js -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
