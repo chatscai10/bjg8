@@ -1,37 +1,26 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+// firebase.js
 
-// 你的 Firebase config
+// 1. 從 Firebase SDK v9+ 匯入需要的函式
+import { initializeApp } from "firebase/app";
+import { getMessaging } from "firebase/messaging";
+
+// 2. Firebase 專案設定
 const firebaseConfig = {
-  // ...
+  apiKey: "AIzaSyBqxtz3vhUgU4AdOhSD9nUh5kuI2FM1FCE",
+  authDomain: "taiwan-bj.firebaseapp.com",
+  projectId: "taiwan-bj",
+  storageBucket: "taiwan-bj.firebasestorage.app",
+  messagingSenderId: "330641090499",
+  appId: "1:330641090499:web:0b2ecc8d71f9d5ffc33f76",
+  measurementId: "G-S2MP6TQEV7"
 };
+
+
+// 3. 初始化 Firebase App
 const app = initializeApp(firebaseConfig);
+
+// 4. 取得 Messaging 實例
 const messaging = getMessaging(app);
 
-// 當使用者點擊「允許通知」按鈕後，呼叫這個函式
-async function requestPermissionAndGetToken() {
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    try {
-      const currentToken = await getToken(messaging, {
-        vapidKey: "oSdOyWkaU2j6WcyDrTQCMb6FovwpiOXO_bU_jyS92KQ"
-      });
-      if (currentToken) {
-        console.log("取得推播 Token:", currentToken);
-        // 這裡把 Token 傳給後端 (Apps Script / Server) 進行儲存
-      } else {
-        console.warn("無法取得 Token，可能使用者未允許或瀏覽器不支援。");
-      }
-    } catch (err) {
-      console.error("取得 Token 發生錯誤:", err);
-    }
-  } else {
-    console.warn("使用者未允許通知權限");
-  }
-}
-
-// 監聽前景推播
-onMessage(messaging, (payload) => {
-  console.log("收到前景推播:", payload);
-  // 可在此做彈窗或 UI 提示
-});
+// 5. 匯出，讓其他檔案可以使用
+export { app, messaging };
