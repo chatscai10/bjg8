@@ -1,0 +1,229 @@
+:root {
+  --bg-dark: #2B2B2B;
+  --card-dark: #333;
+  --gold: #D4AF37;
+  --accent2: #B08D57;
+  --text-dark: #E0E0E0;
+  --text-light: #fff;
+}
+
+/* 全域重置 */
+* {
+  box-sizing: border-box;
+}
+html,body {
+  margin: 0; padding: 0;
+  background: var(--bg-dark);
+  color: var(--text-dark);
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;       /* 基準字體 */
+  line-height: 1.5;
+  -webkit-text-size-adjust: none; /* iOS 防止字體自動放大 */
+}
+
+/* 主容器 */
+.main-container {
+  width: 95%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+/* 公告區 */
+#announcement {
+  background: #1F1F1F;
+  color: var(--gold);
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* 地圖 */
+#map {
+  width: 100%;
+  height: 280px;
+  margin-top: 15px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+.leaflet-container {
+  width: 100%; height: 100%;
+}
+
+/* 店家列表 */
+#store-list {
+  margin-top: 15px;
+}
+
+/* 店家卡片 */
+.store-item {
+  background: var(--card-dark);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+/* 標題 (店名 + promotion) */
+.store-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.store-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+.badge {
+  background: var(--accent2);
+  color: #fff;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+/* 基本資訊 */
+.basic-info {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.basic-info a {
+  color: var(--gold);
+  text-decoration: none;
+}
+.basic-info a:hover {
+  text-decoration: underline;
+}
+
+/* 營業狀態 */
+.status-info {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.open-status {
+  color: #90ee90;
+}
+.closed-status {
+  color: #ff5555;
+}
+
+/* 隱藏細節 */
+.store-details {
+  display: none;
+  background: #444;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+/* 按鈕群組 */
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn-group button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #000;
+  transition: background-color 0.2s;
+}
+.btn-group button:hover {
+  filter: brightness(0.9);
+}
+
+/* 線上訂餐按鈕 */
+.gold-glow-btn {
+  background: var(--gold);
+  animation: goldGlow 1.2s infinite alternate;
+}
+@keyframes goldGlow {
+  0%   { box-shadow: 0 0 5px var(--gold); }
+  100% { box-shadow: 0 0 15px var(--gold); }
+}
+
+/* foodpanda */
+.btn-panda {
+  background: #fc73b5;
+}
+/* uber eats */
+.btn-uber {
+  background: #2ecc71;
+}
+
+/* 卡片半透明 (未營業) */
+.store-item.card-closed {
+  position: relative;
+}
+.store-item.card-closed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  border-radius: 8px;
+  pointer-events: none;
+}
+.store-item.card-closed-lighter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* 模態視窗 */
+#orderWarningModal,
+#nearestStoreModal {
+  display: none;
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#orderWarningContent,
+#nearestStoreModalContent {
+  background: #333;
+  padding: 16px;
+  border-radius: 8px;
+  color: #fff;
+  max-width: 90%;
+  text-align: center;
+}
+#orderWarningContent p,
+#nearestStoreModalContent p {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+#orderWarningContent button,
+#nearestStoreModalContent button {
+  margin: 5px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--gold);
+  color: #000;
+}
+#orderWarningContent button:hover,
+#nearestStoreModalContent button:hover {
+  filter: brightness(0.9);
+}
+
+/* 動畫 keyframes */
+@keyframes goldGlow {
+  0%   { box-shadow: 0 0 5px var(--gold); }
+  100% { box-shadow: 0 0 15px var(--gold); }
+}

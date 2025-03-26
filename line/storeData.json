@@ -1,0 +1,44 @@
+{
+  "announcement": "本店最新活動：全館消費滿 NT$1000 贈送精美小禮品！",
+  "stores": [
+    {
+      "name": "內壢 忠孝店",
+      "latitude": 24.9748412,
+      "longitude": 121.2556713,
+      "address": "桃園市中壢區忠孝路93-1號",
+      "phone": "0912-541609",
+      "promotion": "",
+      "businessHours": "{\"週一\":\"00:00-01:00\",\"週二\":\"15:00-24:00\",\"週三\":\"00:00-01:00,15:00-24:00\",\"週四\":\"00:00-01:00,15:00-24:00\",\"週五\":\"00:00-01:00,15:00-24:00\",\"週六\":\"00:00-01:00,15:00-24:00\",\"週日\":\"00:00-01:00,15:00-24:00\"}",
+      "onlineOrderUrl": "https://online.example.com/taipei",
+      "pandaOrderUrl": "https://panda.example.com/taipei",
+      "uberOrderUrl": "https://uber.example.com/taipei",
+      "imageUrl": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6"
+    },
+    {
+      "name": "桃園 龍安店",
+      "latitude": 24.9880023,
+      "longitude": 121.2812737,
+      "address": "桃園市桃園區龍安街38-8號",
+      "phone": "0976-532478",
+      "promotion": "雞排特價$50",
+      "businessHours": "{\"週一\":\"公休\",\"週二\":\"公休\",\"週三\":\"公休\",\"週四\":\"公休\",\"週五\":\"公休\",\"週六\":\"公休\",\"週日\":\"公休\"}",
+      "onlineOrderUrl": "",
+      "pandaOrderUrl": "",
+      "uberOrderUrl": "https://uber.example.com/taichung",
+      "imageUrl": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6"
+    },
+    {
+      "name": "中壢 龍崗店",
+      "latitude": 24.9298502,
+      "longitude": 121.2529472,
+      "address": "桃園市中壢區龍東路190號正對面",
+      "phone": "0925-309575",
+      "promotion": "新店開幕優惠",
+      "businessHours": "{\"週一\":\"00:00-01:00\",\"週二\":\"15:00-24:00\",\"週三\":\"00:00-01:00,15:00-24:00\",\"週四\":\"00:00-01:00,15:00-24:00\",\"週五\":\"00:00-01:00,15:00-24:00\",\"週六\":\"00:00-01:00,15:00-24:00\",\"週日\":\"00:00-01:00,15:00-24:00\"}",
+      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f/menu",
+      "pandaOrderUrl": "https://panda.example.com/kaohsiung",
+      "uberOrderUrl": "https://uber.example.com/kaohsiung",
+      "imageUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff"
+    }
+  ]
+}
