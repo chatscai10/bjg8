@@ -64,8 +64,10 @@
    */
   let announcement = "";
   let storeData = [];
-  let map;
-  let nearestStore = null;
+  let map = null;
+  let nearestStore = null;      // <--- 只在此宣告一次
+  let nearestStoreName = "";    // 最近店家店名
+  let nearestStoreUrl  = "";    // 最近店家線上訂餐URL
 
   /**
    * 允許跑馬燈: 若想啟用公告跑馬燈可設為 true
@@ -222,10 +224,6 @@
    * 若已計算距離 -> 第0筆為最近
    * 加入「活動卡片」
    */
-  let nearestStore = null;      // 最近店家物件
-  let nearestStoreName = "";    // 最近店家店名
-  let nearestStoreUrl  = "";    // 最近店家線上訂餐URL
-
   function renderStoreList() {
     const storeListDiv = document.getElementById("store-list");
     // 清空
@@ -348,10 +346,8 @@
         // 按鈕點擊 => 在新分頁開啟
         onlineBtn.onclick = () => {
           if (!isOpen) {
-            // 顯示「非營業」提示 Modal
             showOrderModal(store.onlineOrderUrl, phoneClean, (nearestStore && store.name!==nearestStore.name));
           } else {
-            // 若非最近店家 => 顯示「要不要改成最近店家」
             if (nearestStore && store.name!==nearestStore.name) {
               showNearestStoreModal(
                 store.name,
@@ -360,7 +356,6 @@
                 nearestStore.onlineOrderUrl||""
               );
             } else {
-              // 直接在新分頁開啟
               window.open(store.onlineOrderUrl, "_blank");
             }
           }
@@ -374,7 +369,7 @@
         pandaBtn.textContent = "熊貓訂餐";
         pandaBtn.className = "btn-panda";
         pandaBtn.onclick = () => {
-          window.open(store.pandaOrderUrl, "_blank");
+          window.open(store.pandaOrderUrl,"_blank");
         };
         btnGroup.appendChild(pandaBtn);
       }
@@ -385,7 +380,7 @@
         uberBtn.textContent = "UBER訂餐";
         uberBtn.className = "btn-uber";
         uberBtn.onclick = () => {
-          window.open(store.uberOrderUrl, "_blank");
+          window.open(store.uberOrderUrl,"_blank");
         };
         btnGroup.appendChild(uberBtn);
       }
