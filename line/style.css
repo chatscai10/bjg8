@@ -1,27 +1,26 @@
 :root {
   /* 主題色彩定義 */
-  --bg-dark: #2B2B2B;   /* 頁面背景 */
-  --card-dark: #333;    /* 卡片背景 */
-  --gold: #D4AF37;      /* 金色 */
-  --accent2: #B08D57;   /* 次要暗金色 */
-  --text-dark: #E0E0E0; /* 主要文字 (偏淺灰) */
-  --text-light: #fff;   /* 白色文字 */
+  --bg-dark: #2B2B2B;
+  --card-dark: #333;
+  --gold: #D4AF37;
+  --accent2: #B08D57;
+  --text-dark: #E0E0E0;
+  --text-light: #fff;
 }
 
-/* 統一 box-sizing */
 * {
   box-sizing: border-box;
 }
 
 html, body {
-  margin: 0;
+  margin: 0; 
   padding: 0;
   background: var(--bg-dark);
   color: var(--text-dark);
   font-family: "Roboto", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  -webkit-text-size-adjust: none; /* iOS防止字體自動放大 */
+  -webkit-text-size-adjust: none;
 }
 
 .main-container {
@@ -47,7 +46,6 @@ html, body {
   overflow: hidden;
   position: relative;
   white-space: nowrap;
-  /* 可自行調整上下 padding 以縮小空間 */
   padding-top: 1px;
   padding-bottom: 1px;
 }
@@ -140,11 +138,11 @@ html, body {
 }
 .closed-status {
   color: #ff5555;
-  font-size: 2.2rem;  /* 放大 (2倍) */
+  font-size: 1.8rem;
   font-weight: bold;
 }
 
-/* 營業時間細節 (隱藏/顯示) */
+/* 營業時間細節 */
 .store-details {
   display: none;
   background: #444;
@@ -167,14 +165,14 @@ html, body {
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #000; /* 按鈕文字預設黑色 */
+  color: #000;
   transition: background-color 0.2s;
 }
 .btn-group button:hover {
   filter: brightness(0.9);
 }
 
-/* 閃爍的金色按鈕 (營業中線上訂餐) */
+/* 營業中訂餐按鈕 (金光) */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -192,7 +190,7 @@ html, body {
   background: #2ecc71;
 }
 
-/* 未營業卡片 => 加深遮罩 */
+/* 未營業卡片遮罩 */
 .store-item.card-closed {
   position: relative;
 }
@@ -236,7 +234,7 @@ html, body {
   text-align: center;
 }
 
-/* 一般金底黑字按鈕 (Modal) => 加大 */
+/* Modal 按鈕 (加大) */
 .modal-btn {
   background: var(--gold);
   color: #000;
@@ -252,7 +250,7 @@ html, body {
   filter: brightness(0.9);
 }
 
-/* 白光文字發光 (僅字體) */
+/* 白光文字發光 */
 .whiteGlowText {
   animation: whiteTextGlow 1.2s infinite alternate;
   font-weight: bold;
@@ -262,7 +260,7 @@ html, body {
   100% { text-shadow: 0 0 15px #fff; }
 }
 
-/* 紅光按鈕 (整顆按鈕發紅光) */
+/* 紅光按鈕 */
 .redGlowBtn {
   background: var(--gold);
   color: #000;
@@ -283,13 +281,13 @@ html, body {
    活動卡片 (加入官方LINE)
    ================================ */
 .ad-container {
-  margin-top: 120px;
+  margin-top: 70px;
   padding: 16px;
   text-align: center;
   background: rgba(212,175,55,0.1);
   border: 2px solid rgba(212,175,55,0.3);
   border-radius: 8px;
-  animation: adGoldGlow 2s infinite alternate; /* 金光閃爍外框 */
+  animation: adGoldGlow 2s infinite alternate;
 }
 @keyframes adGoldGlow {
   0%   { box-shadow: 0 0 5px var(--gold); }
@@ -305,7 +303,6 @@ html, body {
   margin-bottom: 10px;
   color: var(--text-dark);
 }
-/* 加好友按鈕 => 白光閃爍 */
 .btn-join-line {
   background: var(--gold);
   color: #000;
@@ -325,24 +322,21 @@ html, body {
 }
 
 /* ================================
-   懸浮小通知 (稍微靠下 + 飄動)
+   懸浮通知
    ================================ */
 .floating-notice {
   position: fixed;
   right: 10px;
-  top: 70%; /* 往下移到約7成高度 */
-  transform: translateY(-50%);
+  top: 70%;
+  transform: translateY(-80%);
   z-index: 9999;
   cursor: pointer;
-  /* 飄動動畫 */
   animation: floatUpDown 3s ease-in-out infinite alternate;
 }
 @keyframes floatUpDown {
   0%   { transform: translateY(-50%) translateX(0); }
-  100% { transform: translateY(-60%) translateX(0); }
+  100% { transform: translateY(-80%) translateX(0); }
 }
-
-/* 圖示容器 + 下方文字 */
 .notice-icon-container {
   display: flex;
   flex-direction: column;
@@ -358,15 +352,13 @@ html, body {
   margin-top: 4px;
   font-size: 0.9rem;
   color: var(--gold);
-  animation: whiteTextGlow 1.2s infinite alternate; /* 文字閃爍 */
+  animation: whiteTextGlow 1.2s infinite alternate;
 }
-
-/* 通知內容區 (初始隱藏) */
 .notice-content {
   display: none;
   position: absolute;
   top: 0;
-  right: 60px; /* 往左偏移 */
+  right: 60px;
   width: 200px;
   background: #333;
   color: #fff;
@@ -385,4 +377,3 @@ html, body {
   font-size: 0.9rem;
   line-height: 1.4;
 }
-
