@@ -91,7 +91,7 @@ function requestPermissionAndGetToken() {
     if (permission === 'granted') {
       showNotification("已允許通知");
       // 如果你要 FCM token, 請在此調用 firebase messaging
-      getToken(messaging, { vapidKey: "BPFDf-IEHaHbdPhNjCVbIlVL0MqMBUWgagMW-glQg6TDj_3h3CcKe9nyL4slUhD5Wi2cD35_6BpgCX4mL9sAK5M" }).then(...)
+      getToken(messaging, { vapidKey: "BPFDf-IEHaHbdPhNjCVbIlVL0MqMBUWgagMW-glQg6TDj_3h3CcKe9nyL4slUhD5Wi2cD35_6BpgCX4mL9sAK5M").then(...)
     } else {
       showNotification("使用者未允許通知", true);
     }
