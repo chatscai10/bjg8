@@ -90,8 +90,19 @@ function requestPermissionAndGetToken() {
   Notification.requestPermission().then(permission => {
     if (permission === 'granted') {
       showNotification("已允許通知");
-      // 如果你要 FCM token, 請在此調用 firebase messaging
-      getToken(messaging, { vapidKey: "BPFDf-IEHaHbdPhNjCVbIlVL0MqMBUWgagMW-glQg6TDj_3h3CcKe9nyL4slUhD5Wi2cD35_6BpgCX4mL9sAK5M").then(...)
+      // 調用 getToken(messaging, { vapidKey: "..." })
+      getToken(messaging, { vapidKey: "BPFDf-IEHaHbdPhNjCVbIlVL0MqMBUWgagMW-glQg6TDj_3h3CcKe9nyL4slUhD5Wi2cD35_6BpgCX4mL9sAK5M" })
+        .then((currentToken) => {
+          if (currentToken) {
+            console.log("取得推播 Token:", currentToken);
+            // 你可以把 Token 上傳到後端
+          } else {
+            console.warn("無法取得 Token，使用者可能未允許通知。");
+          }
+        })
+        .catch((err) => {
+          console.error("取得 Token 發生錯誤:", err);
+        });
     } else {
       showNotification("使用者未允許通知", true);
     }
