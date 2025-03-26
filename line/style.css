@@ -1,8 +1,7 @@
 :root {
-  /* 主背景、卡片底色、金色、輔助色、文字顏色等 */
   --bg-dark: #2B2B2B;
   --card-dark: #333;
-  --gold: #D4AF37;      /* 金色 (營業中 & 電腦版活動邊框) */
+  --gold: #D4AF37;
   --accent2: #B08D57;
   --text-dark: #E0E0E0;
   --text-light: #fff;
@@ -16,12 +15,11 @@ html,body {
   background: var(--bg-dark);
   color: var(--text-dark);
   font-family: "Roboto", sans-serif;
-  font-size: 16px;       /* 預設字體大小 */
+  font-size: 16px;
   line-height: 1.5;
   -webkit-text-size-adjust: none; /* iOS防止字體自動放大 */
 }
 
-/* 主容器: 手機上維持 95% 寬度, max-width:600px */
 .main-container {
   width: 95%;
   max-width: 600px;
@@ -39,8 +37,6 @@ html,body {
   font-size: 0.9rem;
   margin-top: 8px;
 }
-
-/* 若啟用跑馬燈 => 加 .marquee */
 #announcement.marquee {
   overflow: hidden;
   position: relative;
@@ -56,7 +52,7 @@ html,body {
   100% { transform: translateX(-100%); }
 }
 
-/* 地圖區 */
+/* 地圖 */
 #map {
   width: 100%;
   height: 280px;
@@ -65,7 +61,8 @@ html,body {
   border-radius: 6px;
 }
 .leaflet-container {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 /* 店家列表 */
@@ -81,8 +78,6 @@ html,body {
   margin-bottom: 15px;
   position: relative;
 }
-
-/* 標題 (店名 + 活動徽章) */
 .store-header {
   display: flex;
   align-items: center;
@@ -93,7 +88,7 @@ html,body {
 .store-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--gold); /* 店名顯示金色 */
+  color: var(--gold);
 }
 .badge {
   background: var(--accent2);
@@ -103,8 +98,6 @@ html,body {
   border-radius: 4px;
   font-size: 0.8rem;
 }
-
-/* 基本資訊 (地址、電話、距離) */
 .basic-info {
   font-size: 0.9rem;
   margin-bottom: 8px;
@@ -118,23 +111,19 @@ html,body {
 .basic-info a:hover {
   text-decoration: underline;
 }
-
-/* 營業狀態 */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
   cursor: pointer;
   position: relative;
-  z-index: 2; /* 狀態文字不被遮 */
+  z-index: 2;
 }
 .open-status {
-  color: var(--gold) !important; /* 營業中 => 金色 */
+  color: var(--gold) !important;
 }
 .closed-status {
-  color: #ff5555;               /* 未營業 => 紅色 */
+  color: #ff5555;
 }
-
-/* 營業時間細節 (預設隱藏) */
 .store-details {
   display: none;
   background: #444;
@@ -143,8 +132,6 @@ html,body {
   margin-bottom: 6px;
   font-size: 0.85rem;
 }
-
-/* 按鈕群組 */
 .btn-group {
   display: flex;
   gap: 10px;
@@ -163,8 +150,6 @@ html,body {
 .btn-group button:hover {
   filter: brightness(0.9);
 }
-
-/* 線上訂餐按鈕: 若營業中 => 閃爍金光 */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -173,17 +158,12 @@ html,body {
   0%   { box-shadow: 0 0 5px var(--gold); }
   100% { box-shadow: 0 0 15px var(--gold); }
 }
-
-/* Foodpanda 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
-/* Uber Eats 按鈕 */
 .btn-uber {
   background: #2ecc71;
 }
-
-/* 卡片半透明 (未營業) => card-closed */
 .store-item.card-closed {
   position: relative;
 }
@@ -194,7 +174,7 @@ html,body {
   background: rgba(0,0,0,0.6);
   border-radius: 8px;
   pointer-events: none;
-  z-index: 1; /* 低於店名/狀態 (z-index=2) */
+  z-index: 1;
 }
 .store-item.card-closed-lighter::after {
   content: "";
@@ -206,7 +186,7 @@ html,body {
   z-index: 1;
 }
 
-/* 模態視窗 (非營業 & 最近店家提示) */
+/* 模態視窗 */
 #orderWarningModal,
 #nearestStoreModal {
   display: none;
@@ -252,7 +232,6 @@ html,body {
   margin-top: 20px;
   padding: 16px;
   text-align: center;
-  /* 手機版預設無卡片包裝, 電腦版有金光外框 => 見下方 media query */
 }
 .ad-content h2 {
   color: var(--gold);
@@ -264,7 +243,6 @@ html,body {
   margin-bottom: 10px;
   color: var(--text-dark);
 }
-/* 加好友按鈕 => 白光閃爍 */
 .btn-join-line {
   background: var(--gold);
   color: #000;
