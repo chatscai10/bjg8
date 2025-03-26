@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>新人資料登錄</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>新人資料登錄</h1>
+  <div id="notification"></div>
+  
+  <label>姓名：</label>
+  <input type="text" id="name">
+  <label>身份證：</label>
+  <input type="text" id="id">
+  <label>出生日期：</label>
+  <input type="date" id="birth">
+  <label>性別：</label>
+  <select id="gender">
+    <option value="男">男</option>
+    <option value="女">女</option>
+  </select>
+  <label>聯絡電話：</label>
+  <input type="text" id="phone">
+  <button id="submitBtn">送出</button>
+
+  <script type="module" src="main.js"></script>
+  <script>
+    import { showNotification, registerNewEmployee } from './main.js';
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const data = {
+        "姓名": document.getElementById("name").value,
+        "身份證": document.getElementById("id").value,
+        "出生日期": document.getElementById("birth").value,
+        "性別": document.getElementById("gender").value,
+        "聯絡電話": document.getElementById("phone").value
+      };
+      registerNewEmployee(data);
+    });
+  </script>
+</body>
+</html>
