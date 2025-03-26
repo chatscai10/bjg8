@@ -31,22 +31,27 @@ html,body {
 #announcement {
   background: #1F1F1F;
   color: var(--gold);
-  padding: 8px;
+  padding: 8px; /* 这里的 padding 会同时影响上下左右内边距 */
   text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
   margin-top: 8px;
 }
+
 #announcement.marquee {
   overflow: hidden;
   position: relative;
   white-space: nowrap;
+  padding-top: 5px; /* 设置跑马灯的上内边距 */
+  padding-bottom: 5px; /* 设置跑马灯的下内边距 */
 }
+
 #announcement.marquee p {
   display: inline-block;
   padding-left: 100%;
   animation: marquee 10s linear infinite;
 }
+
 @keyframes marquee {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-100%); }
