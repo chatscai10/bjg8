@@ -1,13 +1,13 @@
 :root {
+  /* 主背景、卡片底色、金色、輔助色、文字顏色等 */
   --bg-dark: #2B2B2B;
   --card-dark: #333;
-  --gold: #D4AF37; /* 營業中 & 按鈕用 */
+  --gold: #D4AF37;      /* 金色 (營業中 & 電腦版活動邊框) */
   --accent2: #B08D57;
   --text-dark: #E0E0E0;
   --text-light: #fff;
 }
 
-/* 基本重置 & 手機端排版 */
 * {
   box-sizing: border-box;
 }
@@ -16,12 +16,12 @@ html,body {
   background: var(--bg-dark);
   color: var(--text-dark);
   font-family: "Roboto", sans-serif;
-  font-size: 16px;
+  font-size: 16px;       /* 預設字體大小 */
   line-height: 1.5;
-  -webkit-text-size-adjust: none;
+  -webkit-text-size-adjust: none; /* iOS防止字體自動放大 */
 }
 
-/* 主容器: 手機端 95%寬, max 600px */
+/* 主容器: 手機上維持 95% 寬度, max-width:600px */
 .main-container {
   width: 95%;
   max-width: 600px;
@@ -29,18 +29,18 @@ html,body {
   padding-bottom: 40px;
 }
 
-/* 公告區: 上下內距改小 => 4px */
+/* 公告區 */
 #announcement {
   background: #1F1F1F;
   color: var(--gold);
-  padding: 4px 8px; /* 減少上下內距 */
+  padding: 8px;
   text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
   margin-top: 8px;
 }
 
-/* 跑馬燈 (marquee) */
+/* 若啟用跑馬燈 => 加 .marquee */
 #announcement.marquee {
   overflow: hidden;
   position: relative;
@@ -56,7 +56,7 @@ html,body {
   100% { transform: translateX(-100%); }
 }
 
-/* 地圖容器 */
+/* 地圖區 */
 #map {
   width: 100%;
   height: 280px;
@@ -82,18 +82,18 @@ html,body {
   position: relative;
 }
 
-/* 卡片標題 (店名+徽章) */
+/* 標題 (店名 + 活動徽章) */
 .store-header {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
   position: relative;
-  z-index: 2; /* 防止被半透明遮住 */
+  z-index: 2; /* 讓店名不被半透明遮住 */
 }
 .store-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--gold); /* 店名金色 */
+  color: var(--gold); /* 店名顯示金色 */
 }
 .badge {
   background: var(--accent2);
@@ -125,7 +125,7 @@ html,body {
   margin-bottom: 6px;
   cursor: pointer;
   position: relative;
-  z-index: 2;
+  z-index: 2; /* 狀態文字不被遮 */
 }
 .open-status {
   color: var(--gold) !important; /* 營業中 => 金色 */
@@ -134,7 +134,7 @@ html,body {
   color: #ff5555;               /* 未營業 => 紅色 */
 }
 
-/* 營業時間細節 (隱藏) */
+/* 營業時間細節 (預設隱藏) */
 .store-details {
   display: none;
   background: #444;
@@ -164,7 +164,7 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* 線上訂餐 (營業中 => 閃爍金光) */
+/* 線上訂餐按鈕: 若營業中 => 閃爍金光 */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -174,15 +174,16 @@ html,body {
   100% { box-shadow: 0 0 15px var(--gold); }
 }
 
-/* Foodpanda & Uber Eats */
+/* Foodpanda 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
+/* Uber Eats 按鈕 */
 .btn-uber {
   background: #2ecc71;
 }
 
-/* 未營業 => 半透明 */
+/* 卡片半透明 (未營業) => card-closed */
 .store-item.card-closed {
   position: relative;
 }
@@ -193,13 +194,19 @@ html,body {
   background: rgba(0,0,0,0.6);
   border-radius: 8px;
   pointer-events: none;
-  z-index: 1;
+  z-index: 1; /* 低於店名/狀態 (z-index=2) */
 }
 .store-item.card-closed-lighter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* 模態視窗 (非營業 & 最近店家) */
+/* 模態視窗 (非營業 & 最近店家提示) */
 #orderWarningModal,
 #nearestStoreModal {
   display: none;
@@ -240,19 +247,12 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* 活動卡片 (加LINE好友) => 有金光外框 & margin-top:40px */
+/* 活動卡片 (加LINE好友) */
 .ad-container {
-  margin-top: 40px; /* 與店家卡片距離更大 */
+  margin-top: 20px;
   padding: 16px;
   text-align: center;
-  background: rgba(212,175,55,0.1);
-  border: 2px solid rgba(212,175,55,0.3);
-  border-radius: 8px;
-  animation: adGoldGlow 2s infinite alternate;
-}
-@keyframes adGoldGlow {
-  0%   { box-shadow: 0 0 5px var(--gold); }
-  100% { box-shadow: 0 0 25px var(--gold); }
+  /* 手機版預設無卡片包裝, 電腦版有金光外框 => 見下方 media query */
 }
 .ad-content h2 {
   color: var(--gold);
@@ -281,4 +281,28 @@ html,body {
 @keyframes whiteGlow {
   0%   { box-shadow: 0 0 5px #fff; }
   100% { box-shadow: 0 0 15px #fff; }
+}
+
+/* 電腦版(螢幕>=769px) => 活動卡片加金光閃爍外框 */
+@media (min-width: 769px) {
+  .ad-container {
+    background: rgba(212,175,55,0.1);
+    border: 2px solid rgba(212,175,55,0.3);
+    border-radius: 8px;
+    animation: adGoldGlow 2s infinite alternate;
+  }
+  @keyframes adGoldGlow {
+    0%   { box-shadow: 0 0 5px var(--gold); }
+    100% { box-shadow: 0 0 25px var(--gold); }
+  }
+}
+
+/* 額外: blink-gold => 金色閃爍 (用於「改為 XXX」店名) */
+.blink-gold {
+  color: var(--gold);
+  animation: goldBlink 1.2s infinite alternate;
+}
+@keyframes goldBlink {
+  0%   { text-shadow: 0 0 5px var(--gold); }
+  100% { text-shadow: 0 0 20px var(--gold); }
 }
