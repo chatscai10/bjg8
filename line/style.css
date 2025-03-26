@@ -8,12 +8,13 @@
   --text-light: #fff;   /* 白色文字 */
 }
 
+/* 統一 box-sizing */
 * {
   box-sizing: border-box;
 }
 
 html, body {
-  margin: 0; 
+  margin: 0;
   padding: 0;
   background: var(--bg-dark);
   color: var(--text-dark);
@@ -31,26 +32,24 @@ html, body {
 }
 
 /* ================================
-   公告區
+   公告區 (跑馬燈)
    ================================ */
 #announcement {
-  background: #1F1F1F;      /* 公告背景 */
-  color: var(--gold);       /* 金色字 */
-  padding: 8px;             /* 公告的上下左右內距 */
+  background: #1F1F1F;
+  color: var(--gold);
+  padding: 8px;
   text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
   margin-top: 8px;
 }
-
-/* 跑馬燈模式 (useMarquee=true) */
 #announcement.marquee {
   overflow: hidden;
   position: relative;
   white-space: nowrap;
   /* 可自行調整上下 padding 以縮小空間 */
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 #announcement.marquee p {
   display: inline-block;
@@ -92,8 +91,6 @@ html, body {
   margin-bottom: 15px;
   position: relative;
 }
-
-/* 卡片標題 (店名 + 活動徽章) */
 .store-header {
   display: flex;
   align-items: center;
@@ -130,7 +127,7 @@ html, body {
   text-decoration: underline;
 }
 
-/* 店家營業狀態 */
+/* 營業狀態 */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
@@ -139,11 +136,11 @@ html, body {
   z-index: 2;
 }
 .open-status {
-  color: var(--gold) !important;  /* 營業中 => 金色 */
+  color: var(--gold) !important;
 }
 .closed-status {
   color: #ff5555;
-  font-size: 1.8rem;  /* 字體放大 (原本約0.9rem，現在2倍) */
+  font-size: 2.2rem;  /* 放大 (2倍) */
   font-weight: bold;
 }
 
@@ -157,7 +154,7 @@ html, body {
   font-size: 0.85rem;
 }
 
-/* 卡片下方按鈕群組 */
+/* 按鈕群組 */
 .btn-group {
   display: flex;
   gap: 10px;
@@ -170,7 +167,7 @@ html, body {
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #000;  /* 預設按鈕文字顏色為黑 */
+  color: #000; /* 按鈕文字預設黑色 */
   transition: background-color 0.2s;
 }
 .btn-group button:hover {
@@ -187,16 +184,15 @@ html, body {
   100% { box-shadow: 0 0 15px var(--gold); }
 }
 
-/* Foodpanda 按鈕 (粉紅) */
+/* Foodpanda / Uber 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
-/* Uber 按鈕 (綠色) */
 .btn-uber {
   background: #2ecc71;
 }
 
-/* 若店家未營業 => 整張卡片加深遮罩 */
+/* 未營業卡片 => 加深遮罩 */
 .store-item.card-closed {
   position: relative;
 }
@@ -209,7 +205,6 @@ html, body {
   pointer-events: none;
   z-index: 1;
 }
-/* 點擊後短暫顯示淺一點的遮罩 (提示用) */
 .store-item.card-closed-lighter::after {
   content: "";
   position: absolute;
@@ -288,7 +283,7 @@ html, body {
    活動卡片 (加入官方LINE)
    ================================ */
 .ad-container {
-  margin-top: 20px;
+  margin-top: 120px;
   padding: 16px;
   text-align: center;
   background: rgba(212,175,55,0.1);
@@ -330,27 +325,40 @@ html, body {
 }
 
 /* ================================
-   懸浮小通知
+   懸浮小通知 (稍微靠下 + 飄動)
    ================================ */
 .floating-notice {
   position: fixed;
   right: 10px;
-  top: 50%;
+  top: 70%; /* 往下移到約7成高度 */
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
   z-index: 9999;
+  cursor: pointer;
+  /* 飄動動畫 */
+  animation: floatUpDown 3s ease-in-out infinite alternate;
+}
+@keyframes floatUpDown {
+  0%   { transform: translateY(-50%) translateX(0); }
+  100% { transform: translateY(-60%) translateX(0); }
+}
+
+/* 圖示容器 + 下方文字 */
+.notice-icon-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-/* 圖示區，可換成你自己的圖檔 (背景圖示) */
 .notice-icon {
   width: 48px;
   height: 48px;
   background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
+}
+.notice-below-text {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: var(--gold);
+  animation: whiteTextGlow 1.2s infinite alternate; /* 文字閃爍 */
 }
 
 /* 通知內容區 (初始隱藏) */
@@ -358,12 +366,13 @@ html, body {
   display: none;
   position: absolute;
   top: 0;
-  right: 60px; /* 往左偏移一段 */
+  right: 60px; /* 往左偏移 */
   width: 200px;
   background: #333;
   color: #fff;
   padding: 12px;
   border-radius: 8px;
+  box-shadow: 0 0 10px #000;
 }
 .notice-content h4 {
   margin-top: 0;
@@ -376,3 +385,4 @@ html, body {
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
