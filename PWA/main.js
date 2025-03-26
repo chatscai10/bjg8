@@ -1,6 +1,6 @@
 // main.js
 
-export const API_URL = "https://script.google.com/macros/s/xxx/exec"; 
+export const API_URL = "https://script.google.com/macros/s/AKfycbx8zp4GGnZMeXZc_ORfWk2S8Dsbm33MZz2iLyv7XEkFBmsrIfKl2EhQyPKPdhAvyuG8/exec"; 
 // ↑ 請替換成你部署好的 Apps Script URL
 
 /**
