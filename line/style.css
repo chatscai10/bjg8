@@ -31,11 +31,11 @@ html,body {
 #announcement {
   background: #1F1F1F;
   color: var(--gold);
-  padding: 6px;
+  padding: 8px;
   text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 #announcement.marquee {
   overflow: hidden;
@@ -186,7 +186,7 @@ html,body {
   z-index: 1;
 }
 
-/* modal-bg => 外層背景, modal-content => 內部視窗 */
+/* Modal 外層 + 內容 */
 .modal-bg {
   display: none;
   position: fixed;
@@ -205,7 +205,40 @@ html,body {
   text-align: center;
 }
 
-/* 活動卡片 (加LINE好友) - 移除媒體限制,手機也金光 */
+/* modal-btn => 一般金底黑字按鈕 */
+.modal-btn {
+  background: var(--gold);
+  color: #000;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  margin: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.modal-btn:hover {
+  filter: brightness(0.9);
+}
+
+/* switch-btn => 黑底金字閃爍 */
+.switch-btn {
+  background: #000 !important;
+  color: var(--gold) !important;
+  animation: goldBlink 1.2s infinite alternate;
+  padding: 8px 12px;
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  margin: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+@keyframes goldBlink {
+  0%   { text-shadow: 0 0 5px var(--gold); }
+  100% { text-shadow: 0 0 20px var(--gold); }
+}
+
+/* 活動卡片 (加LINE好友) => 直接金光外框, 不分手機/電腦 */
 .ad-container {
   margin-top: 20px;
   padding: 16px;
@@ -229,6 +262,7 @@ html,body {
   margin-bottom: 10px;
   color: var(--text-dark);
 }
+/* 加好友 => 白光閃爍 */
 .btn-join-line {
   background: var(--gold);
   color: #000;
@@ -245,26 +279,4 @@ html,body {
 @keyframes whiteGlow {
   0%   { box-shadow: 0 0 5px #fff; }
   100% { box-shadow: 0 0 15px #fff; }
-}
-
-/* blink-gold => 金色閃爍文字 */
-.blink-gold {
-  color: var(--gold);
-  animation: goldBlink 1.2s infinite alternate;
-}
-@keyframes goldBlink {
-  0%   { text-shadow: 0 0 5px var(--gold); }
-  100% { text-shadow: 0 0 20px var(--gold); }
-}
-
-/* switch-btn => 按鈕背景黑、文字金色閃爍 => 避免金底金字 */
-.switch-btn {
-  background: #000 !important;    /* 黑底 */
-  color: var(--gold) !important;  /* 金字閃爍 */
-  animation: goldBlink 1.2s infinite alternate;
-
-  /* ↓ 新增的重點 ↓ */
-  border: 2px solid var(--gold);  /* 給它金色邊框，讓按鈕更明顯 */
-  padding: 8px 12px;              /* 增加內距，讓文字不貼邊 */
-  border-radius: 6px;             /* 圓角可自行調整 */
 }
