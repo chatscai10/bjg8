@@ -38,7 +38,18 @@
     <div id="nearestStoreModalContent" class="modal-content">
       <p id="nearestStoreModalMessage"></p>
       <button id="btnContinueA" class="modal-btn"></button>
-      <button id="btnSwitchToB" class="switch-btn"></button>
+      <button id="btnSwitchToB" class="redGlowBtn"></button>
+    </div>
+  </div>
+
+  <!-- (3) 右側懸浮小通知 -->
+  <div id="floatingNotice" class="floating-notice">
+    <!-- 圖示區 (可改成你自己的 icon 圖檔) -->
+    <div id="noticeIcon" class="notice-icon"></div>
+    <!-- 通知內容區 (初始隱藏) -->
+    <div id="noticeContent" class="notice-content">
+      <h4>系統公告</h4>
+      <p>最新消息：<br>買三送一，限今天！</p>
     </div>
   </div>
 
@@ -79,6 +90,9 @@
 
     /* 2) 綁定 Modal */
     initModals();
+
+    /* 3) 懸浮通知圖示點擊切換 */
+    initFloatingNotice();
   });
 
   /* -------------------------------------------------------
@@ -231,7 +245,8 @@
 
       const statusInfo=document.createElement("div");
       statusInfo.className="status-info";
-      const statusClass=isOpen?"open-status":"closed-status";
+      // 若非營業 => 使用 closed-status
+      const statusClass=isOpen ? "open-status" : "closed-status";
       statusInfo.innerHTML=`
         <strong>今日狀態：</strong>
         <span class="${statusClass}">${businessStatus}</span>
@@ -366,7 +381,8 @@
     let open=false;
     segments.forEach(seg=>{
       seg=seg.trim();
-      if(seg.toLowerCase().includes("休")) return; // 排除 "休息"
+      // 若包含 "休" => 直接略過(表示公休或休息)
+      if(seg.toLowerCase().includes("休")) return;
       const [start,end]=seg.split("-");
       if(!start||!end)return;
       const startMin=timeToMin(start.trim());
@@ -451,6 +467,8 @@
 
   /* -------------------------------------------------------
      顯示「最近店家」提示
+     - 白光文字 => .whiteGlowText
+     - 按鈕 => 紅光 .redGlowBtn，裡面店家名稱同樣白光字體
   --------------------------------------------------------*/
   function showNearestStoreModal(currentStore, nStoreName, curUrl, nStoreUrl){
     const nearestModal=document.getElementById("nearestStoreModal");
@@ -458,20 +476,55 @@
 
     const msg=document.getElementById("nearestStoreModalMessage");
     msg.innerHTML=`
-      您選擇的 <span class="blink-red">${currentStore}</span> 離您較遠，<br>
-      要改較近的 <span class="blink-red">${nStoreName}</span> 訂餐嗎？
+      您選擇的 
+      <span class="whiteGlowText">${currentStore}</span> 
+      離您較遠，<br>要改較近的 
+      <span class="whiteGlowText">${nStoreName}</span> 
+      訂餐嗎？
     `;
-    document.getElementById("btnContinueA").innerHTML=`繼續 <span class="blink-red">${currentStore}</span>`;
-    document.getElementById("btnSwitchToB").innerHTML=`改為 <span class="blink-red">${nStoreName}</span>`;
 
+    document.getElementById("btnContinueA").innerHTML=
+      `繼續 <span class="whiteGlowText">${currentStore}</span>`;
+
+    document.getElementById("btnSwitchToB").innerHTML=
+      `改為 <span class="whiteGlowText">${nStoreName}</span>`;
+
+    // 按鈕 A => 繼續目前店家
     document.getElementById("btnContinueA").onclick=()=>{
       nearestModal.style.display="none";
       window.open(curUrl,"_blank");
     };
+    // 按鈕 B => 切換到最近店家
     document.getElementById("btnSwitchToB").onclick=()=>{
       nearestModal.style.display="none";
       window.open(nStoreUrl,"_blank");
     };
+  }
+
+  /* -------------------------------------------------------
+     (E) 懸浮通知圖示 + 點擊外部關閉
+  --------------------------------------------------------*/
+  function initFloatingNotice(){
+    const floatingNotice = document.getElementById("floatingNotice");
+    const noticeContent  = document.getElementById("noticeContent");
+
+    // 點擊圖示 => 切換通知視窗顯示/隱藏
+    floatingNotice.addEventListener("click", (e)=>{
+      // 如果點擊的是 noticeContent 裡面，不要馬上關閉
+      if(noticeContent.contains(e.target)) return;
+      if(noticeContent.style.display === "block"){
+        noticeContent.style.display = "none";
+      } else {
+        noticeContent.style.display = "block";
+      }
+    });
+
+    // 點擊網頁其他區域 => 關閉通知
+    document.addEventListener("click", (e)=>{
+      if(!floatingNotice.contains(e.target)){
+        noticeContent.style.display = "none";
+      }
+    });
   }
   </script>
 </body>

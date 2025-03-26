@@ -8,7 +8,6 @@
   --text-light: #fff;   /* 白色文字 */
 }
 
-/* 讓所有元素的 box-sizing 都統一為 border-box */
 * {
   box-sizing: border-box;
 }
@@ -49,7 +48,7 @@ html, body {
   overflow: hidden;
   position: relative;
   white-space: nowrap;
-  /* 跑馬燈上下內距縮小為 2px */
+  /* 可自行調整上下 padding 以縮小空間 */
   padding-top: 2px;
   padding-bottom: 2px;
 }
@@ -143,7 +142,9 @@ html, body {
   color: var(--gold) !important;  /* 營業中 => 金色 */
 }
 .closed-status {
-  color: #ff5555;                 /* 休息中 => 紅色 */
+  color: #ff5555;
+  font-size: 1.8rem;  /* 字體放大 (原本約0.9rem，現在2倍) */
+  font-weight: bold;
 }
 
 /* 營業時間細節 (隱藏/顯示) */
@@ -240,15 +241,15 @@ html, body {
   text-align: center;
 }
 
-/* 一般金底黑字按鈕 (Modal) */
+/* 一般金底黑字按鈕 (Modal) => 加大 */
 .modal-btn {
   background: var(--gold);
   color: #000;
-  padding: 8px 12px;
+  padding: 12px 20px;
+  font-size: 1rem;
   border: none;
   border-radius: 4px;
   margin: 5px;
-  font-size: 0.9rem;
   cursor: pointer;
   transition: filter 0.2s;
 }
@@ -256,27 +257,31 @@ html, body {
   filter: brightness(0.9);
 }
 
-/* 「改為最近店家」的按鈕 => 黃底黑字 + 紅光閃爍 */
-.switch-btn {
-  background: var(--gold) !important;
-  color: #000 !important;
-  border: 2px solid #000;
-  border-radius: 4px;
-  margin: 5px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  animation: redBlink 1.2s infinite alternate; /* 紅色閃爍動畫 */
+/* 白光文字發光 (僅字體) */
+.whiteGlowText {
+  animation: whiteTextGlow 1.2s infinite alternate;
+  font-weight: bold;
 }
-@keyframes redBlink {
-  0%   { box-shadow: 0 0 5px red; }
-  100% { box-shadow: 0 0 15px red; }
+@keyframes whiteTextGlow {
+  0%   { text-shadow: 0 0 5px #fff; }
+  100% { text-shadow: 0 0 15px #fff; }
 }
 
-/* ================================
-   最近店家名 也要閃爍紅光
-   ================================ */
-.blink-red {
-  animation: redBlink 1.2s infinite alternate;
+/* 紅光按鈕 (整顆按鈕發紅光) */
+.redGlowBtn {
+  background: var(--gold);
+  color: #000;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  margin: 5px;
+  cursor: pointer;
+  animation: redGlow 1.5s infinite alternate;
+}
+@keyframes redGlow {
+  0%   { box-shadow: 0 0 5px red; }
+  100% { box-shadow: 0 0 15px red; }
 }
 
 /* ================================
@@ -322,4 +327,52 @@ html, body {
 @keyframes whiteGlow {
   0%   { box-shadow: 0 0 5px #fff; }
   100% { box-shadow: 0 0 15px #fff; }
+}
+
+/* ================================
+   懸浮小通知
+   ================================ */
+.floating-notice {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+/* 圖示區，可換成你自己的圖檔 (背景圖示) */
+.notice-icon {
+  width: 48px;
+  height: 48px;
+  background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
+}
+
+/* 通知內容區 (初始隱藏) */
+.notice-content {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 60px; /* 往左偏移一段 */
+  width: 200px;
+  background: #333;
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+}
+.notice-content h4 {
+  margin-top: 0;
+  margin-bottom: 6px;
+  color: var(--gold);
+  font-size: 1rem;
+}
+.notice-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
