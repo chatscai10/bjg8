@@ -83,7 +83,7 @@ html,body {
   align-items: center;
   margin-bottom: 8px;
   position: relative;
-  z-index: 2; /* 讓店名不被半透明遮住 */
+  z-index: 2;
 }
 .store-header h3 {
   margin: 0;
@@ -186,9 +186,8 @@ html,body {
   z-index: 1;
 }
 
-/* 模態視窗 */
-#orderWarningModal,
-#nearestStoreModal {
+/* modal-bg => 外層背景, modal-content => 內部視窗 */
+.modal-bg {
   display: none;
   position: fixed;
   top:0; left:0; width:100%; height:100%;
@@ -197,8 +196,7 @@ html,body {
   justify-content: center;
   z-index: 9999;
 }
-#orderWarningContent,
-#nearestStoreModalContent {
+.modal-content {
   background: #333;
   padding: 16px;
   border-radius: 8px;
@@ -206,32 +204,20 @@ html,body {
   max-width: 90%;
   text-align: center;
 }
-#orderWarningContent p,
-#nearestStoreModalContent p {
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-#orderWarningContent button,
-#nearestStoreModalContent button {
-  margin: 5px;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  background: var(--gold);
-  color: #000;
-}
-#orderWarningContent button:hover,
-#nearestStoreModalContent button:hover {
-  filter: brightness(0.9);
-}
 
-/* 活動卡片 (加LINE好友) */
+/* 活動卡片 (加LINE好友) - 移除媒體限制,手機也金光 */
 .ad-container {
   margin-top: 20px;
   padding: 16px;
   text-align: center;
+  background: rgba(212,175,55,0.1);
+  border: 2px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  animation: adGoldGlow 2s infinite alternate;
+}
+@keyframes adGoldGlow {
+  0%   { box-shadow: 0 0 5px var(--gold); }
+  100% { box-shadow: 0 0 25px var(--gold); }
 }
 .ad-content h2 {
   color: var(--gold);
@@ -261,21 +247,7 @@ html,body {
   100% { box-shadow: 0 0 15px #fff; }
 }
 
-/* 電腦版(螢幕>=769px) => 活動卡片加金光閃爍外框 */
-@media (min-width: 769px) {
-  .ad-container {
-    background: rgba(212,175,55,0.1);
-    border: 2px solid rgba(212,175,55,0.3);
-    border-radius: 8px;
-    animation: adGoldGlow 2s infinite alternate;
-  }
-  @keyframes adGoldGlow {
-    0%   { box-shadow: 0 0 5px var(--gold); }
-    100% { box-shadow: 0 0 25px var(--gold); }
-  }
-}
-
-/* 額外: blink-gold => 金色閃爍 (用於「改為 XXX」店名) */
+/* blink-gold => 金色閃爍文字 */
 .blink-gold {
   color: var(--gold);
   animation: goldBlink 1.2s infinite alternate;
@@ -283,4 +255,11 @@ html,body {
 @keyframes goldBlink {
   0%   { text-shadow: 0 0 5px var(--gold); }
   100% { text-shadow: 0 0 20px var(--gold); }
+}
+
+/* switch-btn => 按鈕背景黑、文字金色閃爍 => 避免金底金字 */
+.switch-btn {
+  background: #000 !important;
+  color: var(--gold) !important;
+  animation: goldBlink 1.2s infinite alternate;
 }

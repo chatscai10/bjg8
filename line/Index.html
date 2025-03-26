@@ -30,8 +30,8 @@
   </div> <!-- end .main-container -->
 
   <!-- 模態視窗 (非營業時間) -->
-  <div id="orderWarningModal">
-    <div id="orderWarningContent">
+  <div id="orderWarningModal" class="modal-bg">
+    <div id="orderWarningContent" class="modal-content">
       <p id="orderWarningMessage">
         目前可能還沒營業，建議先詢問店家。<br>
         是否要繼續線上訂餐？
@@ -43,11 +43,12 @@
   </div>
 
   <!-- 模態視窗 (最近店家提示) -->
-  <div id="nearestStoreModal">
-    <div id="nearestStoreModalContent">
+  <div id="nearestStoreModal" class="modal-bg">
+    <div id="nearestStoreModalContent" class="modal-content">
       <p id="nearestStoreModalMessage"></p>
       <button id="btnContinueA"></button>
-      <button id="btnSwitchToB"></button>
+      <!-- ★「改為 XXX」按鈕用 switch-btn，背景黑、文字金色閃爍 -->
+      <button id="btnSwitchToB" class="switch-btn"></button>
     </div>
   </div>
 
@@ -387,7 +388,7 @@
 
     // 在店家列表下方插入「活動卡片」(加LINE好友)
     const adContainer = document.createElement("div");
-    adContainer.className = "ad-container";
+    adContainer.className = "ad-container gold-border"; /* 移除媒體查詢限制，手機也能看到金光 */
     adContainer.innerHTML = `
       <div class="ad-content">
         <h2>✨ 加入官方LINE ✨</h2>
@@ -459,6 +460,7 @@
   /**
    * initModals():
    * 綁定「非營業提示」和「最近店家提示」兩個 Modal
+   * 並實作「點擊外部空白處 => 關閉 Modal」
    */
   let currentStoreUrl = "";
   let phoneNumber = "";
@@ -467,6 +469,7 @@
   function initModals() {
     // 1) 非營業提示
     const orderModal = document.getElementById("orderWarningModal");
+    const orderContent = document.getElementById("orderWarningContent");
     const continueBtn = document.getElementById("continueOrderBtn");
     const callBtn     = document.getElementById("callStoreBtn");
     const closeBtn    = document.getElementById("closeModalBtn");
@@ -490,13 +493,27 @@
     closeBtn.onclick= () => {
       orderModal.style.display="none";
     };
+    // 點擊外部 => 關閉
+    orderModal.addEventListener("click", e => {
+      if (e.target === orderModal) {
+        orderModal.style.display="none";
+      }
+    });
 
     // 2) 最近店家提示
     const nearestModal = document.getElementById("nearestStoreModal");
+    const nearestContent = document.getElementById("nearestStoreModalContent");
     const btnA = document.getElementById("btnContinueA");
     const btnB = document.getElementById("btnSwitchToB");
     btnA.onclick = () => nearestModal.style.display="none";
     btnB.onclick = () => nearestModal.style.display="none";
+
+    // 點擊外部 => 關閉
+    nearestModal.addEventListener("click", e => {
+      if (e.target === nearestModal) {
+        nearestModal.style.display="none";
+      }
+    });
   }
 
   /**
@@ -514,26 +531,25 @@
   /**
    * showNearestStoreModal(currentStore, nStoreName, curUrl, nStoreUrl):
    * 顯示「最近店家」提示
-   * (1) 「改為 nStoreName」 => 金色 + 閃爍
-   * (2) 「繼續 currentStore」 => 一般灰白色
+   * 「改為 nStoreName」 => switch-btn (黑底+金色閃爍)
+   * 「繼續 currentStore」 => 灰白字
    */
   function showNearestStoreModal(currentStore, nStoreName, curUrl, nStoreUrl) {
     const nearestModal = document.getElementById("nearestStoreModal");
     nearestModal.style.display="flex";
 
-    // Modal訊息: 原店名 => 灰白, 要改的店名 => 金色閃爍
+    // Modal訊息: 原店名 => 灰白, 要改的店名 => blink-gold
     const msg = document.getElementById("nearestStoreModalMessage");
     msg.innerHTML = `
       您選擇的 <span style="color:#E0E0E0;font-weight:bold;">${currentStore}</span> 離您較遠，<br>
       要改成 <span class="blink-gold">${nStoreName}</span> 嗎？
     `;
 
-    // 「繼續 currentStore」 => 灰白, 無特效
+    // 「繼續 currentStore」 => 灰白
     document.getElementById("btnContinueA").innerHTML = `繼續 <span style="color:#E0E0E0;">${currentStore}</span>`;
-    // 「改為 nStoreName」 => 金色閃爍
+    // 「改為 nStoreName」 => gold blink
     document.getElementById("btnSwitchToB").innerHTML = `改為 <span class="blink-gold">${nStoreName}</span>`;
 
-    // 按鈕行為
     document.getElementById("btnContinueA").onclick=()=>{
       nearestModal.style.display="none";
       window.open(curUrl,"_blank");
