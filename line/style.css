@@ -31,11 +31,11 @@ html,body {
 #announcement {
   background: #1F1F1F;
   color: var(--gold);
-  padding: 8px;
+  padding: 6px;
   text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 #announcement.marquee {
   overflow: hidden;
@@ -259,7 +259,12 @@ html,body {
 
 /* switch-btn => 按鈕背景黑、文字金色閃爍 => 避免金底金字 */
 .switch-btn {
-  background: #000 !important;
-  color: var(--gold) !important;
+  background: #000 !important;    /* 黑底 */
+  color: var(--gold) !important;  /* 金字閃爍 */
   animation: goldBlink 1.2s infinite alternate;
+
+  /* ↓ 新增的重點 ↓ */
+  border: 2px solid var(--gold);  /* 給它金色邊框，讓按鈕更明顯 */
+  padding: 8px 12px;              /* 增加內距，讓文字不貼邊 */
+  border-radius: 6px;             /* 圓角可自行調整 */
 }
