@@ -39,6 +39,7 @@ html,body {
   font-size: 0.9rem;
   margin-top: 8px;
 }
+
 /* 若啟用跑馬燈 => 加 .marquee */
 #announcement.marquee {
   overflow: hidden;
@@ -81,7 +82,7 @@ html,body {
   position: relative;
 }
 
-/* (1) 標題 (店名 + 活動徽章) */
+/* 標題 (店名 + 活動徽章) */
 .store-header {
   display: flex;
   align-items: center;
@@ -103,7 +104,7 @@ html,body {
   font-size: 0.8rem;
 }
 
-/* (2) 基本資訊 (地址+電話+距離) */
+/* 基本資訊 (地址、電話、距離) */
 .basic-info {
   font-size: 0.9rem;
   margin-bottom: 8px;
@@ -118,7 +119,7 @@ html,body {
   text-decoration: underline;
 }
 
-/* (3) 營業狀態 */
+/* 營業狀態 */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
@@ -133,7 +134,7 @@ html,body {
   color: #ff5555;               /* 未營業 => 紅色 */
 }
 
-/* (4) 隱藏細節 (營業時間) */
+/* 營業時間細節 (預設隱藏) */
 .store-details {
   display: none;
   background: #444;
@@ -143,7 +144,7 @@ html,body {
   font-size: 0.85rem;
 }
 
-/* (5) 按鈕群組 */
+/* 按鈕群組 */
 .btn-group {
   display: flex;
   gap: 10px;
@@ -163,7 +164,7 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* (6) 線上訂餐按鈕: 若營業中 => 閃爍金光 */
+/* 線上訂餐按鈕: 若營業中 => 閃爍金光 */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -182,7 +183,7 @@ html,body {
   background: #2ecc71;
 }
 
-/* (7) 卡片半透明 (未營業) => card-closed */
+/* 卡片半透明 (未營業) => card-closed */
 .store-item.card-closed {
   position: relative;
 }
@@ -195,12 +196,17 @@ html,body {
   pointer-events: none;
   z-index: 1; /* 低於店名/狀態 (z-index=2) */
 }
-/* card-closed-lighter => 暫時降低遮罩深度 */
 .store-item.card-closed-lighter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* (8) 模態視窗 (非營業 & 最近店家提示) */
+/* 模態視窗 (非營業 & 最近店家提示) */
 #orderWarningModal,
 #nearestStoreModal {
   display: none;
@@ -241,17 +247,13 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* (9) 活動卡片 (加LINE好友) */
+/* 活動卡片 (加LINE好友) */
 .ad-container {
   margin-top: 20px;
   padding: 16px;
   text-align: center;
-
-  /* 手機版: 簡化外觀, 無卡片包裝 */
-  /* 電腦版: 金光閃爍邊框 */
+  /* 手機版預設無卡片包裝, 電腦版有金光外框 => 見下方 media query */
 }
-
-/* 內容文字 & 按鈕 */
 .ad-content h2 {
   color: var(--gold);
   margin-bottom: 10px;
@@ -262,8 +264,7 @@ html,body {
   margin-bottom: 10px;
   color: var(--text-dark);
 }
-
-/* (10) 加好友按鈕 => 白光閃爍 */
+/* 加好友按鈕 => 白光閃爍 */
 .btn-join-line {
   background: var(--gold);
   color: #000;
@@ -282,7 +283,7 @@ html,body {
   100% { box-shadow: 0 0 15px #fff; }
 }
 
-/* (11) 電腦版: ad-container 金光閃爍外框 */
+/* 電腦版(螢幕>=769px) => 活動卡片加金光閃爍外框 */
 @media (min-width: 769px) {
   .ad-container {
     background: rgba(212,175,55,0.1);
