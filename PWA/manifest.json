@@ -4,7 +4,7 @@
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "description": "整合後端系統的 PWA 前端",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icon.png",

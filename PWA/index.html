@@ -4,41 +4,25 @@
   <meta charset="UTF-8">
   <title>員工登入</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 若你有 PWA manifest 或樣式表，可在此引入 -->
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input { display: block; margin: 10px 0; padding: 5px; width: 100%; }
-    button { padding: 10px 15px; margin: 5px 0; }
-    .notification { background: #dfd; border: 1px solid #9cd; padding: 10px; margin: 10px 0; }
-    .error { background: #fdd; border: 1px solid #f99; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>員工登入</h1>
   <div id="notification"></div>
   
-  <!-- 登入表單 -->
   <label for="name">姓名：</label>
-  <input type="text" id="name">
+  <input type="text" id="name" placeholder="王小明">
   <label for="id">身分證：</label>
-  <input type="text" id="id">
+  <input type="text" id="id" placeholder="A123456789">
   <button id="loginBtn">登入</button>
-  <br>
-  <button id="newRegisterBtn">新人資料登錄</button>
+  <br><br>
+  <button id="registerBtn">新人資料登錄</button>
 
   <hr>
-
-  <h1>PWA + Firebase 推播範例</h1>
+  <h2>推播功能</h2>
   <button id="getTokenBtn">允許通知並取得 Token</button>
 
-  <hr>
-
-  <h1>通知授權示範</h1>
-  <button id="askNotificationBtn">允許通知</button>
-
-  <!-- 以 ES Module 方式載入 main.js -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
