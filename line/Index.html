@@ -264,7 +264,7 @@
           }else{
             if(nearestStore && store.name!==nearestStore.name){
               showNearestStoreModal(
-                store.name,
+                store.name, // 传入正确的店铺名称
                 nearestStore.name,
                 store.onlineOrderUrl,
                 nearestStore.onlineOrderUrl||""
@@ -423,7 +423,7 @@
     const msg=document.getElementById("nearestStoreModalMessage");
     msg.innerHTML=`
       您選擇的 <span style="color:#E0E0E0;font-weight:bold;">${currentStore}</span> 離您較遠，<br>
-      要改成 <span class="blink-gold">${nStoreName}</span> 嗎？
+      要改較近的 <span class="blink-gold">${nStoreName}</span> 訂餐嗎？
     `;
     document.getElementById("btnContinueA").innerHTML=`繼續 <span style="color:#E0E0E0;">${currentStore}</span>`;
     document.getElementById("btnSwitchToB").innerHTML=`改為 <span class="blink-gold">${nStoreName}</span>`;
@@ -439,4 +439,4 @@
   }
   </script>
 </body>
-</html>
+</html>    
