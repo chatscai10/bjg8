@@ -1,5 +1,8 @@
 {
+  // 公告文字
   "announcement": "本店最新活動：全館消費滿 NT$1000 贈送精美小禮品！",
+
+  // 店家清單
   "stores": [
     {
       "name": "內壢 忠孝店",
@@ -35,7 +38,7 @@
       "phone": "0925-309575",
       "promotion": "新店開幕優惠",
       "businessHours": "{\"週一\":\"00:00-01:00\",\"週二\":\"15:00-24:00\",\"週三\":\"00:00-01:00,15:00-24:00\",\"週四\":\"00:00-01:00,15:00-24:00\",\"週五\":\"00:00-01:00,15:00-24:00\",\"週六\":\"00:00-01:00,15:00-24:00\",\"週日\":\"00:00-01:00,15:00-24:00\"}",
-      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f-3a74-44ae-9517-8c305d73c0fb/menu",
+      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f/menu",
       "pandaOrderUrl": "https://panda.example.com/kaohsiung",
       "uberOrderUrl": "https://uber.example.com/kaohsiung",
       "imageUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff"

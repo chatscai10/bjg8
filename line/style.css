@@ -1,7 +1,8 @@
 :root {
+  /* 主背景、卡片底色、金色、輔助色、文字顏色等 */
   --bg-dark: #2B2B2B;
   --card-dark: #333;
-  --gold: #D4AF37;      /* 金色 (營業中改用這個) */
+  --gold: #D4AF37;      /* 金色 (營業中 & 電腦版活動邊框) */
   --accent2: #B08D57;
   --text-dark: #E0E0E0;
   --text-light: #fff;
@@ -15,11 +16,12 @@ html,body {
   background: var(--bg-dark);
   color: var(--text-dark);
   font-family: "Roboto", sans-serif;
-  font-size: 16px;
+  font-size: 16px;       /* 預設字體大小 */
   line-height: 1.5;
-  -webkit-text-size-adjust: none; /* iOS防止自動放大 */
+  -webkit-text-size-adjust: none; /* iOS防止字體自動放大 */
 }
 
+/* 主容器: 手機上維持 95% 寬度, max-width:600px */
 .main-container {
   width: 95%;
   max-width: 600px;
@@ -37,8 +39,23 @@ html,body {
   font-size: 0.9rem;
   margin-top: 8px;
 }
+/* 若啟用跑馬燈 => 加 .marquee */
+#announcement.marquee {
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+}
+#announcement.marquee p {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 10s linear infinite;
+}
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
 
-/* 地圖 */
+/* 地圖區 */
 #map {
   width: 100%;
   height: 280px;
@@ -64,18 +81,18 @@ html,body {
   position: relative;
 }
 
-/* 標題 (店名 + 活動徽章) */
+/* (1) 標題 (店名 + 活動徽章) */
 .store-header {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
   position: relative;
-  z-index: 2; /* 確保店名不被遮 */
+  z-index: 2; /* 讓店名不被半透明遮住 */
 }
 .store-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--gold);
+  color: var(--gold); /* 店名顯示金色 */
 }
 .badge {
   background: var(--accent2);
@@ -86,7 +103,7 @@ html,body {
   font-size: 0.8rem;
 }
 
-/* 基本資訊 */
+/* (2) 基本資訊 (地址+電話+距離) */
 .basic-info {
   font-size: 0.9rem;
   margin-bottom: 8px;
@@ -101,7 +118,7 @@ html,body {
   text-decoration: underline;
 }
 
-/* 營業狀態 */
+/* (3) 營業狀態 */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
@@ -110,14 +127,13 @@ html,body {
   z-index: 2; /* 狀態文字不被遮 */
 }
 .open-status {
-  /* (2) 改用金色 */
-  color: var(--gold) !important;
+  color: var(--gold) !important; /* 營業中 => 金色 */
 }
 .closed-status {
-  color: #ff5555;
+  color: #ff5555;               /* 未營業 => 紅色 */
 }
 
-/* 隱藏細節 */
+/* (4) 隱藏細節 (營業時間) */
 .store-details {
   display: none;
   background: #444;
@@ -127,7 +143,7 @@ html,body {
   font-size: 0.85rem;
 }
 
-/* 按鈕群組 */
+/* (5) 按鈕群組 */
 .btn-group {
   display: flex;
   gap: 10px;
@@ -147,7 +163,7 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* 線上訂餐按鈕閃爍 */
+/* (6) 線上訂餐按鈕: 若營業中 => 閃爍金光 */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -157,16 +173,16 @@ html,body {
   100% { box-shadow: 0 0 15px var(--gold); }
 }
 
-/* foodpanda */
+/* Foodpanda 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
-/* uber eats */
+/* Uber Eats 按鈕 */
 .btn-uber {
   background: #2ecc71;
 }
 
-/* 卡片半透明 (未營業) */
+/* (7) 卡片半透明 (未營業) => card-closed */
 .store-item.card-closed {
   position: relative;
 }
@@ -177,19 +193,14 @@ html,body {
   background: rgba(0,0,0,0.6);
   border-radius: 8px;
   pointer-events: none;
-  z-index: 1; /* 低於 store-header, status-info (z-index=2) */
+  z-index: 1; /* 低於店名/狀態 (z-index=2) */
 }
+/* card-closed-lighter => 暫時降低遮罩深度 */
 .store-item.card-closed-lighter::after {
-  content: "";
-  position: absolute;
-  inset: 0;
   background: rgba(0,0,0,0.2);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 1;
 }
 
-/* 模態視窗 */
+/* (8) 模態視窗 (非營業 & 最近店家提示) */
 #orderWarningModal,
 #nearestStoreModal {
   display: none;
@@ -230,15 +241,17 @@ html,body {
   filter: brightness(0.9);
 }
 
-/* 活動卡片 (加LINE好友) */
+/* (9) 活動卡片 (加LINE好友) */
 .ad-container {
-  background: rgba(212,175,55,0.1);
-  border: 1px solid rgba(212,175,55,0.3);
-  border-radius: 8px;
+  margin-top: 20px;
   padding: 16px;
   text-align: center;
-  margin-top: 20px;
+
+  /* 手機版: 簡化外觀, 無卡片包裝 */
+  /* 電腦版: 金光閃爍邊框 */
 }
+
+/* 內容文字 & 按鈕 */
 .ad-content h2 {
   color: var(--gold);
   margin-bottom: 10px;
@@ -249,6 +262,8 @@ html,body {
   margin-bottom: 10px;
   color: var(--text-dark);
 }
+
+/* (10) 加好友按鈕 => 白光閃爍 */
 .btn-join-line {
   background: var(--gold);
   color: #000;
@@ -257,7 +272,26 @@ html,body {
   border-radius: 4px;
   font-size: 0.9rem;
   cursor: pointer;
+  animation: whiteGlow 1.5s infinite alternate;
 }
 .btn-join-line:hover {
   filter: brightness(0.9);
+}
+@keyframes whiteGlow {
+  0%   { box-shadow: 0 0 5px #fff; }
+  100% { box-shadow: 0 0 15px #fff; }
+}
+
+/* (11) 電腦版: ad-container 金光閃爍外框 */
+@media (min-width: 769px) {
+  .ad-container {
+    background: rgba(212,175,55,0.1);
+    border: 2px solid rgba(212,175,55,0.3);
+    border-radius: 8px;
+    animation: adGoldGlow 2s infinite alternate;
+  }
+  @keyframes adGoldGlow {
+    0%   { box-shadow: 0 0 5px var(--gold); }
+    100% { box-shadow: 0 0 25px var(--gold); }
+  }
 }
