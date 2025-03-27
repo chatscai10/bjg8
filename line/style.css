@@ -1,10 +1,18 @@
+/* ==========================================================================
+   全域變數與基本設定
+   ========================================================================== */
 :root {
-  /* 主題色彩定義 */
+  /* 主背景色 */
   --bg-dark: #2B2B2B;
+  /* 卡片背景色 */
   --card-dark: #333;
+  /* 金色 (強調色) */
   --gold: #D4AF37;
+  /* 輔助金色 */
   --accent2: #B08D57;
+  /* 主要文字色 (淺灰) */
   --text-dark: #E0E0E0;
+  /* 白色 */
   --text-light: #fff;
 }
 
@@ -12,17 +20,19 @@
   box-sizing: border-box;
 }
 
+/* 設定 html 與 body 的基本樣式 */
 html, body {
-  margin: 0; 
+  margin: 0;
   padding: 0;
   background: var(--bg-dark);
   color: var(--text-dark);
   font-family: "Roboto", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  -webkit-text-size-adjust: none;
+  -webkit-text-size-adjust: none; /* 防止 iOS 自動縮放字體 */
 }
 
+/* 主容器，置中且限制最大寬度 */
 .main-container {
   width: 95%;
   max-width: 600px;
@@ -30,9 +40,11 @@ html, body {
   padding-bottom: 40px;
 }
 
-/* ================================
+/* ==========================================================================
    公告區 (跑馬燈)
-   ================================ */
+   ==========================================================================
+   此區塊顯示公告文字，若使用跑馬燈效果則設定固定高度及 overflow
+*/
 #announcement {
   background: #1F1F1F;
   color: var(--gold);
@@ -41,13 +53,16 @@ html, body {
   font-weight: bold;
   font-size: 0.9rem;
   margin-top: 8px;
+  /* 使用 Flex 置中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #announcement.marquee {
   overflow: hidden;
-  position: relative;
   white-space: nowrap;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 2px;  /* 上下內距縮小 */
+  padding-bottom: 2px;
 }
 #announcement.marquee p {
   display: inline-block;
@@ -59,9 +74,11 @@ html, body {
   100% { transform: translateX(-100%); }
 }
 
-/* ================================
-   地圖
-   ================================ */
+/* ==========================================================================
+   地圖 (#map)
+   ==========================================================================
+   此區塊設定地圖寬高與邊框
+*/
 #map {
   width: 100%;
   height: 280px;
@@ -74,14 +91,20 @@ html, body {
   height: 100%;
 }
 
-/* ================================
-   店家列表
-   ================================ */
+/* ==========================================================================
+   店家列表 (#store-list)
+   ==========================================================================
+   此區塊用於呈現所有店家卡片
+*/
 #store-list {
   margin-top: 15px;
 }
 
-/* 店家卡片外層 */
+/* ==========================================================================
+   店家卡片 (.store-item)
+   ==========================================================================
+   每個店家以卡片方式呈現，含標題、基本資訊、狀態與按鈕
+*/
 .store-item {
   background: var(--card-dark);
   border-radius: 8px;
@@ -93,7 +116,6 @@ html, body {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
-  position: relative;
   z-index: 2;
 }
 .store-header h3 {
@@ -110,11 +132,10 @@ html, body {
   font-size: 0.8rem;
 }
 
-/* 店家基本資訊 */
+/* 基本資訊與狀態資訊 */
 .basic-info {
   font-size: 0.9rem;
   margin-bottom: 8px;
-  position: relative;
   z-index: 1;
 }
 .basic-info a {
@@ -124,25 +145,29 @@ html, body {
 .basic-info a:hover {
   text-decoration: underline;
 }
-
-/* 營業狀態 */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
   cursor: pointer;
-  position: relative;
   z-index: 2;
 }
 .open-status {
-  color: var(--gold) !important;
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 1.1rem;
+  animation: openBlink 10s infinite alternate;
+}
+@keyframes openBlink {
+  0%   { text-shadow: 0 0 5px #D4AF37; }
+  10%  { text-shadow: 0 0 35px #FFD700; }
 }
 .closed-status {
   color: #ff5555;
-  font-size: 1.8rem;
+  font-size: 1.8rem; /* 放大兩倍 */
   font-weight: bold;
 }
 
-/* 營業時間細節 */
+/* 詳細營業時間 */
 .store-details {
   display: none;
   background: #444;
@@ -152,7 +177,7 @@ html, body {
   font-size: 0.85rem;
 }
 
-/* 按鈕群組 */
+/* 按鈕群組 (.btn-group) */
 .btn-group {
   display: flex;
   gap: 10px;
@@ -172,7 +197,7 @@ html, body {
   filter: brightness(0.9);
 }
 
-/* 營業中訂餐按鈕 (金光) */
+/* 營業中訂餐按鈕 (金光效果) */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -182,7 +207,7 @@ html, body {
   100% { box-shadow: 0 0 15px var(--gold); }
 }
 
-/* Foodpanda / Uber 按鈕 */
+/* Foodpanda 與 UBER 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
@@ -190,7 +215,11 @@ html, body {
   background: #2ecc71;
 }
 
-/* 未營業卡片遮罩 */
+/* ==========================================================================
+   未營業卡片遮罩
+   ==========================================================================
+   使用較接近背景色的遮罩，讓未營業的卡片較不明顯
+*/
 .store-item.card-closed {
   position: relative;
 }
@@ -198,7 +227,8 @@ html, body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  /* 使用接近背景色的深灰色 */
+  background: rgba(43,43,43,0.9);
   border-radius: 8px;
   pointer-events: none;
   z-index: 1;
@@ -207,23 +237,28 @@ html, body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.2);
+  background: rgba(43,43,43,0.6);
   border-radius: 8px;
   pointer-events: none;
   z-index: 1;
 }
 
-/* ================================
+/* ==========================================================================
    Modal (彈窗)
-   ================================ */
+   ==========================================================================
+   兩個 Modal 均使用固定定位，置中呈現
+*/
 .modal-bg {
   display: none;
   position: fixed;
-  top:0; left:0; width:100%; height:100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  /* 注意：非營業提示 Modal 不會自動關閉 */
+  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
 }
 .modal-content {
   background: #333;
@@ -234,7 +269,7 @@ html, body {
   text-align: center;
 }
 
-/* Modal 按鈕 (加大) */
+/* Modal 按鈕，大小較大 */
 .modal-btn {
   background: var(--gold);
   color: #000;
@@ -250,7 +285,11 @@ html, body {
   filter: brightness(0.9);
 }
 
-/* 白光文字發光 */
+/* ==========================================================================
+   白光文字發光效果 (.whiteGlowText)
+   ==========================================================================
+   僅針對文字加上發光效果
+*/
 .whiteGlowText {
   animation: whiteTextGlow 1.2s infinite alternate;
   font-weight: bold;
@@ -260,7 +299,11 @@ html, body {
   100% { text-shadow: 0 0 15px #fff; }
 }
 
-/* 紅光按鈕 */
+/* ==========================================================================
+   紅光按鈕 (.redGlowBtn)
+   ==========================================================================
+   整顆按鈕加上紅色發光效果，用於「改為」按鈕
+*/
 .redGlowBtn {
   background: var(--gold);
   color: #000;
@@ -277,17 +320,20 @@ html, body {
   100% { box-shadow: 0 0 15px red; }
 }
 
-/* ================================
-   活動卡片 (加入官方LINE)
-   ================================ */
+/* ==========================================================================
+   廣告卡片 (.ad-container)
+   ==========================================================================
+   保留閃爍金光效果
+*/
 .ad-container {
-  margin-top: 70px;
+  margin-top: 20px;
   padding: 16px;
   text-align: center;
   background: rgba(212,175,55,0.1);
   border: 2px solid rgba(212,175,55,0.3);
   border-radius: 8px;
   animation: adGoldGlow 2s infinite alternate;
+  font-size: 1rem;
 }
 @keyframes adGoldGlow {
   0%   { box-shadow: 0 0 5px var(--gold); }
@@ -321,22 +367,25 @@ html, body {
   100% { box-shadow: 0 0 15px #fff; }
 }
 
-/* ================================
-   懸浮通知
-   ================================ */
+/* ==========================================================================
+   懸浮通知 (.floating-notice)
+   ==========================================================================
+   固定於右側，位置調整至 top:70%，並加入飄動動畫
+*/
 .floating-notice {
   position: fixed;
   right: 10px;
   top: 70%;
-  transform: translateY(-80%);
+  transform: translateY(-50%);
   z-index: 9999;
   cursor: pointer;
   animation: floatUpDown 3s ease-in-out infinite alternate;
 }
 @keyframes floatUpDown {
   0%   { transform: translateY(-50%) translateX(0); }
-  100% { transform: translateY(-80%) translateX(0); }
+  100% { transform: translateY(-60%) translateX(0); }
 }
+/* 圖示與下方文字容器 */
 .notice-icon-container {
   display: flex;
   flex-direction: column;
@@ -346,14 +395,16 @@ html, body {
 .notice-icon {
   width: 48px;
   height: 48px;
-  background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
+  background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png) no-repeat center/cover;
 }
+/* 將下方文字與圖示距離縮小 */
 .notice-below-text {
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 0.9rem;
   color: var(--gold);
   animation: whiteTextGlow 1.2s infinite alternate;
 }
+/* 通知內容區 */
 .notice-content {
   display: none;
   position: absolute;
