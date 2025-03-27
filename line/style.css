@@ -91,10 +91,9 @@ html, body {
   padding: 12px;
   margin-bottom: 15px;
   position: relative;
-  /* 預設所有內容層級為 0 */
-  z-index: 0;
+  z-index: 0; /* 預設層級 */
 }
-/* 店名區 (.store-header) - 只顯示店名與狀態，設定較高 z-index */
+/* 店名區 (store-header) => 置於遮罩上層 (z-index=2) */
 .store-header {
   display: flex;
   align-items: center;
@@ -107,7 +106,7 @@ html, body {
   font-size: 1.1rem;
   color: var(--gold);
 }
-/* 促銷徽章只在營業中顯示，故未營業時可不顯示 */
+/* 促銷徽章 => 只在營業中顯示 */
 .badge {
   background: var(--accent2);
   color: #fff;
@@ -116,9 +115,8 @@ html, body {
   border-radius: 4px;
   font-size: 0.8rem;
 }
-/* 基本資訊 (.basic-info) 與詳細資訊 (.store-details) 均放置於遮罩下層 */
-.basic-info,
-.store-details {
+/* 基本資訊 (地址、電話、距離) => z-index=0 (會被遮罩擋住) */
+.basic-info {
   position: relative;
   z-index: 0;
   font-size: 0.9rem;
@@ -131,8 +129,7 @@ html, body {
 .basic-info a:hover {
   text-decoration: underline;
 }
-
-/* 狀態資訊 (.status-info) - 顯示店家狀態，放大 2 倍後的效果 */
+/* 狀態資訊 => (目前營業中 / 目前休息中) => 置於遮罩上層 (z-index=2) */
 .status-info {
   position: relative;
   z-index: 2;
@@ -155,22 +152,30 @@ html, body {
   font-size: 1.8rem; /* 放大兩倍 */
   font-weight: bold;
 }
+/* 詳細營業時間 => 預設不顯示, z-index=0 => 被遮罩 */
+.store-details {
+  position: relative;
+  z-index: 0;
+  display: none;
+  background: #444;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
 
 /* ==========================================================================
-   未營業卡片遮罩 (.card-closed)
+   未營業卡片遮罩
    ========================================================================== */
 .store-item.card-closed::after {
   content: "";
   position: absolute;
   inset: 0;
-  /* 使用接近背景的深灰色 */
-  background: rgba(43,43,43,0.9);
+  background: rgba(43,43,43,0.9); /* 接近背景色 */
   border-radius: 8px;
   pointer-events: none;
-  z-index: 1; /* 遮罩層，覆蓋 .basic-info 與 .store-details */
+  z-index: 1; /* 遮罩層，蓋住 basic-info, store-details, btn-group */
 }
-
-/* 可加上較淺的遮罩效果 */
 .store-item.card-closed-lighter::after {
   content: "";
   position: absolute;
@@ -189,7 +194,7 @@ html, body {
   gap: 10px;
   margin-top: 10px;
   position: relative;
-  z-index: 0;
+  z-index: 0; /* 會被遮罩擋住 */
 }
 .btn-group button {
   flex: 1;
@@ -204,8 +209,7 @@ html, body {
 .btn-group button:hover {
   filter: brightness(0.9);
 }
-
-/* 營業中訂餐按鈕 (金光效果) */
+/* 營業中訂餐按鈕 => 金光效果 */
 .gold-glow-btn {
   background: var(--gold);
   animation: goldGlow 1.2s infinite alternate;
@@ -214,8 +218,6 @@ html, body {
   0%   { box-shadow: 0 0 5px var(--gold); }
   100% { box-shadow: 0 0 15px var(--gold); }
 }
-
-/* Foodpanda 與 UBER 按鈕 */
 .btn-panda {
   background: #fc73b5;
 }
@@ -233,7 +235,6 @@ html, body {
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 9999;
-  /* 點擊 Modal 背景關閉 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -246,8 +247,7 @@ html, body {
   max-width: 90%;
   text-align: center;
 }
-
-/* Modal 按鈕 (較大) */
+/* Modal 按鈕 => 加大 */
 .modal-btn {
   background: var(--gold);
   color: #000;
