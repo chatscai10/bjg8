@@ -21,7 +21,7 @@
     <div id="store-list"></div>
   </div>
 
-  <!-- (1) 非營業提示 Modal (不自動關閉，無關閉按鈕) -->
+  <!-- (1) 非營業提示 Modal -->
   <div id="orderWarningModal" class="modal-bg">
     <div id="orderWarningContent" class="modal-content">
       <p id="orderWarningMessage">
@@ -45,14 +45,15 @@
   <!-- (3) 右側懸浮小通知 -->
   <div id="floatingNotice" class="floating-notice">
     <div id="noticeIconContainer" class="notice-icon-container">
+      <!-- 使用指定的圖示網址 -->
       <div id="noticeIcon" class="notice-icon"></div>
-      <!-- 調整「預約外送」文字距離圖示更近 -->
+      <!-- 將下方文字與圖示距離縮小，並加上閃爍發光效果 -->
       <div id="noticeBelowText" class="notice-below-text">預約外送</div>
     </div>
     <div id="noticeContent" class="notice-content">
       <h4>預約外送通知:</h4>
       <p>
-        什麼! 預約外送更便宜?? <br>
+        什麼! 預約外送更便宜?? 
         <a href="https://example.com" onclick="openExternalOrHref('https://example.com'); return false;" style="color: var(--gold); text-decoration: underline;">
           快點這裡
         </a>
@@ -63,10 +64,9 @@
   <!-- 載入 Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    /* ===================================================
-       [LIFF 初始化與外部開啟連結函式]
-       =================================================== */
-      const MY_LIFF_ID = "2007075778-Zqnz7ON8"; // 你的 LIFF ID
+    /**************** LIFF 與外部連結設定 ****************/
+    // LIFF ID 直接設定為提供的值
+    const MY_LIFF_ID = "2007075778-Zqnz7ON8";
     let lineUserId = "";
     async function initLineLiff() {
       if (typeof liff === "undefined") {
@@ -90,7 +90,7 @@
         console.error("LIFF 初始化錯誤:", err);
       }
     }
-    // 若在 LINE in‑app，使用 liff.openWindow 開啟外部連結
+    // 在 LINE in‑app 瀏覽器中用 liff.openWindow 開啟外部連結
     function openExternalOrHref(finalUrl) {
       if (typeof liff !== "undefined" && liff.isInClient()) {
         liff.openWindow({
@@ -102,25 +102,22 @@
       }
     }
 
-    /* ===================================================
-       全域變數與初始設定
-       =================================================== */
+    /**************** 全域變數與初始設定 ****************/
     let announcement = "";
     let storeData = [];
     let map = null;
     let nearestStore = null;
     let nearestStoreName = "";
     let nearestStoreUrl  = "";
-    const useMarquee = true; // 是否使用跑馬燈
-
-    // 用於非營業提示 Modal
+    const useMarquee = true;
+    // 用於非營業提示 Modal 的變數
     let currentStoreName = "";
     let currentStoreUrl  = "";
     let phoneNumber      = "";
     let isNotNearest     = false;
 
     document.addEventListener("DOMContentLoaded", () => {
-      initLineLiff(); // 初始化 LIFF
+      initLineLiff();
       fetch("storeData.json")
         .then(r => r.json())
         .then(json => {
@@ -138,9 +135,7 @@
       initFloatingNotice();
     });
 
-    /* ===================================================
-       (A) 公告區
-       =================================================== */
+    /**************** 公告區 (跑馬燈) ****************/
     function renderAnnouncement() {
       const announcementDiv = document.getElementById("announcement");
       if (announcement && announcement.trim() !== "") {
@@ -156,9 +151,7 @@
       }
     }
 
-    /* ===================================================
-       (B) 初始化地圖 (Leaflet)
-       =================================================== */
+    /**************** 地圖初始化 (Leaflet) ****************/
     function initMap() {
       map = L.map('map').setView([23.5, 121], 7);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -177,9 +170,7 @@
       });
     }
 
-    /* ===================================================
-       (C) 取得定位、計算距離並排序
-       =================================================== */
+    /**************** 取得定位並排序店家 ****************/
     function initGeolocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
@@ -189,7 +180,7 @@
             iconUrl: 'https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png',
             iconSize: [60, 60],
             iconAnchor: [30, 60],
-            popupAnchor: [0, -60]  // 將 popup 往上移
+            popupAnchor: [0, -60] // 將 popup 往上移
           });
           L.marker([userLat, userLon], { icon: userIcon })
             .addTo(map)
@@ -220,9 +211,7 @@
     }
     function toRad(v){ return v * Math.PI / 180; }
 
-    /* ===================================================
-       (D) 產生店家卡片列表
-       =================================================== */
+    /**************** 產生店家卡片列表 ****************/
     function renderStoreList() {
       const storeListDiv = document.getElementById("store-list");
       storeListDiv.innerHTML = "";
@@ -234,18 +223,24 @@
       storeData.forEach(store => {
         const storeItem = document.createElement("div");
         storeItem.className = "store-item";
+        // 建立標題與促銷徽章，若非營業則隱藏促銷徽章
         const storeHeader = document.createElement("div");
         storeHeader.className = "store-header";
         const h3 = document.createElement("h3");
         h3.textContent = store.name;
+        // 設定 storeHeader 的 z-index，確保位於遮罩上方
+        storeHeader.style.zIndex = 2;
+        storeHeader.style.position = "relative";
         storeHeader.appendChild(h3);
-        if (store.promotion && store.promotion.trim() !== "") {
+        if (store.promotion && store.promotion.trim() !== "" && checkStoreOpen(store)) {
           const badge = document.createElement("span");
           badge.className = "badge";
           badge.textContent = store.promotion;
           storeHeader.appendChild(badge);
         }
         storeItem.appendChild(storeHeader);
+
+        // 基本資訊
         const basicInfo = document.createElement("div");
         basicInfo.className = "basic-info";
         const phoneClean = store.phone.replace(/-/g, "");
@@ -256,6 +251,8 @@
         }
         basicInfo.innerHTML = infoHTML;
         storeItem.appendChild(basicInfo);
+
+        // 判斷今日營業狀態
         let isOpen = false;
         let businessStatus = "目前休息中";
         try {
@@ -266,21 +263,31 @@
           if(hours){
             isOpen = checkOpenNow(hours);
             businessStatus = isOpen ? "目前營業中" : "目前休息中";
+            // 若今日公休
+            if (hours.toLowerCase().includes("公休")) {
+              businessStatus = "今日公休";
+            }
           }
         } catch(e){}
+        // 狀態資訊，並設定 z-index 以顯示在遮罩上方
         const statusInfo = document.createElement("div");
         statusInfo.className = "status-info";
+        statusInfo.style.zIndex = 2;
+        statusInfo.style.position = "relative";
         const statusClass = isOpen ? "open-status" : "closed-status";
         statusInfo.innerHTML = `<strong>今日狀態：</strong>
                                 <span class="${statusClass}">${businessStatus}</span>`;
         storeItem.appendChild(statusInfo);
+        // 若非營業，則在卡片上加遮罩，但保持標題與狀態顯示
         if (!isOpen) {
           storeItem.classList.add("card-closed");
         }
+        // 營業時間詳細資訊
         const detailsDiv = document.createElement("div");
         detailsDiv.className = "store-details";
         detailsDiv.innerHTML = `<strong>完整營業時間：</strong>${formatBH(store.businessHours)}`;
         storeItem.appendChild(detailsDiv);
+        // 點擊狀態資訊時，若營業中則顯示/隱藏詳細資訊；若非營業則關閉遮罩
         statusInfo.onclick = () => {
           if (isOpen) {
             detailsDiv.style.display = (detailsDiv.style.display === "block" ? "none" : "block");
@@ -295,6 +302,7 @@
             }, 3000);
           }
         };
+        // 按鈕群組
         const btnGroup = document.createElement("div");
         btnGroup.className = "btn-group";
         if (store.onlineOrderUrl) {
@@ -336,7 +344,7 @@
         storeItem.appendChild(btnGroup);
         storeListDiv.appendChild(storeItem);
       });
-      // 插入廣告卡片 (例如加入官方LINE)
+      // 加入廣告卡片 (例如加入官方LINE)
       const adContainer = document.createElement("div");
       adContainer.className = "ad-container";
       adContainer.innerHTML = `
@@ -351,6 +359,19 @@
       if (joinBtn) {
         joinBtn.onclick = () => openExternalOrHref("https://line.me/R/ti/p/@fried");
       }
+    }
+    // 判斷店家今日是否營業，用於是否顯示促銷徽章（促銷徽章只顯示於營業中）
+    function checkStoreOpen(store) {
+      try {
+        const dayMap = {0:"週日",1:"週一",2:"週二",3:"週三",4:"週四",5:"週五",6:"週六"};
+        const todayStr = dayMap[new Date().getDay()];
+        const bh = JSON.parse(store.businessHours || "{}");
+        const hours = bh[todayStr];
+        if(hours){
+          return checkOpenNow(hours);
+        }
+      } catch(e){}
+      return false;
     }
     function formatBH(bhStr) {
       try {
@@ -391,14 +412,15 @@
       return parseInt(hh) * 60 + parseInt(mm);
     }
 
-    /* ===================================================
-       (E) Modal 綁定與顯示函式
-       - 非營業提示不會因外部點擊而自動關閉
-    =================================================== */
+    /**************** Modal 綁定與顯示 ****************/
     function initModals() {
       const orderModal = document.getElementById("orderWarningModal");
       const continueBtn = document.getElementById("continueOrderBtn");
       const callBtn = document.getElementById("callStoreBtn");
+      // 點擊外部區域關閉非營業提示 Modal
+      orderModal.addEventListener("click", e => {
+        if(e.target === orderModal) { orderModal.style.display = "none"; }
+      });
       continueBtn.onclick = () => {
         orderModal.style.display = "none";
         if (isNotNearest && nearestStore) {
@@ -416,12 +438,10 @@
         orderModal.style.display = "none";
         window.location.href = "tel:" + phoneNumber;
       };
-      // 不在 orderModal 外點擊時不自動關閉
+
       const nearestModal = document.getElementById("nearestStoreModal");
       nearestModal.addEventListener("click", e => {
-        if(e.target === nearestModal){
-          nearestModal.style.display = "none";
-        }
+        if(e.target === nearestModal) { nearestModal.style.display = "none"; }
       });
     }
     function showOrderModal(sName, onlineUrl, phone, notNearest) {
@@ -436,7 +456,7 @@
       const nearestModal = document.getElementById("nearestStoreModal");
       nearestModal.style.display = "flex";
       const msg = document.getElementById("nearestStoreModalMessage");
-      // currentStore 不用特效，nStoreName 以白光呈現
+      // currentStore不加特效，nStoreName 加白光
       msg.innerHTML = `
         您選擇的 ${currentStore} 離您較遠，<br>
         要改較近的 <span class="whiteGlowText">${nStoreName}</span> 訂餐嗎？
@@ -455,18 +475,18 @@
       };
     }
 
-    /* ===================================================
-       (F) 懸浮通知 (點擊圖示切換通知內容顯示)
-    =================================================== */
+    /**************** 懸浮通知 ****************/
     function initFloatingNotice() {
       const noticeContent = document.getElementById("noticeContent");
       const floatingNotice = document.getElementById("floatingNotice");
+      // 初始隱藏通知內容
+      noticeContent.style.display = "none";
       floatingNotice.addEventListener("click", (e) => {
         if(noticeContent.contains(e.target)) return;
         noticeContent.style.display = (noticeContent.style.display === "block" ? "none" : "block");
       });
       document.addEventListener("click", (e) => {
-        if(!floatingNotice.contains(e.target)){
+        if(!floatingNotice.contains(e.target)) {
           noticeContent.style.display = "none";
         }
       });
