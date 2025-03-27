@@ -191,10 +191,10 @@ iconAnchor: [33, 98]
           const userLat = pos.coords.latitude;
           const userLon = pos.coords.longitude;
           const userIcon = L.icon({
-            iconUrl: 'https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png',
-            iconSize: [60, 60],
-            iconAnchor: [30, 60],
-            popupAnchor: [0, -60]
+            iconUrl: 'https://chatscai10.github.io/bjg8/line/754e3924-3cc8-46a9-b512-48aaf012d1dd.png',
+            iconSize: [74, 102],             // 圖示寬74px、高102px
+    iconAnchor: [37, 94],            // 圖示錨點：寬度一半，底部向上8px
+    popupAnchor: [0, -94]
           });
           L.marker([userLat, userLon], { icon: userIcon })
             .addTo(map)
