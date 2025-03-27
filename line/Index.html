@@ -172,8 +172,8 @@
 
       const customIcon = L.icon({
         iconUrl: 'https://chatscai10.github.io/bjg8/line/6d08c24e-8c45-4950-b4da-aae1c19e641c.png',
-        iconSize: [65, 98],
-iconAnchor: [33, 98]
+        iconSize: [45, 68],
+iconAnchor: [23, 68]
       });
       storeData.forEach(store => {
         L.marker([store.latitude, store.longitude], { icon: customIcon })
@@ -192,9 +192,9 @@ iconAnchor: [33, 98]
           const userLon = pos.coords.longitude;
           const userIcon = L.icon({
             iconUrl: 'https://chatscai10.github.io/bjg8/line/754e3924-3cc8-46a9-b512-48aaf012d1dd.png',
-            iconSize: [74, 102],             // 圖示寬74px、高102px
-    iconAnchor: [37, 94],            // 圖示錨點：寬度一半，底部向上8px
-    popupAnchor: [0, -94]
+            iconSize: [52, 71],             // 圖示寬74px、高102px
+    iconAnchor: [26, 68],            // 圖示錨點：寬度一半，底部向上8px
+    popupAnchor: [0, -60]
           });
           L.marker([userLat, userLon], { icon: userIcon })
             .addTo(map)
