@@ -91,8 +91,10 @@ html, body {
   padding: 12px;
   margin-bottom: 15px;
   position: relative;
+  /* 預設所有內容層級為 0 */
+  z-index: 0;
 }
-/* 店名區 (僅顯示店名與狀態) 提高 z-index */
+/* 店名區 (.store-header) - 只顯示店名與狀態，設定較高 z-index */
 .store-header {
   display: flex;
   align-items: center;
@@ -105,7 +107,7 @@ html, body {
   font-size: 1.1rem;
   color: var(--gold);
 }
-/* 促銷徽章只在營業中顯示 */
+/* 促銷徽章只在營業中顯示，故未營業時可不顯示 */
 .badge {
   background: var(--accent2);
   color: #fff;
@@ -114,15 +116,13 @@ html, body {
   border-radius: 4px;
   font-size: 0.8rem;
 }
-/* 基本資訊 (地址、電話、距離) 於非營業時隱藏 */
-.basic-info {
+/* 基本資訊 (.basic-info) 與詳細資訊 (.store-details) 均放置於遮罩下層 */
+.basic-info,
+.store-details {
+  position: relative;
+  z-index: 0;
   font-size: 0.9rem;
   margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
-}
-.store-item.card-closed .basic-info {
-  display: none;
 }
 .basic-info a {
   color: var(--gold);
@@ -131,13 +131,14 @@ html, body {
 .basic-info a:hover {
   text-decoration: underline;
 }
-/* 狀態資訊 (營業中、休息中) */
+
+/* 狀態資訊 (.status-info) - 顯示店家狀態，放大 2 倍後的效果 */
 .status-info {
+  position: relative;
+  z-index: 2;
   font-size: 0.9rem;
   margin-bottom: 6px;
   cursor: pointer;
-  position: relative;
-  z-index: 2;
 }
 .open-status {
   color: var(--gold);
@@ -155,17 +156,29 @@ html, body {
   font-weight: bold;
 }
 
-/* 詳細營業時間，於非營業時隱藏 */
-.store-details {
-  display: block;
-  background: #444;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 6px;
-  font-size: 0.85rem;
+/* ==========================================================================
+   未營業卡片遮罩 (.card-closed)
+   ========================================================================== */
+.store-item.card-closed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* 使用接近背景的深灰色 */
+  background: rgba(43,43,43,0.9);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1; /* 遮罩層，覆蓋 .basic-info 與 .store-details */
 }
-.store-item.card-closed .store-details {
-  display: none;
+
+/* 可加上較淺的遮罩效果 */
+.store-item.card-closed-lighter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(43,43,43,0.6);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ==========================================================================
@@ -175,6 +188,8 @@ html, body {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  position: relative;
+  z-index: 0;
 }
 .btn-group button {
   flex: 1;
@@ -209,32 +224,6 @@ html, body {
 }
 
 /* ==========================================================================
-   未營業卡片遮罩
-   ========================================================================== */
-.store-item.card-closed {
-  position: relative;
-}
-.store-item.card-closed::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  /* 使用接近背景的顏色 */
-  background: rgba(43,43,43,0.9);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 1;
-}
-.store-item.card-closed-lighter::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(43,43,43,0.6);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ==========================================================================
    Modal (彈窗)
    ========================================================================== */
 .modal-bg {
@@ -244,7 +233,7 @@ html, body {
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 9999;
-  /* Modal 點擊外部即關閉 */
+  /* 點擊 Modal 背景關閉 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,7 +247,7 @@ html, body {
   text-align: center;
 }
 
-/* Modal 按鈕，較大 */
+/* Modal 按鈕 (較大) */
 .modal-btn {
   background: var(--gold);
   color: #000;
@@ -375,11 +364,11 @@ html, body {
 .notice-icon {
   width: 48px;
   height: 48px;
-  /* 使用指定的圖示網址 */
+  /* 使用指定的懸浮通知圖示網址 */
   background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
 }
 .notice-below-text {
-  margin-top: 2px; /* 與圖示距離更近 */
+  margin-top: 2px;
   font-size: 0.9rem;
   color: var(--gold);
   animation: whiteTextGlow 1.2s infinite alternate;
