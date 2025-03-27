@@ -9,7 +9,7 @@
       "phone": "0912-541609",
       "promotion": "",
       "businessHours": "{\"週一\":\"00:00-01:00\",\"週二\":\"15:00-24:00\",\"週三\":\"00:00-01:00,15:00-24:00\",\"週四\":\"00:00-01:00,15:00-24:00\",\"週五\":\"00:00-01:00,15:00-24:00\",\"週六\":\"00:00-01:00,15:00-24:00\",\"週日\":\"00:00-01:00,15:00-24:00\"}",
-      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f/menu",
+      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f-3a74-44ae-9517-8c305d73c0fb/menu?openExternalBrowser=1",
       "pandaOrderUrl": "",
       "uberOrderUrl": "",
       "imageUrl": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6"
@@ -22,7 +22,7 @@
       "phone": "0976-532478",
       "promotion": "雞排特價$50",
       "businessHours": "{\"週一\":\"公休\",\"週二\":\"公休\",\"週三\":\"公休\",\"週四\":\"公休\",\"週五\":\"公休\",\"週六\":\"公休\",\"週日\":\"公休\"}",
-      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f/menu",
+      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f-3a74-44ae-9517-8c305d73c0fb/menu?openExternalBrowser=1",
       "pandaOrderUrl": "",
       "uberOrderUrl": "",
       "imageUrl": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6"
@@ -35,7 +35,7 @@
       "phone": "0925-309575",
       "promotion": "新店開幕優惠",
       "businessHours": "{\"週一\":\"00:00-01:00\",\"週二\":\"15:00-24:00\",\"週三\":\"00:00-01:00,15:00-24:00\",\"週四\":\"00:00-01:00,15:00-24:00\",\"週五\":\"00:00-01:00,15:00-24:00\",\"週六\":\"00:00-01:00,15:00-24:00\",\"週日\":\"00:00-01:00,15:00-24:00\"}",
-      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f/menu",
+      "onlineOrderUrl": "https://customer.posky.net/store/2c0d4d7f-3a74-44ae-9517-8c305d73c0fb/menu?openExternalBrowser=1",
       "pandaOrderUrl": "",
       "uberOrderUrl": "",
       "imageUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff"
