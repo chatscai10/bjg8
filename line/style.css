@@ -107,13 +107,20 @@ html, body {
   color: var(--gold);
 }
 /* 促銷徽章 => 只在營業中顯示 */
+/* 預設徽章樣式 */
 .badge {
   background: var(--accent2);
   color: #fff;
+  font-size: 0.8rem;
   padding: 2px 6px;
   margin-left: 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
+}
+
+/* 非營業的卡片 → 徽章變半透明，不要消失 */
+.card-closed .badge {
+  opacity: 0.3;
+  filter: grayscale(100%);
 }
 /* 基本資訊 (地址、電話、距離) => z-index=0 (會被遮罩擋住) */
 .basic-info {
