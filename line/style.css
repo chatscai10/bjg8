@@ -297,101 +297,116 @@ html, body {
    廣告卡片 (.ad-container)
    ========================================================================== */
 .ad-container {
-  margin-top: 20px;
-  padding: 16px;
-  text-align: center;
-  background: rgba(212,175,55,0.1);
-  border: 2px solid rgba(212,175,55,0.3);
-  border-radius: 8px;
-  animation: adGoldGlow 2s infinite alternate;
-  font-size: 1rem;
+  margin-top: 70px; /* 與上方區塊間距 */
+  padding: 16px; /* 內距 */
+  text-align: center; /* 文字置中 */
+  background: rgba(212,175,55,0.1); /* 淡金色背景（透明） */
+  border: 2px solid rgba(212,175,55,0.3); /* 金色邊框（較透明） */
+  border-radius: 8px; /* 圓角 */
+  animation: adGoldGlow 2s infinite alternate; /* 加上金光動畫 */
+  font-size: 1rem; /* 基本文字大小（約16px） */
 }
+
 @keyframes adGoldGlow {
-  0%   { box-shadow: 0 0 5px var(--gold); }
-  100% { box-shadow: 0 0 25px var(--gold); }
+  0%   { box-shadow: 0 0 5px var(--gold); } /* 初始微光 */
+  100% { box-shadow: 0 0 35px var(--gold); } /* 結束金光較強 */
 }
+
 .ad-content h2 {
-  color: var(--gold);
-  margin-bottom: 10px;
-  font-size: 1rem;
+  color: var(--gold); /* 金色標題文字 */
+  margin-bottom: 10px; /* 下方間距 */
+  font-size: 1rem; /* 標題文字大小 */
 }
+
 .ad-content p {
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-  color: var(--text-dark);
+  font-size: 0.9rem; /* 內文略小字體 */
+  margin-bottom: 10px; /* 下方間距 */
+  color: var(--text-dark); /* 文字為主色 */
 }
+
 .btn-join-line {
-  background: var(--gold);
-  color: #000;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  animation: whiteGlow 1.5s infinite alternate;
+  background: var(--gold); /* 金色背景 */
+  color: #000; /* 黑色文字 */
+  padding: 8px 14px; /* 上下8px，左右14px */
+  border: none; /* 無邊框 */
+  border-radius: 4px; /* 圓角 */
+  font-size: 0.9rem; /* 字體略小 */
+  cursor: pointer; /* 滑鼠變成手指 */
+  animation: whiteGlow 1.5s infinite alternate; /* 白光閃爍動畫 */
 }
+
 .btn-join-line:hover {
-  filter: brightness(0.9);
+  filter: brightness(0.9); /* 滑鼠懸停時略微變暗 */
 }
+
 @keyframes whiteGlow {
-  0%   { box-shadow: 0 0 5px #fff; }
-  100% { box-shadow: 0 0 15px #fff; }
+  0%   { box-shadow: 0 0 5px #fff; } /* 初始微白光 */
+  100% { box-shadow: 0 0 35px #fff; } /* 強白光 */
 }
+
 
 /* ==========================================================================
    懸浮通知 (.floating-notice)
    ========================================================================== */
 .floating-notice {
-  position: fixed;
-  right: 10px;
-  top: 70%;
-  transform: translateY(-50%);
-  z-index: 9999;
-  cursor: pointer;
-  animation: floatUpDown 3s ease-in-out infinite alternate;
+  position: fixed; /* 固定在畫面上 */
+  right: 10px; /* 靠右 10px */
+  top: 70%; /* 垂直位置：視窗 70% 處 */
+  transform: translateY(-50%); /* 微調位置居中 */
+  z-index: 9999; /* 最上層顯示 */
+  cursor: pointer; /* 滑鼠變手指 */
+  animation: floatUpDown 3s ease-in-out infinite alternate; /* 浮動動畫（上下飄） */
 }
+
 @keyframes floatUpDown {
-  0%   { transform: translateY(-50%) translateX(0); }
-  100% { transform: translateY(-60%) translateX(0); }
+  0%   { transform: translateY(-50%) translateX(0); } /* 初始位置 */
+  100% { transform: translateY(-90%) translateX(0); } /* 向上微移 10% */
 }
+
 .notice-icon-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; /* 使用 flex 排版 */
+  flex-direction: column; /* 垂直排列 */
+  align-items: center; /* 水平置中 */
+  justify-content: center; /* 垂直置中 */
 }
+
 .notice-icon {
-  width: 48px;
-  height: 48px;
-  /* 使用指定的懸浮通知圖示網址 */
+  width: 48px; /* 寬度 48px */
+  height: 48px; /* 高度 48px */
   background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
+  /* 設定圖片來源、置中並完整填滿 */
 }
+
 .notice-below-text {
-  margin-top: 2px;
-  font-size: 0.9rem;
-  color: var(--gold);
-  animation: whiteTextGlow 1.2s infinite alternate;
+  margin-top: 2px; /* 與圖示間距 */
+  font-size: 0.9rem; /* 字體大小 */
+  color: var(--gold); /* 金色字 */
+  animation: whiteTextGlow 1.2s infinite alternate; /* 白光發光效果 */
 }
+
 .notice-content {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 60px;
-  width: 200px;
-  background: #333;
-  color: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px #000;
+  display: none; /* 預設隱藏內容視窗 */
+  position: absolute; /* 絕對定位 */
+  top: 0; /* 對齊頂部 */
+  right: 60px; /* 靠右偏移（避免蓋到圖示） */
+  width: 200px; /* 固定寬度 */
+  background: #333; /* 深色背景 */
+  color: #fff; /* 白色字體 */
+  padding: 12px; /* 內距 */
+  border-radius: 8px; /* 圓角 */
+  box-shadow: 0 0 10px #000; /* 黑色陰影 */
 }
+
 .notice-content h4 {
-  margin-top: 0;
-  margin-bottom: 6px;
-  color: var(--gold);
-  font-size: 1rem;
+  margin-top: 0; /* 無上間距 */
+  margin-bottom: 6px; /* 下方間距 */
+  color: var(--gold); /* 金色標題 */
+  font-size: 1rem; /* 字體大小 */
 }
+
 .notice-content p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  margin: 0; /* 無上下間距 */
+  font-size: 0.9rem; /* 字體略小 */
+  line-height: 1.4; /* 行高 */
 }
+
