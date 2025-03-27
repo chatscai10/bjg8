@@ -2,11 +2,11 @@
    全域變數與基本設定
    ========================================================================== */
 :root {
-  --bg-dark: #2B2B2B;           /* 背景色 */
-  --card-dark: #333;            /* 卡片背景 */
-  --gold: #D4AF37;              /* 金色 */
+  --bg-dark: #2B2B2B;           /* 頁面背景色 */
+  --card-dark: #333;            /* 卡片背景色 */
+  --gold: #D4AF37;              /* 金色 (主要強調色) */
   --accent2: #B08D57;           /* 輔助金色 */
-  --text-dark: #E0E0E0;         /* 主要文字 (淺灰) */
+  --text-dark: #E0E0E0;         /* 主要文字顏色 (淺灰) */
   --text-light: #fff;           /* 白色 */
 }
 * {
@@ -20,7 +20,7 @@ html, body {
   font-family: "Roboto", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  -webkit-text-size-adjust: none;
+  -webkit-text-size-adjust: none; /* 防止 iOS 自動縮放字體 */
 }
 .main-container {
   width: 95%;
@@ -92,7 +92,7 @@ html, body {
   margin-bottom: 15px;
   position: relative;
 }
-/* 店名區與狀態資訊設定較高 z-index，避免被遮罩覆蓋 */
+/* 店名區 (僅顯示店名與狀態) 提高 z-index */
 .store-header {
   display: flex;
   align-items: center;
@@ -105,6 +105,7 @@ html, body {
   font-size: 1.1rem;
   color: var(--gold);
 }
+/* 促銷徽章只在營業中顯示 */
 .badge {
   background: var(--accent2);
   color: #fff;
@@ -113,11 +114,15 @@ html, body {
   border-radius: 4px;
   font-size: 0.8rem;
 }
+/* 基本資訊 (地址、電話、距離) 於非營業時隱藏 */
 .basic-info {
   font-size: 0.9rem;
   margin-bottom: 8px;
   position: relative;
-  z-index: 2;
+  z-index: 1;
+}
+.store-item.card-closed .basic-info {
+  display: none;
 }
 .basic-info a {
   color: var(--gold);
@@ -126,6 +131,7 @@ html, body {
 .basic-info a:hover {
   text-decoration: underline;
 }
+/* 狀態資訊 (營業中、休息中) */
 .status-info {
   font-size: 0.9rem;
   margin-bottom: 6px;
@@ -133,7 +139,6 @@ html, body {
   position: relative;
   z-index: 2;
 }
-/* 營業中文字 */
 .open-status {
   color: var(--gold);
   font-weight: bold;
@@ -144,21 +149,23 @@ html, body {
   0%   { text-shadow: 0 0 5px #D4AF37; }
   10%  { text-shadow: 0 0 35px #FFD700; }
 }
-/* 非營業 (休息中或今日公休) 放大 2 倍 */
 .closed-status {
   color: #ff5555;
-  font-size: 1.8rem;
+  font-size: 1.8rem; /* 放大兩倍 */
   font-weight: bold;
 }
 
-/* 詳細營業時間 */
+/* 詳細營業時間，於非營業時隱藏 */
 .store-details {
-  display: none;
+  display: block;
   background: #444;
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 6px;
   font-size: 0.85rem;
+}
+.store-item.card-closed .store-details {
+  display: none;
 }
 
 /* ==========================================================================
@@ -211,7 +218,7 @@ html, body {
   content: "";
   position: absolute;
   inset: 0;
-  /* 使用接近背景色的深灰色 */
+  /* 使用接近背景的顏色 */
   background: rgba(43,43,43,0.9);
   border-radius: 8px;
   pointer-events: none;
@@ -237,7 +244,7 @@ html, body {
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 9999;
-  /* Modal 可點擊外部關閉 (已加於 JS 中) */
+  /* Modal 點擊外部即關閉 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -359,7 +366,6 @@ html, body {
   0%   { transform: translateY(-50%) translateX(0); }
   100% { transform: translateY(-60%) translateX(0); }
 }
-/* 圖示與下方文字容器 */
 .notice-icon-container {
   display: flex;
   flex-direction: column;
@@ -369,16 +375,15 @@ html, body {
 .notice-icon {
   width: 48px;
   height: 48px;
-  /* 使用提供的懸浮通知圖示網址 */
+  /* 使用指定的圖示網址 */
   background: url('https://chatscai10.github.io/bjg8/8388143b-4ff4-49a4-b146-0324df489d05.png') no-repeat center/cover;
 }
 .notice-below-text {
   margin-top: 2px; /* 與圖示距離更近 */
   font-size: 0.9rem;
   color: var(--gold);
-  animation: whiteTextGlow 1.2s infinite alternate; /* 閃爍發光效果 */
+  animation: whiteTextGlow 1.2s infinite alternate;
 }
-/* 通知內容 */
 .notice-content {
   display: none;
   position: absolute;
