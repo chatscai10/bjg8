@@ -1,63 +1,122 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>充電樁登入頁面</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>車格登入 · Prestige HyperUX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .link-container { margin-bottom: 10px; }
-    a.button {
-      display: inline-block;
-      padding: 10px 16px;
-      background-color: #007bff;
-      color: white;
-      border-radius: 6px;
-      text-decoration: none;
-      margin: 5px;
+    :root {
+      --bg: linear-gradient(160deg, #0a0f1c 0%, #13192b 100%);
+      --card-bg: rgba(255, 255, 255, 0.02);
+      --glow: rgba(173, 216, 230, 0.15);
+      --blur: 18px;
+      --main-color: #9ed3ff;
     }
-    a.button:hover { background-color: #0056b3; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Unbounded', sans-serif;
+      background: var(--bg);
+      color: #f0f0f0;
+      overflow-x: hidden;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.6rem;
+      margin-top: 2.2rem;
+      color: var(--main-color);
+      text-shadow: 0 0 12px rgba(158, 211, 255, 0.35);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 30px;
+      padding: 40px 24px 80px;
+      max-width: 1024px;
+      margin: auto;
+    }
+    .car-slot {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 48px 0;
+      text-align: center;
+      backdrop-filter: blur(var(--blur));
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.03), 0 0 15px var(--glow);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.35s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .car-slot:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 0 40px var(--glow), 0 0 10px rgba(255,255,255,0.05);
+    }
+    .car-slot::before {
+      content: "";
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+      animation: spinGlow 16s linear infinite;
+      z-index: 0;
+    }
+    @keyframes spinGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .label {
+      position: relative;
+      font-size: 1.6rem;
+      z-index: 2;
+      color: var(--main-color);
+      text-shadow: 0 0 12px rgba(158, 211, 255, 0.35);
+    }
+    .emoji {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: -1;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.015) 0%, transparent 80%), url('https://raw.githubusercontent.com/JulianLaval/canvas-particle-network/master/demo/media/starfield.png');
+      background-size: cover;
+      background-blend-mode: screen;
+      animation: pulseBG 20s ease-in-out infinite;
+    }
+    @keyframes pulseBG {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.15); }
+    }
+    @media (hover: none) {
+      .car-slot:hover {
+        transform: none;
+        box-shadow: 0 0 25px var(--glow);
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>充電樁登入（自動填入）</h2>
-
-  <div class="link-container">
-    <a href="#" class="button" onclick="openConn(10)">車位 10</a>
-    <a href="#" class="button" onclick="openConn(8)">車位 8</a>
-    <a href="#" class="button" onclick="openConn(9)">車位 9</a>
-    <a href="#" class="button" onclick="openConn(7)">車位 7</a>
-    <a href="#" class="button" onclick="openConn(6)">車位 6</a>
-    <a href="#" class="button" onclick="openConn(5)">車位 5</a>
-    <a href="#" class="button" onclick="openConn(3)">車位 3</a>
-    <a href="#" class="button" onclick="openConn(4)">車位 4</a>
+  <div class="starfield"></div>
+  <h1>車格選擇</h1>
+  <div class="grid">
+    <div class="car-slot" onclick="go(3)"><div class="emoji">🚗</div><div class="label">車格 3</div></div>
+    <div class="car-slot" onclick="go(4)"><div class="emoji">🚗</div><div class="label">車格 4</div></div>
+    <div class="car-slot" onclick="go(5)"><div class="emoji">🚗</div><div class="label">車格 5</div></div>
+    <div class="car-slot" onclick="go(6)"><div class="emoji">🚗</div><div class="label">車格 6</div></div>
+    <div class="car-slot" onclick="go(7)"><div class="emoji">🚗</div><div class="label">車格 7</div></div>
+    <div class="car-slot" onclick="go(8)"><div class="emoji">🚗</div><div class="label">車格 8</div></div>
+    <div class="car-slot" onclick="go(9)"><div class="emoji">🚗</div><div class="label">車格 9</div></div>
+    <div class="car-slot" onclick="go(10)"><div class="emoji">🚗</div><div class="label">車格 10</div></div>
   </div>
-
   <script>
-    const phone = "0936219719";
-    const plate = "EAC-9570";
-
-    function openConn(connId) {
+    function go(connId) {
       const url = `http://211.23.157.144:30084/charge/#/ChargeTagVerify?ConnID=${connId}`;
-      const win = window.open(url, '_blank');
-
-      const tryFill = setInterval(() => {
-        try {
-          const doc = win.document;
-          const phoneInput = doc.querySelector('input[type=tel]');
-          const plateInput = doc.querySelector('input[type=text]');
-
-          if (phoneInput && plateInput) {
-            phoneInput.value = phone;
-            plateInput.value = plate;
-            doc.querySelector('button[type=submit]').click();
-            clearInterval(tryFill);
-          }
-        } catch (e) {
-          // 跨域阻擋操作，無法自動填寫
-          clearInterval(tryFill);
-        }
-      }, 1000);
+      window.open(url, '_blank');
     }
   </script>
 </body>
