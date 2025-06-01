@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>充電樁登入頁面</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .link-container { margin-bottom: 10px; }
+    a.button {
+      display: inline-block;
+      padding: 10px 16px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      margin: 5px;
+    }
+    a.button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+  <h2>充電樁登入（自動填入）</h2>
+
+  <div class="link-container">
+    <a href="#" class="button" onclick="openConn(10)">車位 10</a>
+    <a href="#" class="button" onclick="openConn(8)">車位 8</a>
+    <a href="#" class="button" onclick="openConn(9)">車位 9</a>
+    <a href="#" class="button" onclick="openConn(7)">車位 7</a>
+    <a href="#" class="button" onclick="openConn(6)">車位 6</a>
+    <a href="#" class="button" onclick="openConn(5)">車位 5</a>
+    <a href="#" class="button" onclick="openConn(3)">車位 3</a>
+    <a href="#" class="button" onclick="openConn(4)">車位 4</a>
+  </div>
+
+  <script>
+    const phone = "0936219719";
+    const plate = "EAC-9570";
+
+    function openConn(connId) {
+      const url = `http://211.23.157.144:30084/charge/#/ChargeTagVerify?ConnID=${connId}`;
+      const win = window.open(url, '_blank');
+
+      const tryFill = setInterval(() => {
+        try {
+          const doc = win.document;
+          const phoneInput = doc.querySelector('input[type=tel]');
+          const plateInput = doc.querySelector('input[type=text]');
+
+          if (phoneInput && plateInput) {
+            phoneInput.value = phone;
+            plateInput.value = plate;
+            doc.querySelector('button[type=submit]').click();
+            clearInterval(tryFill);
+          }
+        } catch (e) {
+          // 跨域阻擋操作，無法自動填寫
+          clearInterval(tryFill);
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
