@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業室內佈局編輯器 (v6.0 - Undo/Redo)</title>
+    <title>專業室內佈局編輯器 (v7.0 - 跨區/字型)</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -62,14 +62,13 @@
         .controls button.danger { background-color: #dc3545; }
         .controls button.danger:hover { background-color: #c82333; }
         
-        /* (新) 禁用按鈕的樣式 */
         .controls button:disabled,
         .controls button:disabled:hover {
             background-color: #c6c6c6;
             cursor: not-allowed;
         }
         
-        .control-row { display: flex; gap: 10px; } /* (新) 用於放 Undo/Redo */
+        .control-row { display: flex; gap: 10px; }
         .control-row button { width: 100%; }
         
         .checkbox-group { display: flex; align-items: center; gap: 10px; }
@@ -104,7 +103,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             box-sizing: border-box;
             transition: border-color 0.3s;
-            overflow: hidden;
             cursor: grab;
             display: flex;
             align-items: center;
@@ -117,10 +115,16 @@
             z-index: 50; 
         }
 
-        /* --- 房間標籤 --- */
+        /* --- 房間標籤 (新) --- */
         .room-label {
-            position: absolute; font-size: 14px; font-weight: bold;
-            color: rgba(0,0,0,0.25); pointer-events: none; user-select: none; white-space: nowrap;
+            position: absolute;
+            /* (新) 使用 CSS 變數，預設 14px */
+            font-size: var(--font-size, 14px); 
+            font-weight: bold;
+            color: rgba(0,0,0,0.25);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
         }
         .label-room-main { position: relative; }
         .label-room-width { bottom: 5px; left: 50%; transform: translateX(-50%); }
@@ -136,6 +140,8 @@
             box-sizing: border-box;
             border: 2px solid #555;
             transition: left 0.1s ease-out, top 0.1s ease-out, border-color 0.2s, background-color 0.2s;
+            /* (新) 確保家具在房間上面 */
+            z-index: 100;
         }
         
         .furniture.furniture-active {
@@ -144,11 +150,16 @@
             z-index: 500; 
         }
 
-        /* --- 家具標籤 --- */
+        /* --- 家具標籤 (新) --- */
         .furniture-label {
-            position: absolute; font-size: 14px; color: #1f1f1f;
+            position: absolute;
+            /* (新) 使用 CSS 變數，預設 14px */
+            font-size: var(--font-size, 14px);
+            color: #1f1f1f;
             text-shadow: 0 0 3px rgba(255,255,255,0.9);
-            pointer-events: none; user-select: none; white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
         }
         .label-main { position: relative; font-weight: bold; }
         .label-width { bottom: 2px; left: 50%; transform: translateX(-50%); }
@@ -226,6 +237,10 @@
                 <label for="roomLabel">備註</label>
                 <input type="text" id="roomLabel" value="客廳">
             </div>
+            <div class="control-group">
+                <label for="roomFontSize">文字大小 (px)</label>
+                <input type="number" id="roomFontSize" value="14" min="8" max="100">
+            </div>
             <button id="addRoomBtn">新增房間</button>
         </div>
         
@@ -258,7 +273,11 @@
                 <label for="furnLabel">備註</label>
                 <input type="text" id="furnLabel" value="沙發">
             </div>
-            <button id="addFurnitureBtn">新增家具 (至高亮房間)</button>
+            <div class="control-group">
+                <label for="furnFontSize">文字大小 (px)</label>
+                <input type="number" id="furnFontSize" value="14" min="8" max="100">
+            </div>
+            <button id="addFurnitureBtn">新增家具</button>
         </div>
     </div>
 
@@ -287,12 +306,12 @@
         let activeFurniture = null;
         let zoomLevel = 1.0;
         
-        // --- (新) 歷史紀錄功能變數 ---
+        // --- 歷史紀錄功能變數 ---
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
         let historyStack = [];
         let redoStack = [];
-        let stateBeforeDrag = null; // 用於儲存拖曳前的狀態
+        let stateBeforeDrag = null;
 
         // --- 輔助函式：取得事件座標 ---
         function getEventCoords(e) {
@@ -328,63 +347,70 @@
         zoomResetBtn.onclick = () => { zoomLevel = 1.0; updateZoom(); };
         
         
-        // --- (新) 功能 B: 歷史紀錄 (Undo/Redo) ---
+        // --- (*** 重構 ***) 功能 B: 歷史紀錄 (Undo/Redo) ---
         
-        // B-1: 取得目前狀態 (用於儲存)
+        // B-1: 取得目前狀態 (新架構)
         function getCurrentState() {
-            const layoutData = { rooms: [] };
+            const layoutData = {
+                rooms: [],
+                furniture: [] // (新) 家具現在是頂層
+            };
+            
+            // 儲存所有房間
             canvas.querySelectorAll('.room').forEach(room => {
-                const roomData = {
+                layoutData.rooms.push({
                     left: room.style.left, top: room.style.top,
                     width: room.style.width, height: room.style.height,
                     cmWidth: room.dataset.cmWidth, cmHeight: room.dataset.cmHeight,
                     label: room.dataset.label,
-                    furniture: []
-                };
-                room.querySelectorAll('.furniture').forEach(f => {
-                    roomData.furniture.push({
-                        left: f.style.left, top: f.style.top,
-                        width: f.style.width, height: f.style.height,
-                        color: f.dataset.colorHex, opacity: f.dataset.opacity,
-                        shape: f.style.borderRadius === '50%' ? 'circle' : 'rectangle',
-                        label: f.dataset.label,
-                        cmWidth: f.dataset.cmWidth, cmHeight: f.dataset.cmHeight
-                    });
+                    fontSize: room.dataset.fontSize // (新) 儲存文字大小
                 });
-                layoutData.rooms.push(roomData);
+            });
+            
+            // 儲存所有家具
+            canvas.querySelectorAll('.furniture').forEach(f => {
+                layoutData.furniture.push({
+                    left: f.style.left, top: f.style.top,
+                    width: f.style.width, height: f.style.height,
+                    color: f.dataset.colorHex, opacity: f.dataset.opacity,
+                    shape: f.style.borderRadius === '50%' ? 'circle' : 'rectangle',
+                    label: f.dataset.label,
+                    cmWidth: f.dataset.cmWidth, cmHeight: f.dataset.cmHeight,
+                    fontSize: f.dataset.fontSize // (新) 儲存文字大小
+                });
             });
             return layoutData;
         }
 
-        // B-2: 載入狀態 (用於 Undo/Redo/匯入)
+        // B-2: 載入狀態 (新架構)
         function loadLayout(layoutData) {
-            clearCanvas(false); // 清空畫布，但不儲存歷史 (false)
+            clearCanvas(false); // 清空畫布，但不儲存歷史
             
-            // 檢查 layoutData 是否有效
-            if (!layoutData || !layoutData.rooms) {
-                console.error("Invalid layout data to load.");
-                return;
-            }
+            if (!layoutData) { console.error("Invalid layout data to load."); return; }
             
-            layoutData.rooms.forEach((roomData) => {
-                const room = createRoomElement(roomData.cmWidth, roomData.cmHeight, roomData.label);
+            // 載入房間
+            (layoutData.rooms || []).forEach((roomData) => {
+                const fontSize = roomData.fontSize || 14; // (新)
+                const room = createRoomElement(roomData.cmWidth, roomData.cmHeight, roomData.label, fontSize);
                 room.style.left = roomData.left; room.style.top = roomData.top;
-                canvas.appendChild(room);
-                makeRoomDraggable(room);
+                canvas.appendChild(room); // (新) 加入 canvas
                 
+                makeRoomDraggable(room);
                 room.addEventListener('click', (e) => { e.stopPropagation(); setActiveRoom(room); });
                 room.addEventListener('touchstart', (e) => { e.stopPropagation(); }); 
-
-                (roomData.furniture || []).forEach(furnData => {
-                    const opacity = furnData.opacity || 1; 
-                    const furniture = createFurnitureElement(furnData.cmWidth, furnData.cmHeight, furnData.shape, furnData.color, furnData.label, opacity);
-                    furniture.style.left = furnData.left; furniture.style.top = furnData.top;
-                    room.appendChild(furniture);
-                    makeFurnitureDraggable(furniture);
-                    
-                    furniture.addEventListener('click', (e) => { e.stopPropagation(); setActiveFurniture(furniture); });
-                    furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); setActiveFurniture(furniture); });
-                });
+            });
+            
+            // 載入家具
+            (layoutData.furniture || []).forEach(furnData => {
+                const opacity = furnData.opacity || 1; 
+                const fontSize = furnData.fontSize || 14; // (新)
+                const furniture = createFurnitureElement(furnData.cmWidth, furnData.cmHeight, furnData.shape, furnData.color, furnData.label, opacity, fontSize);
+                furniture.style.left = furnData.left; furniture.style.top = furnData.top;
+                canvas.appendChild(furniture); // (新) 加入 canvas
+                
+                makeFurnitureDraggable(furniture);
+                furniture.addEventListener('click', (e) => { e.stopPropagation(); setActiveFurniture(furniture); });
+                furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); setActiveFurniture(furniture); });
             });
         }
         
@@ -396,36 +422,25 @@
 
         // B-4: 儲存一個動作到歷史
         function saveStateForUndo() {
-            redoStack = []; // 執行新動作時，清空 Redo 堆疊
+            redoStack = []; 
             historyStack.push(getCurrentState());
-            // 保持堆疊大小，例如最多 50 步
-            if (historyStack.length > 50) {
-                historyStack.shift(); // 移除最舊的紀錄
-            }
+            if (historyStack.length > 50) historyStack.shift();
             updateUndoRedoButtons();
         }
         
         // B-5: 按下 Undo
         undoBtn.onclick = function() {
             if (historyStack.length === 0) return;
-            
-            // 把「目前」的狀態存到 Redo
             redoStack.push(getCurrentState());
-            // 從 History 取出「上一步」的狀態並載入
             loadLayout(historyStack.pop());
-            
             updateUndoRedoButtons();
         };
 
         // B-6: 按下 Redo
         redoBtn.onclick = function() {
             if (redoStack.length === 0) return;
-            
-            // 把「目前」的狀態存回 History
             historyStack.push(getCurrentState());
-            // 從 Redo 取出「下一步」的狀態並載入
             loadLayout(redoStack.pop());
-            
             updateUndoRedoButtons();
         };
 
@@ -450,18 +465,10 @@
             try { layoutData = JSON.parse(dataString); } 
             catch (e) { alert('代碼格式錯誤，無法解析。\n' + e.message); return; }
             
-            // (新) 匯入時，儲存當前狀態，並清空 redo
-            saveStateForUndo(); 
-            
+            historyStack = []; // 匯入時清空所有歷史
+            redoStack = [];
             loadLayout(layoutData);
-            
-            // (新) 匯入也算一步，再存一次 (可選，但更安全)
-            // 不，匯入後應該是清空 history，因為這是全新的開始
-            historyStack = [];
-            redoStack = [];
-            loadLayout(layoutData); // 重新載入
             historyStack.push(getCurrentState()); // 把匯入的狀態當作「第一步」
-            redoStack = [];
             updateUndoRedoButtons();
             
             alert('佈局已從代碼載入！');
@@ -485,24 +492,21 @@
         // C-4: 清空畫布
         clearBtn.onclick = function() {
             if (confirm('確定要清空所有房間和家具嗎？')) {
-                saveStateForUndo(); // 儲存清空前的狀態，以便復原
-                clearCanvas(false); // 清空，但不觸發 saveState (因為上面手動存了)
+                saveStateForUndo(); 
+                clearCanvas(false); 
                 updateUndoRedoButtons();
             }
         };
         
         function clearCanvas(saveHistory = true) {
             if (saveHistory) saveStateForUndo();
-            
             canvas.innerHTML = '';
             activeRoom = null;
             activeFurniture = null;
-            
-            // (新) 清空畫布時不清空歷史，除非是匯入
             if (saveHistory) updateUndoRedoButtons();
         }
 
-        // --- 功能 D: 選取管理 ---
+        // --- (*** 重構 ***) 功能 D: 選取管理 (已修復BUG) ---
         
         canvasWrapper.addEventListener('click', function(e) {
              if (e.target === canvasWrapper || e.target === canvas) {
@@ -522,7 +526,7 @@
             if (activeRoom) activeRoom.classList.remove('room-active');
             if (activeFurniture) activeFurniture.classList.remove('furniture-active');
             
-            activeFurniture = null;
+            activeFurniture = null; // (*** 修正 ***) 選房間時，一定取消家具
             activeRoom = room;
             
             if (room) {
@@ -530,6 +534,7 @@
                 document.getElementById('roomWidth').value = room.dataset.cmWidth;
                 document.getElementById('roomHeight').value = room.dataset.cmHeight;
                 document.getElementById('roomLabel').value = room.dataset.label;
+                document.getElementById('roomFontSize').value = room.dataset.fontSize || 14; // (新)
             }
         }
         
@@ -538,7 +543,7 @@
             if (activeRoom) activeRoom.classList.remove('room-active');
             if (activeFurniture) activeFurniture.classList.remove('furniture-active');
             
-            activeRoom = null;
+            activeRoom = null; // (*** 修正 ***) 選家具時，一定取消房間
             activeFurniture = furniture;
             
             if (furniture) {
@@ -549,14 +554,15 @@
                 document.getElementById('furnLabel').value = furniture.dataset.label;
                 document.getElementById('furnColor').value = furniture.dataset.colorHex;
                 document.getElementById('furnShape').value = furniture.style.borderRadius === '50%' ? 'circle' : 'rectangle';
+                document.getElementById('furnFontSize').value = furniture.dataset.fontSize || 14; // (新)
                 
                 const opacity = (furniture.dataset.opacity || 1) * 100;
                 opacitySlider.value = opacity;
                 opacityValue.innerText = Math.round(opacity);
                 
-                setActiveRoom(furniture.parentElement);
-                furniture.classList.add('furniture-active');
-                activeRoom.classList.add('room-active');
+                // (*** 移除 ***) 
+                // 不再需要 setActiveRoom(furniture.parentElement)，因為父元素是 canvas
+                // 這也自然修復了你提的刪除 BUG
             }
         }
 
@@ -564,19 +570,17 @@
         const updateBtn = document.getElementById('updateBtn');
         const deleteBtn = document.getElementById('deleteBtn');
 
-        // E-1: 刪除 (*** 已修正 BUG ***)
+        // E-1: 刪除 (已修正)
         deleteBtn.onclick = function() {
             if (activeFurniture) {
-                const parentRoom = activeFurniture.parentElement; // (修正) 先取得父元素
                 if (confirm(`確定要刪除選中的家具 "${activeFurniture.dataset.label}" 嗎？`)) {
-                    saveStateForUndo(); // (新) 儲存歷史
+                    saveStateForUndo(); 
                     activeFurniture.remove();
                     activeFurniture = null;
-                    setActiveRoom(parentRoom); // (修正) 刪除後，重新選取父房間
                 }
             } else if (activeRoom) {
-                if (confirm(`確定要刪除選中的房間 "${activeRoom.dataset.label}" (包含裡面所有家具) 嗎？`)) {
-                    saveStateForUndo(); // (新) 儲存歷史
+                if (confirm(`確定要刪除選中的房間 "${activeRoom.dataset.label}" 嗎？`)) {
+                    saveStateForUndo();
                     activeRoom.remove();
                     activeRoom = null;
                 }
@@ -585,25 +589,29 @@
             }
         };
 
-        // E-2: 更新
+        // E-2: 更新 (新)
         updateBtn.onclick = function() {
-            saveStateForUndo(); // (新) 儲存歷史
+            saveStateForUndo();
             
             if (activeFurniture) {
                 try {
                     const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
                     const label = document.getElementById('furnLabel').value, color = document.getElementById('furnColor').value;
                     const shape = document.getElementById('furnShape').value, opacity = opacitySlider.value / 100;
+                    const fontSize = document.getElementById('furnFontSize').value; // (新)
                     
                     activeFurniture.dataset.cmWidth = width; activeFurniture.dataset.cmHeight = height;
                     activeFurniture.dataset.label = label; activeFurniture.dataset.colorHex = color;
                     activeFurniture.dataset.opacity = opacity;
+                    activeFurniture.dataset.fontSize = fontSize; // (新)
+                    
                     activeFurniture.style.width = (width * SCALE) + 'px';
                     activeFurniture.style.height = (height * SCALE) + 'px';
                     activeFurniture.style.borderRadius = (shape === 'circle') ? '50%' : '0';
+                    activeFurniture.style.setProperty('--font-size', fontSize + 'px'); // (新)
+                    
                     const rgb = hexToRgb(color);
                     activeFurniture.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
-
                     updateElementLabels(activeFurniture, 'furniture', label, width, height);
                     alert('家具已更新！');
                 } catch (e) { alert('更新失敗: ' + e.message); }
@@ -612,32 +620,38 @@
                  try {
                     const width = document.getElementById('roomWidth').value, height = document.getElementById('roomHeight').value;
                     const label = document.getElementById('roomLabel').value;
-                    
+                    const fontSize = document.getElementById('roomFontSize').value; // (新)
+
                     activeRoom.dataset.cmWidth = width; activeRoom.dataset.cmHeight = height;
                     activeRoom.dataset.label = label;
+                    activeRoom.dataset.fontSize = fontSize; // (新)
+
                     activeRoom.style.width = (width * SCALE) + 'px';
                     activeRoom.style.height = (height * SCALE) + 'px';
+                    activeRoom.style.setProperty('--font-size', fontSize + 'px'); // (新)
+                    
                     updateElementLabels(activeRoom, 'room', label, width, height);
                     alert('房間已更新！');
                 } catch (e) { alert('更新失敗: ' + e.message); }
             } else {
                 alert('請先點擊一個房間或家具來選取。');
-                historyStack.pop(); // (新) 如果沒有選取，剛才的儲存就是無效的，移除掉
+                historyStack.pop(); 
                 updateUndoRedoButtons();
             }
         };
 
-        // --- 功能 F: 新增項目 ---
+        // --- (*** 重構 ***) 功能 F: 新增項目 ---
 
         // F-1: 新增房間
         addRoomBtn.onclick = function() {
-            saveStateForUndo(); // (新) 儲存歷史
+            saveStateForUndo(); 
             
             const roomWidth = document.getElementById('roomWidth').value;
             const roomHeight = document.getElementById('roomHeight').value;
             const roomLabel = document.getElementById('roomLabel').value;
+            const roomFontSize = document.getElementById('roomFontSize').value; // (新)
 
-            const room = createRoomElement(roomWidth, roomHeight, roomLabel);
+            const room = createRoomElement(roomWidth, roomHeight, roomLabel, roomFontSize);
             room.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
             room.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             makeRoomDraggable(room);
@@ -645,24 +659,26 @@
             room.addEventListener('click', (e) => { e.stopPropagation(); setActiveRoom(room); });
             room.addEventListener('touchstart', (e) => { e.stopPropagation(); });
             
-            canvas.appendChild(room);
+            canvas.appendChild(room); // (新)
             setActiveRoom(room);
         };
 
         // F-2: 新增家具
         addFurnitureBtn.onclick = function() {
-            if (!activeRoom) { alert('請先新增並選定一個房間！'); return; }
+            // (*** 移除 ***) 不再需要 'if (!activeRoom)' 檢查
             
-            saveStateForUndo(); // (新) 儲存歷史
+            saveStateForUndo(); 
             
             const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
             const shape = document.getElementById('furnShape').value, color = document.getElementById('furnColor').value;
             const label = document.getElementById('furnLabel').value, opacity = opacitySlider.value / 100;
+            const fontSize = document.getElementById('furnFontSize').value; // (新)
             
-            const furniture = createFurnitureElement(width, height, shape, color, label, opacity);
-            furniture.style.top = '10px'; furniture.style.left = '10px';
+            const furniture = createFurnitureElement(width, height, shape, color, label, opacity, fontSize);
+            furniture.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
+            furniture.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             
-            activeRoom.appendChild(furniture);
+            canvas.appendChild(furniture); // (新)
             makeFurnitureDraggable(furniture);
             
             furniture.addEventListener('click', (e) => { e.stopPropagation(); setActiveFurniture(furniture); });
@@ -673,24 +689,29 @@
         
         // --- 輔助功能：建立元素 DOM ---
 
-        // G-1: 建立房間
-        function createRoomElement(width, height, label) {
+        // G-1: 建立房間 (新)
+        function createRoomElement(width, height, label, fontSize = 14) {
             const room = document.createElement('div');
             room.className = 'room';
-            room.dataset.cmWidth = width; room.dataset.cmHeight = height; room.dataset.label = label;
+            room.dataset.cmWidth = width; room.dataset.cmHeight = height;
+            room.dataset.label = label; room.dataset.fontSize = fontSize; // (新)
             room.style.width = (width * SCALE) + 'px'; room.style.height = (height * SCALE) + 'px';
+            room.style.setProperty('--font-size', fontSize + 'px'); // (新)
             updateElementLabels(room, 'room', label, width, height);
             return room;
         }
 
-        // G-2: 建立家具
-        function createFurnitureElement(width, height, shape, color, label, opacity = 1) {
+        // G-2: 建立家具 (新)
+        function createFurnitureElement(width, height, shape, color, label, opacity = 1, fontSize = 14) {
             const furniture = document.createElement('div');
             furniture.className = 'furniture';
             furniture.dataset.cmWidth = width; furniture.dataset.cmHeight = height;
             furniture.dataset.label = label; furniture.dataset.colorHex = color;
-            furniture.dataset.opacity = opacity;
+            furniture.dataset.opacity = opacity; furniture.dataset.fontSize = fontSize; // (新)
+            
             furniture.style.width = (width * SCALE) + 'px'; furniture.style.height = (height * SCALE) + 'px';
+            furniture.style.setProperty('--font-size', fontSize + 'px'); // (新)
+            
             const rgb = hexToRgb(color);
             furniture.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
             if (shape === 'circle') furniture.style.borderRadius = '50%';
@@ -724,30 +745,33 @@
         }
 
         
-        // --- 功能 H: 讓家具可拖曳 (支援觸控) ---
+        // --- (*** 重構 ***) 功能 H: 讓家具可拖曳 (支援觸控) ---
         function makeFurnitureDraggable(element) {
-            let isDragging = false, offsetX, offsetY, room, roomRect, elemWidth, elemHeight, preventOverlap, siblings;
+            let isDragging = false, offsetX, offsetY, elemWidth, elemHeight, preventOverlap, siblings, allRooms;
 
             function onDragStart(e) {
                 e.stopPropagation(); 
                 isDragging = true;
-                
-                stateBeforeDrag = getCurrentState(); // (新) 儲存拖曳前的狀態
+                stateBeforeDrag = getCurrentState();
                 
                 const { x, y } = getEventCoords(e);
                 const rect = element.getBoundingClientRect();
-
-                room = element.parentElement; roomRect = room.getBoundingClientRect();
+                
                 elemWidth = element.clientWidth; elemHeight = element.clientHeight;
                 preventOverlap = document.getElementById('preventOverlap').checked;
-                siblings = [];
-                room.querySelectorAll('.furniture').forEach(f => { if (f !== element) siblings.push(f); });
                 
+                // (新) 取得所有兄弟家具 和 所有房間 (用於吸附)
+                siblings = [];
+                canvas.querySelectorAll('.furniture').forEach(f => { if (f !== element) siblings.push(f); });
+                allRooms = canvas.querySelectorAll('.room'); // (新)
+                
+                const canvasRect = canvas.getBoundingClientRect(); // (新)
                 offsetX = (x / zoomLevel) - (rect.left / zoomLevel);
                 offsetY = (y / zoomLevel) - (rect.top / zoomLevel);
+                
                 element.dataset.lastValidX = element.offsetLeft;
                 element.dataset.lastValidY = element.offsetTop;
-                element.style.zIndex = 1000;
+                element.style.zIndex = 1001; // (新) 拖曳時最高
                 element.style.transition = 'none';
                 
                 document.addEventListener('mousemove', onDragMove);
@@ -761,13 +785,18 @@
                 if (e.touches) e.preventDefault();
                 
                 const { x, y } = getEventCoords(e);
-                let newX = (x / zoomLevel) - (roomRect.left / zoomLevel) - offsetX;
-                let newY = (y / zoomLevel) - (roomRect.top / zoomLevel) - offsetY;
+                const canvasRect = canvas.getBoundingClientRect(); // (新)
+                
+                // (新) 計算相對於 canvas 的位置
+                let newX = (x / zoomLevel) - (canvasRect.left / zoomLevel) - offsetX;
+                let newY = (y / zoomLevel) - (canvasRect.top / zoomLevel) - offsetY;
 
-                // 吸附邏D輯
+                // 吸附邏輯
                 if (document.getElementById('enableSnapping').checked) {
                     let snappedX = false, snappedY = false;
                     const myLeft = newX, myRight = newX + elemWidth, myTop = newY, myBottom = newY + elemHeight;
+                    
+                    // (新) 1. 吸附其他家具
                     for (const sibling of siblings) {
                         const sLeft = sibling.offsetLeft, sRight = sLeft + sibling.clientWidth, sTop = sibling.offsetTop, sBottom = sTop + sibling.clientHeight;
                         if (!snappedX) {
@@ -784,14 +813,25 @@
                         }
                         if(snappedX && snappedY) break;
                     }
+                    
+                    // (新) 2. 吸附房間邊框
+                    for (const room of allRooms) {
+                        const rLeft = room.offsetLeft, rRight = rLeft + room.clientWidth, rTop = room.offsetTop, rBottom = rTop + room.clientHeight;
+                        if (!snappedX) {
+                            if (Math.abs(myLeft - rLeft) < SNAP_DISTANCE) { newX = rLeft; snappedX = true; }
+                            else if (Math.abs(myRight - rRight) < SNAP_DISTANCE) { newX = rRight - elemWidth; snappedX = true; }
+                        }
+                        if (!snappedY) {
+                            if (Math.abs(myTop - rTop) < SNAP_DISTANCE) { newY = rTop; snappedY = true; }
+                            else if (Math.abs(myBottom - rBottom) < SNAP_DISTANCE) { newY = rBottom - elemHeight; snappedY = true; }
+                        }
+                        if(snappedX && snappedY) break;
+                    }
                 }
                 
-                // 邊界檢查
-                if (newX < 0) newX = 0; if (newY < 0) newY = 0;
-                if (newX + elemWidth > room.clientWidth) newX = room.clientWidth - elemWidth;
-                if (newY + elemHeight > room.clientHeight) newY = room.clientHeight - elemHeight;
-
-                // 碰撞偵測
+                // (*** 移除 ***) 房間邊界檢查
+                
+                // 碰撞偵測 (只偵測其他家具)
                 let isColliding = false;
                 if (preventOverlap) {
                     for (const sibling of siblings) {
@@ -810,20 +850,18 @@
             }
 
             function onDragEnd(e) {
-                if (!isDragging) return; // (新) 避免重複觸發
+                if (!isDragging) return;
                 isDragging = false;
                 
-                // (新) 檢查是否有實際移動
                 const hasMoved = element.offsetLeft != element.dataset.lastValidX || element.offsetTop != element.dataset.lastValidY;
-                
                 if (hasMoved && stateBeforeDrag) {
-                    redoStack = []; // 清空 Redo
-                    historyStack.push(stateBeforeDrag); // 儲存拖曳前的狀態
+                    redoStack = [];
+                    historyStack.push(stateBeforeDrag);
                     updateUndoRedoButtons();
                 }
-                stateBeforeDrag = null; // 清除暫存
+                stateBeforeDrag = null;
 
-                element.style.zIndex = 'auto';
+                element.style.zIndex = '100'; // (新) 恢復 z-index
                 element.style.transition = 'left 0.1s ease-out, top 0.1s ease-out, background-color 0.2s';
                 if (element.classList.contains('colliding')) {
                     element.classList.remove('colliding');
@@ -849,10 +887,8 @@
 
             function onDragStart(e) {
                 if (e.type === 'mousedown' && e.button !== 0) return;
-                
-                isDragging = true;
-                hasMoved = false;
-                stateBeforeDrag = getCurrentState(); // (新) 儲存拖曳前的狀態
+                isDragging = true; hasMoved = false;
+                stateBeforeDrag = getCurrentState();
                 
                 element.style.cursor = 'grabbing';
                 const { x, y } = getEventCoords(e);
@@ -870,14 +906,14 @@
             function onDragMove(e) {
                 if (!isDragging) return;
                 if (e.touches) e.preventDefault();
-                
                 hasMoved = true;
+                
                 const { x, y } = getEventCoords(e);
                 const canvasRect = canvas.getBoundingClientRect();
                 let newX = (x / zoomLevel) - (canvasRect.left / zoomLevel) - offsetX;
                 let newY = (y / zoomLevel) - (canvasRect.top / zoomLevel) - offsetY;
                 
-                // 房間吸附
+                // 房間吸附 (只吸附其他房間)
                 if (document.getElementById('enableSnapping').checked) {
                     let snappedX = false, snappedY = false;
                     const elemWidth = element.clientWidth, elemHeight = element.clientHeight;
@@ -903,15 +939,15 @@
             }
             
             function onDragEnd(e) {
-                if (!isDragging) return; // (新) 避免重複觸發
+                if (!isDragging) return;
                 isDragging = false;
 
                 if (hasMoved && stateBeforeDrag) {
-                    redoStack = []; // 清空 Redo
-                    historyStack.push(stateBeforeDrag); // 儲存拖曳前的狀態
+                    redoStack = [];
+                    historyStack.push(stateBeforeDrag);
                     updateUndoRedoButtons();
                 }
-                stateBeforeDrag = null; // 清除暫存
+                stateBeforeDrag = null;
 
                 element.style.cursor = 'grab';
                 element.style.zIndex = '50';
@@ -919,7 +955,6 @@
                 if (hasMoved) {
                     setActiveRoom(element);
                 }
-                // (如果只是點擊，會由 'click' 事件處理)
 
                 document.removeEventListener('mousemove', onDragMove);
                 document.removeEventListener('mouseup', onDragEnd);
@@ -932,8 +967,8 @@
         }
         
         // --- 初始設定 ---
-        updateUndoRedoButtons(); // 頁面載入時，禁用 Undo/Redo
-        historyStack.push(getCurrentState()); // 儲存一個空白的初始狀態
+        updateUndoRedoButtons();
+        historyStack.push(getCurrentState()); // 儲存空白的初始狀態
 
     </script>
 </body>
