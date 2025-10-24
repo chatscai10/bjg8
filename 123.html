@@ -31,7 +31,7 @@
             height: 100vh;
             box-sizing: border-box;
         }
-        
+
         .controls h3 { margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .controls h3:first-child { margin-top: 0; }
         .control-group { margin-bottom: 15px; }
@@ -40,10 +40,10 @@
         .controls input[type="number"],
         .controls select,
         .controls textarea {
-            width: calc(100% - 20px); 
-            padding: 8px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
+            width: calc(100% - 20px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             font-family: monospace;
             font-size: 12px;
         }
@@ -52,7 +52,7 @@
         .controls input[type="number"] { font-family: Arial, sans-serif; font-size: 14px; }
         .controls input[type="range"] { width: 100%; padding: 0; }
         .controls input[type="color"] { padding: 0; height: 35px; width: 100%; }
-        
+
         .controls button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; margin-top: 5px; }
         .controls button:hover { background-color: #0056b3; }
         .controls button.secondary { background-color: #6c757d; }
@@ -65,20 +65,20 @@
         .controls button.info:hover { background-color: #138496; }
         .controls button.warning { background-color: #ffc107; color:#333; } /* (新) */
         .controls button.warning:hover { background-color: #e0a800; }
-        
+
         .controls button:disabled,
         .controls button:disabled:hover {
             background-color: #c6c6c6;
             cursor: not-allowed;
             opacity: 0.6;
         }
-        
+
         .control-row { display: flex; gap: 10px; }
         .control-row button { width: 100%; font-size: 14px; padding: 8px;} /* (修改) 按鈕小一點 */
-        
+
         .checkbox-group { display: flex; align-items: center; gap: 10px; }
         .checkbox-group label { margin-bottom: 0; font-weight: normal; }
-        
+
         /* (新) 物件庫樣式 */
         #libraryItems {
             display: grid;
@@ -162,7 +162,7 @@
             transform-origin: top left;
             transition: transform 0.2s ease-out;
         }
-        
+
         /* (新) 拖曳選框 */
         #selectionBox {
             position: absolute;
@@ -176,7 +176,7 @@
 
         /* --- 房間 (畫布) --- */
         .room {
-            position: absolute; 
+            position: absolute;
             background-color: #ffffff;
             border: 2px solid #aaa; /* (修改) 預設邊框細一點 */
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -199,7 +199,7 @@
         /* --- 房間標籤 --- */
         .room-label {
             position: absolute;
-            font-size: var(--font-size, 14px); 
+            font-size: var(--font-size, 14px);
             font-weight: bold;
             color: rgba(0,0,0,0.25);
             pointer-events: none;
@@ -209,10 +209,10 @@
         .label-room-main { position: relative; }
         .label-room-width { bottom: 5px; left: 50%; transform: translateX(-50%); }
         .label-room-height { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center; }
-        
+
         /* --- 家具 (色塊) --- */
         .furniture {
-            position: absolute; 
+            position: absolute;
             cursor: move;
             display: flex;
             align-items: center;
@@ -223,7 +223,7 @@
             z-index: 100; /* (新) 家具的基礎 z-index */
             transform-origin: center;
         }
-        
+
         .furniture.selected { /* (新) 多重選取樣式 */
             border: 3px solid #007bff;
             box-shadow: 0 0 15px rgba(0,123,255,0.3);
@@ -243,14 +243,14 @@
         .label-main { position: relative; font-weight: bold; }
         .label-width { bottom: 2px; left: 50%; transform: translateX(-50%); }
         .label-height { right: 5px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center; }
-        
+
         .furniture.colliding {
             border: 3px solid #dc3545 !important;
             box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
             z-index: 1001 !important;
-            transition: none; 
+            transition: none;
         }
-        
+
         /* --- 手機版響應式樣式 --- */
         @media (max-width: 768px) {
             body { flex-direction: column; height: 100vh; }
@@ -262,7 +262,6 @@
 </head>
 <body>
 
-    <!-- 1. 控制面板 (HTML) -->
     <div class="controls">
         <h3>視圖控制</h3>
         <div class="control-group control-row">
@@ -273,10 +272,9 @@
         <div class="control-group control-row">
             <button id="undoBtn" class="secondary" disabled>上一步</button>
             <button id="redoBtn" class="secondary" disabled>下一步</button>
-            <!-- (新) 平移模式按鈕 -->
-            <button id="panModeBtn" class="secondary">平移模式 (🖐️)</button> 
+            <button id="panModeBtn" class="secondary">平移模式 (🖐️)</button>
         </div>
-        
+
         <h3>專案 (分享/匯入)</h3>
         <div class="control-group">
             <label for="importExportArea">佈局代碼 (機器碼)</label>
@@ -292,8 +290,7 @@
         <h3>編輯選中項目</h3>
         <div class="control-group">
             <p id="selectionInfo" style="font-size: 13px; color: #555;">(請點擊/觸控畫布上的項目)</p>
-             <!-- (新) 圖層按鈕 -->
-            <div class="control-row" style="margin-bottom: 10px;">
+             <div class="control-row" style="margin-bottom: 10px;">
                 <button id="bringForwardBtn" class="info" disabled>上移一層</button>
                 <button id="sendBackwardBtn" class="info" disabled>下移一層</button>
             </div>
@@ -301,8 +298,7 @@
                 <button id="bringToFrontBtn" class="info" disabled>置於頂層</button>
                 <button id="sendToBackBtn" class="info" disabled>置於底層</button>
             </div>
-             <!-- (新) 群組按鈕 -->
-            <div class="control-row" style="margin-bottom: 10px;">
+             <div class="control-row" style="margin-bottom: 10px;">
                 <button id="groupBtn" class="warning" disabled>設為群組</button>
                 <button id="ungroupBtn" class="warning" disabled>取消群組</button>
             </div>
@@ -318,13 +314,11 @@
             <label for="enableSnapping">啟用邊緣吸附 (限0/90度)</label>
         </div>
 
-        <!-- (新) 物件庫 -->
         <h3>物件庫</h3>
         <div class="control-group">
             <button id="saveToLibraryBtn" class="info" disabled>儲存選中至庫</button>
             <div id="libraryItems">
-                <!-- 庫項目會動態加載於此 -->
-            </div>
+                </div>
         </div>
 
 
@@ -353,7 +347,7 @@
             </div>
             <button id="addRoomBtn">新增房間</button>
         </div>
-        
+
         <div style="border:1px solid #eee; padding: 15px; border-radius: 5px; margin-top:15px;">
             <h4>新增家具</h4>
             <div class="control-group">
@@ -395,12 +389,9 @@
         </div>
     </div>
 
-    <!-- 2. 模擬區域 (HTML) -->
     <div id="canvas-wrapper">
         <div id="canvas">
-            <!-- 房間和家具都會新增於此 -->
-        </div>
-        <!-- (新) 拖曳選框 -->
+            </div>
         <div id="selectionBox"></div>
     </div>
 
@@ -408,11 +399,12 @@
         // 3. JavaScript 功能實現
 
         // --- 比例尺 & 常數 ---
-        const SCALE = 1.5; 
+        const SCALE = 1.5;
         const SNAP_DISTANCE = 10;
         const Z_INDEX_ROOM_BASE = 50;   // (新)
         const Z_INDEX_FURN_BASE = 100;  // (新)
         const Z_INDEX_STEP = 1;         // (新)
+        const CURRENT_LAYOUT_VERSION = "10.0"; // (*** 新增：版本控制 ***)
 
         // 獲取元素
         const controlsPanel = document.querySelector('.controls'); // (新)
@@ -424,7 +416,7 @@
         const opacityValue = document.getElementById('opacityValue');
         const selectionBox = document.getElementById('selectionBox'); // (新)
         const selectionInfo = document.getElementById('selectionInfo'); // (新)
-        
+
         // 全局變數
         let selectedItems = []; // (新) 多選陣列
         let zoomLevel = 1.0;
@@ -432,7 +424,7 @@
         let panStartX = 0, panStartY = 0, scrollStartX = 0, scrollStartY = 0; // (新)
         let isSelectingBox = false; // (新)
         let selectionStartX = 0, selectionStartY = 0; // (新)
-        
+
         // --- 歷史紀錄功能變數 ---
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
@@ -464,7 +456,7 @@
             }
             return { r, g, b };
         }
-        
+
         // 更新透明度滑桿文字
         opacitySlider.oninput = function() {
             opacityValue.innerText = this.value;
@@ -478,7 +470,7 @@
         function applyZoom(newZoomLevel, centerX, centerY) {
             const currentZoom = zoomLevel;
             newZoomLevel = Math.max(0.2, Math.min(newZoomLevel, 3.0)); // 限制範圍
-            
+
             if (newZoomLevel === currentZoom) return;
 
             const scrollX = canvasWrapper.scrollLeft;
@@ -501,19 +493,19 @@
             canvasWrapper.scrollTop = scrollY + dy;
         }
 
-        zoomInBtn.onclick = () => { 
+        zoomInBtn.onclick = () => {
             const rect = canvasWrapper.getBoundingClientRect();
             applyZoom(zoomLevel + 0.1, rect.left + rect.width / 2, rect.top + rect.height / 2);
         };
-        zoomOutBtn.onclick = () => { 
+        zoomOutBtn.onclick = () => {
             const rect = canvasWrapper.getBoundingClientRect();
             applyZoom(zoomLevel - 0.1, rect.left + rect.width / 2, rect.top + rect.height / 2);
          };
-        zoomResetBtn.onclick = () => { 
+        zoomResetBtn.onclick = () => {
              const rect = canvasWrapper.getBoundingClientRect();
             applyZoom(1.0, rect.left + rect.width / 2, rect.top + rect.height / 2);
          };
-         
+
         // (新) 滾輪縮放
         canvasWrapper.addEventListener('wheel', (e) => {
             if (isPanMode) return; // 平移模式下禁用滾輪縮放
@@ -522,9 +514,9 @@
             applyZoom(zoomLevel + delta, e.clientX, e.clientY);
         }, { passive: false }); // 需要 preventDefault
 
-        
+
         // --- 功能 B: 歷史紀錄 (Undo/Redo) ---
-        
+
         // B-1: 取得目前狀態
         function getCurrentState() {
             const layoutData = { rooms: [], furniture: [] };
@@ -551,38 +543,101 @@
                     zIndex: f.style.zIndex || Z_INDEX_FURN_BASE // (新) zIndex
                 });
             });
-            return layoutData;
+
+            // (*** 修改：回傳包含版本號的包裝物件 ***)
+            return {
+                version: CURRENT_LAYOUT_VERSION,
+                layout: layoutData
+            };
         }
 
-        // B-2: 載入狀態
+        // B-2: 載入狀態 (***注意：此函式現在接收的是 layoutData.layout 物件***)
         function loadLayout(layoutData) {
             clearSelection(); // (新) 清除選取
-            clearCanvas(false); 
+            clearCanvas(false);
             if (!layoutData) { console.error("Invalid layout data to load."); return; }
-            
+
             (layoutData.rooms || []).forEach((roomData) => {
                 const fontSize = roomData.fontSize || 14;
                 const rotation = roomData.rotation || 0;
-                const room = createRoomElement(roomData.cmWidth, roomData.cmHeight, roomData.label, fontSize, rotation, roomData.id);
+                // Defensive check for width/height - important if migrating from older data
+                const cmWidth = roomData.cmWidth || 500; // Provide a default
+                const cmHeight = roomData.cmHeight || 400; // Provide a default
+                const label = roomData.label || 'Room'; // Provide a default
+                const room = createRoomElement(cmWidth, cmHeight, label, fontSize, rotation, roomData.id);
                 room.style.left = roomData.left; room.style.top = roomData.top;
                 room.style.zIndex = roomData.zIndex || Z_INDEX_ROOM_BASE; // (新)
                 canvas.appendChild(room);
                 makeDraggable(room); // (新) 統一的拖曳函式
+                 // Add event listeners for selection AFTER makeDraggable
+                room.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(room, e.shiftKey); });
+                room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); }, { passive: true }); // *** 修正: passive true ***
             });
-            
+
             (layoutData.furniture || []).forEach(furnData => {
-                const opacity = furnData.opacity || 1; 
+                const opacity = furnData.opacity || 1;
                 const fontSize = furnData.fontSize || 14;
                 const rotation = furnData.rotation || 0;
-                const furniture = createFurnitureElement(furnData.cmWidth, furnData.cmHeight, furnData.shape, furnData.color, furnData.label, opacity, fontSize, rotation, furnData.id);
+                // Defensive checks
+                const cmWidth = furnData.cmWidth || 100;
+                const cmHeight = furnData.cmHeight || 50;
+                const shape = furnData.shape || 'rectangle';
+                const color = furnData.color || '#cccccc';
+                const label = furnData.label || 'Furniture';
+                const furniture = createFurnitureElement(cmWidth, cmHeight, shape, color, label, opacity, fontSize, rotation, furnData.id);
                 furniture.style.left = furnData.left; furniture.style.top = furnData.top;
                 furniture.style.zIndex = furnData.zIndex || Z_INDEX_FURN_BASE; // (新)
                 if (furnData.groupId) furniture.dataset.groupId = furnData.groupId; // (新)
                 canvas.appendChild(furniture);
                 makeDraggable(furniture); // (新) 統一的拖曳函式
+                 // Add event listeners for selection AFTER makeDraggable
+                furniture.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(furniture, e.shiftKey); });
+                furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); }, { passive: true }); // *** 修正: passive true ***
             });
         }
-        
+
+
+        // (*** 新增 B-2.5: 佈局版本遷移函式 ***)
+        function migrateLayout(data, fromVersion) {
+            if (fromVersion === CURRENT_LAYOUT_VERSION) {
+                return data; // 版本相同，無需遷移
+            }
+
+            let migratedData = JSON.parse(JSON.stringify(data)); // 深度複製以安全操作
+            console.log(`正在從 ${fromVersion} 遷移到 ${CURRENT_LAYOUT_VERSION}...`);
+
+            // --- 遷移邏輯 ---
+            // 範例：如果 v10.0 之前的版本 (pre-10.0)
+            if (fromVersion === "pre-10.0") {
+                // 假設 pre-10.0 的 "label" 欄位在 v10.0 中改名為 "name"
+                // (migratedData.rooms || []).forEach(r => {
+                //    r.name = r.label; delete r.label;
+                // });
+                // (migratedData.furniture || []).forEach(f => {
+                //    f.name = f.label; delete f.label;
+                // });
+
+                // 目前 v10.0 仍然使用 'label'，且 loadLayout 具有良好的向下相容性
+                // (會為 zIndex, groupId 等提供預設值)，所以這裡不需要實際的遷移代碼。
+                // 這裡只是為未來的版本更新提供一個框架。
+                console.log("... 'pre-10.0' 結構與 '10.0' 相容, 無需重大變更。");
+                fromVersion = "10.0"; // 標記為已升級到 10.0
+            }
+
+            // 範例：如果未來有 v11.0
+            /*
+            if (fromVersion === "10.0") {
+                // 假設 v11.0 新增了 'isLocked' 屬性
+                (migratedData.rooms || []).forEach(r => { r.isLocked = false; });
+                (migratedData.furniture || []).forEach(f => { f.isLocked = false; });
+                fromVersion = "11.0"; // 標記為已升級到 11.0
+            }
+            */
+
+            console.log("遷移完成。");
+            return migratedData;
+        }
+
         // B-3: 更新 Undo/Redo 按鈕狀態
         function updateUndoRedoButtons() {
             undoBtn.disabled = historyStack.length === 0;
@@ -592,17 +647,18 @@
         // B-4: 儲存一個動作到歷史
         function saveStateForUndo(actionDescription = "") { // (新) 可選描述
              // console.log("Saving state for:", actionDescription); // Debug
-            redoStack = []; 
-            historyStack.push(getCurrentState());
+            redoStack = [];
+            historyStack.push(getCurrentState()); // getCurrentState() 已包含版本包裝
             if (historyStack.length > 50) historyStack.shift();
             updateUndoRedoButtons();
         }
-        
+
         // B-5: 按下 Undo
         undoBtn.onclick = function() {
             if (historyStack.length === 0) return;
             redoStack.push(getCurrentState());
-            loadLayout(historyStack.pop());
+            const stateToLoad = historyStack.pop(); // 這是包裝物件
+            loadLayout(stateToLoad.layout); // (*** 修改：傳入 .layout ***)
             updateUndoRedoButtons();
         };
 
@@ -610,7 +666,8 @@
         redoBtn.onclick = function() {
             if (redoStack.length === 0) return;
             historyStack.push(getCurrentState());
-            loadLayout(redoStack.pop());
+            const stateToLoad = redoStack.pop(); // 這是包裝物件
+            loadLayout(stateToLoad.layout); // (*** 修改：傳入 .layout ***)
             updateUndoRedoButtons();
         };
 
@@ -623,6 +680,7 @@
 
         // C-1: 匯出為代碼
         exportTextBtn.onclick = function() {
+            // getCurrentState() 已包含版本包裝
             importExportArea.value = JSON.stringify(getCurrentState(), null, 2);
             alert('代碼已匯出到上方的文字框！');
         };
@@ -631,16 +689,32 @@
         importTextBtn.onclick = function() {
             const dataString = importExportArea.value;
             if (!dataString) { alert('請先在文字框中貼上佈局代碼。'); return; }
-            let layoutData;
-            try { layoutData = JSON.parse(dataString); } 
+            let parsedData;
+            try { parsedData = JSON.parse(dataString); }
             catch (e) { alert('代碼格式錯誤，無法解析。\n' + e.message); return; }
-            
-            historyStack = []; 
+
+            // (*** 修改：加入版本檢查與遷移 ***)
+            let dataToLoad;
+            let sourceVersion = "pre-10.0"; // Assume old format initially
+            if (parsedData.version && parsedData.layout) {
+                 // Looks like v10.0+ format
+                 sourceVersion = parsedData.version;
+                 dataToLoad = migrateLayout(parsedData.layout, sourceVersion);
+            } else if (Array.isArray(parsedData.rooms) || Array.isArray(parsedData.furniture)) {
+                 // Looks like old (pre-10.0) format (check if it has room/furniture arrays)
+                 dataToLoad = migrateLayout(parsedData, sourceVersion);
+            } else {
+                 alert('無法識別的代碼格式。');
+                 return;
+            }
+
+
+            historyStack = [];
             redoStack = [];
-            loadLayout(layoutData);
-            historyStack.push(getCurrentState()); 
+            loadLayout(dataToLoad); // 載入遷移後的數據
+            historyStack.push(getCurrentState()); // 儲存包含版本包裝的當前狀態
             updateUndoRedoButtons();
-            
+
             alert('佈局已從代碼載入！');
         };
 
@@ -649,7 +723,7 @@
             if (typeof html2canvas === 'undefined') { alert('錯誤：圖片輸出函式庫載入失敗。'); return; }
             alert('正在準備輸出圖片... 請稍候。');
             clearSelection();
-            
+
             html2canvas(canvas, { useCORS: true, backgroundColor: '#e9ebee' })
             .then(canvasImage => {
                 const link = document.createElement('a');
@@ -662,23 +736,21 @@
         // C-4: 清空畫布
         clearBtn.onclick = function() {
             if (confirm('確定要清空所有房間和家具嗎？')) {
-                saveStateForUndo("Clear Canvas"); 
-                clearCanvas(false); 
+                saveStateForUndo("Clear Canvas");
+                clearCanvas(false);
                 updateUndoRedoButtons();
             }
         };
-        
+
         function clearCanvas(saveHistory = true) {
             if (saveHistory) saveStateForUndo("Clear Canvas Internal");
             canvas.innerHTML = '';
-            // activeRoom = null; // 由 clearSelection 處理
-            // activeFurniture = null;
             clearSelection();
             if (saveHistory) updateUndoRedoButtons();
         }
 
         // --- (*** 重構 ***) 功能 D: 選取管理 (支援多選) ---
-        
+
         const updateBtn = document.getElementById('updateBtn');
         const deleteBtn = document.getElementById('deleteBtn');
         const bringForwardBtn = document.getElementById('bringForwardBtn');
@@ -704,7 +776,7 @@
             selectedItems.forEach(item => item.classList.add('selected'));
             updateSelectionUI();
         }
-        
+
         // D-3: 切換單一物件的選取狀態
         function toggleSelection(item, isShiftKey) {
             const groupId = item.dataset.groupId;
@@ -743,7 +815,7 @@
         // D-4: 更新 UI 狀態 (按鈕啟用/禁用, 表單內容)
         function updateSelectionUI() {
             const count = selectedItems.length;
-            
+
             // 更新提示文字
             if (count === 0) {
                 selectionInfo.textContent = "(請點擊/觸控畫布上的項目)";
@@ -768,7 +840,7 @@
             if (count === 1) {
                 const item = selectedItems[0];
                 const isRoom = item.classList.contains('room');
-                
+
                 if (isRoom) {
                     document.getElementById('roomWidth').value = item.dataset.cmWidth;
                     document.getElementById('roomHeight').value = item.dataset.cmHeight;
@@ -801,7 +873,7 @@
             if (e.shiftKey) return;
 
             const { x, y } = getEventCoords(e);
-            
+
             if (isPanMode) {
                 // 開始平移
                 canvasWrapper.style.cursor = 'grabbing';
@@ -830,12 +902,12 @@
                 document.addEventListener('mouseup', endSelectionBox);
                 document.addEventListener('touchmove', dragSelectionBox, { passive: false });
                 document.addEventListener('touchend', endSelectionBox);
-                
+
                 // 清除之前的選取
                 clearSelection();
             }
         }
-        
+
         // D-6: 拖曳選框中
         function dragSelectionBox(e) {
             if (!isSelectingBox) return;
@@ -885,7 +957,7 @@
                 // 簡化判斷：只檢查物件中心點是否在框內
                 const itemCenterX = itemLeft + item.offsetWidth / 2;
                 const itemCenterY = itemTop + item.offsetHeight / 2;
-                
+
                 if (itemCenterX >= boxLeft && itemCenterX <= boxRight &&
                     itemCenterY >= boxTop && itemCenterY <= boxBottom) {
                     itemsInBox.push(item);
@@ -899,8 +971,6 @@
 
 
         // --- 功能 E: 編輯 / 刪除 ---
-        const updateBtn = document.getElementById('updateBtn');
-        const deleteBtn = document.getElementById('deleteBtn');
 
         // E-1: 刪除 (多選)
         deleteBtn.onclick = function() {
@@ -909,7 +979,7 @@
                  return;
             }
             if (confirm(`確定要刪除選取的 ${selectedItems.length} 個項目嗎？`)) {
-                saveStateForUndo("Delete Selected"); 
+                saveStateForUndo("Delete Selected");
                 selectedItems.forEach(item => item.remove());
                 clearSelection(); // 清空選取
             }
@@ -922,7 +992,7 @@
                  return;
             }
             saveStateForUndo("Update Item");
-            
+
             const item = selectedItems[0];
             const isRoom = item.classList.contains('room');
 
@@ -947,12 +1017,12 @@
                     const shape = document.getElementById('furnShape').value, opacity = opacitySlider.value / 100;
                     const fontSize = document.getElementById('furnFontSize').value;
                     const rotation = document.getElementById('furnRotation').value;
-                    
+
                     item.dataset.cmWidth = width; item.dataset.cmHeight = height;
                     item.dataset.label = label; item.dataset.colorHex = color;
                     item.dataset.opacity = opacity; item.dataset.fontSize = fontSize;
                     item.dataset.rotation = rotation;
-                    
+
                     item.style.width = (width * SCALE) + 'px'; item.style.height = (height * SCALE) + 'px';
                     item.style.borderRadius = (shape === 'circle') ? '50%' : '0';
                     item.style.setProperty('--font-size', fontSize + 'px');
@@ -962,10 +1032,11 @@
                     updateElementLabels(item, 'furniture', label, width, height);
                 }
                 alert('項目已更新！');
-            } catch (e) { 
-                alert('更新失敗: ' + e.message); 
+            } catch (e) {
+                alert('更新失敗: ' + e.message);
                 // 如果更新失敗，復原到上一步
-                if (historyStack.length > 0) loadLayout(historyStack.pop());
+                // (*** 修改：從包裝物件中取出 .layout ***)
+                if (historyStack.length > 0) loadLayout(historyStack.pop().layout);
                 updateUndoRedoButtons();
             }
         };
@@ -1015,7 +1086,7 @@
                 item.dataset.groupId = groupId;
             });
             // 群組後保持選取狀態
-            updateSelectionUI(); 
+            updateSelectionUI();
             alert(`已將 ${selectedItems.length} 個項目設為群組！`);
         }
 
@@ -1030,7 +1101,7 @@
             updateSelectionUI();
              alert(`已將 ${itemsToUngroup.length} 個項目取消群組！`);
         }
-        
+
         // --- (新) 功能 H: 平移模式 ---
         const panModeBtn = document.getElementById('panModeBtn');
         panModeBtn.onclick = function() {
@@ -1056,7 +1127,7 @@
             const { x, y } = getEventCoords(e);
             const dx = x - panStartX;
             const dy = y - panStartY;
-            
+
             canvasWrapper.scrollLeft = scrollStartX - dx;
             canvasWrapper.scrollTop = scrollStartY - dy;
         }
@@ -1071,7 +1142,7 @@
         }
 
         // --- (新) 功能 I: 物件庫 ---
-        const saveToLibraryBtn = document.getElementById('saveToLibraryBtn');
+
         const libraryItemsContainer = document.getElementById('libraryItems');
         let objectLibrary = JSON.parse(localStorage.getItem('objectLibrary') || '[]');
 
@@ -1085,7 +1156,7 @@
 
                 const preview = document.createElement('div');
                 preview.className = 'library-item-preview';
-                
+
                 // 應用樣式
                 const isRoom = !itemData.color; // 簡單判斷是否為房間
                 if (isRoom) {
@@ -1103,7 +1174,7 @@
                 const label = document.createElement('span');
                 label.className = 'library-item-label';
                 label.textContent = itemData.label;
-                
+
                 // (新) 刪除按鈕
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-lib-item';
@@ -1124,7 +1195,7 @@
                 itemWrapper.onclick = () => {
                     addItemFromLibrary(itemData);
                 };
-                
+
                 libraryItemsContainer.appendChild(itemWrapper);
             });
         }
@@ -1134,22 +1205,22 @@
             if (selectedItems.length !== 1) return;
             const item = selectedItems[0];
             const isRoom = item.classList.contains('room');
-            
+
             const itemData = {
                 cmWidth: item.dataset.cmWidth, cmHeight: item.dataset.cmHeight,
                 label: item.dataset.label, fontSize: item.dataset.fontSize,
                 rotation: item.dataset.rotation
             };
-            
+
             if (!isRoom) {
                 itemData.color = item.dataset.colorHex;
                 itemData.opacity = item.dataset.opacity;
                 itemData.shape = item.style.borderRadius === '50%' ? 'circle' : 'rectangle';
             }
-            
+
             // 檢查是否已存在 (簡易判斷)
             const exists = objectLibrary.some(libItem => libItem.label === itemData.label && libItem.cmWidth === itemData.cmWidth && libItem.cmHeight === itemData.cmHeight);
-            
+
             if (exists) {
                 if (!confirm(`物件 "${itemData.label}" 已存在庫中，是否覆蓋？`)) {
                     return;
@@ -1167,7 +1238,7 @@
         // I-3: 從庫中新增物件
         function addItemFromLibrary(itemData) {
             saveStateForUndo("Add Item from Library");
-            
+
             let newItem;
             const isRoom = !itemData.color;
             const positionX = (canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2) / zoomLevel; // 畫面中央
@@ -1181,17 +1252,17 @@
 
             newItem.style.left = positionX - newItem.offsetWidth / 2 + 'px'; // 放到中央
             newItem.style.top = positionY - newItem.offsetHeight / 2 + 'px';
-            
+
             canvas.appendChild(newItem);
             makeDraggable(newItem); // 綁定拖曳
-            
-            // 綁定選取
+
+            // 綁定選取 (*** 修正: touchstart passive ***)
             newItem.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(newItem, e.shiftKey); });
-            newItem.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(newItem, false); }); // 觸控不支援 Shift
+            newItem.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(newItem, false); }, { passive: true });
 
             setSelection(newItem); // 新增後自動選取
         }
-        
+
         // (新) I-4: 從庫中刪除
         function deleteFromLibrary(index) {
              objectLibrary.splice(index, 1);
@@ -1203,7 +1274,7 @@
 
         // J-1: 新增房間
         addRoomBtn.onclick = function() {
-            saveStateForUndo("Add Room"); 
+            saveStateForUndo("Add Room");
             const roomWidth = document.getElementById('roomWidth').value, roomHeight = document.getElementById('roomHeight').value;
             const roomLabel = document.getElementById('roomLabel').value;
             const roomFontSize = document.getElementById('roomFontSize').value;
@@ -1213,36 +1284,38 @@
             room.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
             room.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             makeDraggable(room);
-            
+
+            // (*** 修正: touchstart passive ***)
             room.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(room, e.shiftKey); });
-            room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); });
-            
+            room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); }, { passive: true });
+
             canvas.appendChild(room);
             setSelection(room);
         };
 
         // J-2: 新增家具
         addFurnitureBtn.onclick = function() {
-            saveStateForUndo("Add Furniture"); 
+            saveStateForUndo("Add Furniture");
             const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
             const shape = document.getElementById('furnShape').value, color = document.getElementById('furnColor').value;
             const label = document.getElementById('furnLabel').value, opacity = opacitySlider.value / 100;
             const fontSize = document.getElementById('furnFontSize').value;
             const rotation = document.getElementById('furnRotation').value;
-            
+
             const furniture = createFurnitureElement(width, height, shape, color, label, opacity, fontSize, rotation);
             furniture.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
             furniture.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
-            
+
             canvas.appendChild(furniture);
             makeDraggable(furniture);
-            
+
+            // (*** 修正: touchstart passive ***)
             furniture.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(furniture, e.shiftKey); });
-            furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); });
-            
+            furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); }, { passive: true });
+
             setSelection(furniture);
         };
-        
+
         // --- 輔助功能：建立元素 DOM ---
 
         // K-1: 建立房間
@@ -1270,19 +1343,19 @@
             furniture.dataset.label = label; furniture.dataset.colorHex = color;
             furniture.dataset.opacity = opacity; furniture.dataset.fontSize = fontSize;
             furniture.dataset.rotation = rotation;
-            
+
             furniture.style.width = (width * SCALE) + 'px'; furniture.style.height = (height * SCALE) + 'px';
             furniture.style.setProperty('--font-size', fontSize + 'px');
             furniture.style.transform = 'rotate(' + rotation + 'deg)';
             furniture.style.zIndex = Z_INDEX_FURN_BASE; // (新)
-            
+
             const rgb = hexToRgb(color);
             furniture.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
             if (shape === 'circle') furniture.style.borderRadius = '50%';
             updateElementLabels(furniture, 'furniture', label, width, height);
             return furniture;
         }
-        
+
         // K-3: 更新元素標籤
         function updateElementLabels(element, type, label, width, height) {
             element.innerHTML = '';
@@ -1294,21 +1367,21 @@
             const labelMain = document.createElement('span');
             labelMain.className = `${prefix}label ${mainClass}`;
             labelMain.innerText = label;
-            
+
             const labelWidth = document.createElement('span');
             labelWidth.className = `${prefix}label ${widthClass}`;
             labelWidth.innerText = `${width} cm`;
-            
+
             const labelHeight = document.createElement('span');
             labelHeight.className = `${prefix}label ${heightClass}`;
             labelHeight.innerText = `${height} cm`;
-            
+
             element.appendChild(labelMain);
             element.appendChild(labelWidth);
             element.appendChild(labelHeight);
         }
 
-        
+
         // --- (*** 重構 ***) 功能 L: 統一的拖曳函式 (支援多選/群組/旋轉優化) ---
         function makeDraggable(element) {
             let isDragging = false;
@@ -1319,25 +1392,48 @@
             function onDragStart(e) {
                 // (新) 平移模式下禁止拖曳
                 if (isPanMode) return;
-                
+
                 // (新) 點擊選取邏輯
-                if (!e.target.classList.contains('selected')) {
-                    toggleSelection(e.target, e.shiftKey);
-                }
-                
-                // (新) 如果沒有選中的物件，或點擊的不是選中的物件 (且沒按 shift)，則不開始拖曳
-                if (selectedItems.length === 0 || !selectedItems.includes(e.target)) {
-                    // 如果點擊空白處，會由 canvasWrapper 的 mousedown 處理
-                    return;
+                // Note: Click/Tap for selection is now handled by separate listeners added AFTER makeDraggable is called
+                // This allows the touchstart listener here to focus *only* on starting the drag if needed.
+                // We still need to check if the clicked item is *part* of the current selection to allow dragging multiple items.
+                if (!selectedItems.includes(e.target)) {
+                    // If the clicked item isn't selected (and Shift wasn't pressed), the separate click/tap listener would have already handled the selection change.
+                    // If Shift *was* pressed, the other listener handles adding/removing.
+                    // Therefore, if we get here and the target isn't selected, it means we shouldn't start a drag.
+                    // Exception: If the target belongs to a selected group, allow drag start.
+                    const targetGroupId = e.target.dataset.groupId;
+                    if (!targetGroupId || !selectedItems.some(item => item.dataset.groupId === targetGroupId)) {
+                         // Also check if any selected item is the target itself (case: single item selected, no group)
+                         if (!selectedItems.includes(e.target)) {
+                            return; // Don't start drag if clicking outside the selection/selected group
+                         }
+                    }
+                     // If it's part of a selected group, proceed to drag the whole selection
                 }
 
-                e.stopPropagation(); 
+
+                // Make sure we drag ALL currently selected items, not just the clicked one
+                currentDragTargets = [...selectedItems];
+                if (currentDragTargets.length === 0) return; // Should not happen if selection logic is correct, but safety check
+
+
+                // If we reach here, a drag should commence
+                e.stopPropagation(); // Prevent canvas click/pan
+                // For touch events, explicitly prevent default if we are definitely starting a drag
+                // to avoid scrolling interference immediately.
+                 if (e.type === 'touchstart') {
+                     // We might conditionally call preventDefault in onDragMove, but preventing it here
+                     // ensures the drag starts smoothly without page scroll attempts.
+                     // However, this might interfere with tap-selection if the user taps and slightly moves.
+                     // Let's defer preventDefault to onDragMove when actual movement happens.
+                     // e.preventDefault(); // Moved to onDragMove
+                 }
+
                 isDragging = true;
                 hasMoved = false;
-                stateBeforeDrag = getCurrentState();
-                
-                // (新) 設定拖曳目標 (可能是多個)
-                currentDragTargets = [...selectedItems]; // 複製一份，避免選取變化影響
+                stateBeforeDrag = getCurrentState(); // 儲存包含版本包裝的狀態
+
                 dragStartPositions = currentDragTargets.map(item => ({
                     element: item,
                     startX: item.offsetLeft,
@@ -1346,176 +1442,262 @@
 
                 const { x, y } = getEventCoords(e);
                 const canvasRect = canvas.getBoundingClientRect();
-                
+
                 // (新) 計算滑鼠相對於 Canvas 的點擊位置
                 const pointerStartX = (x / zoomLevel) - (canvasRect.left / zoomLevel);
                 const pointerStartY = (y / zoomLevel) - (canvasRect.top / zoomLevel);
 
                 // (新) 計算滑鼠相對於「被點擊元素」左上角的偏移
-                // 注意：這裡用的是被點擊的 e.target，而不是 group center
                 dragOffsetX = pointerStartX - e.target.offsetLeft;
                 dragOffsetY = pointerStartY - e.target.offsetTop;
-                
+
                 currentDragTargets.forEach(item => {
-                    item.style.zIndex = parseInt(item.style.zIndex || (item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE)) + 1000; // 提高 z-index
+                    // Ensure zIndex is a number before adding
+                    const currentZ = parseInt(item.style.zIndex || (item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE));
+                    item.style.zIndex = currentZ + 1000; // 提高 z-index
                     item.style.transition = 'none'; // 移除動畫
                 });
-                
+
                 document.addEventListener('mousemove', onDragMove);
                 document.addEventListener('mouseup', onDragEnd);
-                document.addEventListener('touchmove', onDragMove, { passive: false });
+                document.addEventListener('touchmove', onDragMove, { passive: false }); // Needs preventDefault
                 document.addEventListener('touchend', onDragEnd);
             }
 
             function onDragMove(e) {
                 if (!isDragging) return;
-                if (e.touches) e.preventDefault();
+
+                // Only prevent default on touchmove IF dragging has actually started moving
+                if (!hasMoved && e.type === 'touchmove') {
+                   // Check if movement exceeds a small threshold to distinguish tap from drag? (Optional enhancement)
+                   // For now, assume any touchmove while dragging is intentional.
+                }
+                 if (e.cancelable && e.type === 'touchmove') e.preventDefault(); // Prevent scroll only when moving
+
+
                 hasMoved = true;
-                
+
                 const { x, y } = getEventCoords(e);
                 const canvasRect = canvas.getBoundingClientRect();
-                
+
                 const pointerX = (x / zoomLevel) - (canvasRect.left / zoomLevel);
                 const pointerY = (y / zoomLevel) - (canvasRect.top / zoomLevel);
-                
-                // (新) 計算被點擊元素的目標新位置
+
+                // (新) 計算被點擊元素的目標新位置 (use dragStartPositions[0] as reference for group/multi-drag)
+                const referenceStartX = dragStartPositions.find(p => p.element === e.target)?.startX ?? dragStartPositions[0].startX;
+                const referenceStartY = dragStartPositions.find(p => p.element === e.target)?.startY ?? dragStartPositions[0].startY;
+
                 const targetNewX = pointerX - dragOffsetX;
                 const targetNewY = pointerY - dragOffsetY;
-                
+
+                // (*** 修正: Use let instead of const ***)
                 // (新) 計算相對於拖曳開始時的位移量
-                const dx = targetNewX - dragStartPositions[0].element.offsetLeft;
-                const dy = targetNewY - dragStartPositions[0].element.offsetTop;
+                let dx = targetNewX - referenceStartX;
+                let dy = targetNewY - referenceStartY;
 
-                // (新) 將位移量應用到所有拖曳目標上
-                dragStartPositions.forEach((startPos, index) => {
-                    const item = startPos.element;
-                    let itemNewX = startPos.startX + dx;
-                    let itemNewY = startPos.startY + dy;
 
-                    // --- 吸附與碰撞 (只對第一個拖曳物件進行計算和應用) ---
-                    // (這是一個簡化，理想情況下應該對每個物件獨立計算，但非常複雜)
-                    if (index === 0) {
-                        const elemWidth = item.clientWidth;
-                        const elemHeight = item.clientHeight;
-                        const rotation = parseFloat(item.dataset.rotation) || 0;
-                        const isAxisAligned = (rotation % 90 === 0);
-                        let effectiveWidth = elemWidth, effectiveHeight = elemHeight;
-                        if (isAxisAligned && (rotation % 180 !== 0)) {
-                            effectiveWidth = elemHeight; effectiveHeight = elemWidth;
-                        }
-                        
-                        // 吸附 (僅軸對齊)
-                        if (document.getElementById('enableSnapping').checked && isAxisAligned) {
-                            let snappedX = false, snappedY = false;
-                            const myLeft = itemNewX, myRight = itemNewX + effectiveWidth, myTop = itemNewY, myBottom = itemNewY + effectiveHeight;
-                            
-                            // 吸附其他未被拖曳的物件 + 所有房間
-                            const otherItems = Array.from(canvas.querySelectorAll('.room, .furniture')).filter(el => !currentDragTargets.includes(el));
-                            
-                            for (const other of otherItems) {
-                                const oLeft = other.offsetLeft, oRight = oLeft + other.clientWidth, oTop = other.offsetTop, oBottom = oTop + other.clientHeight;
-                                // 簡易吸附，只考慮左上角
-                                if (!snappedX) {
-                                    if (Math.abs(myLeft - oRight) < SNAP_DISTANCE) { itemNewX = oRight; snappedX = true; }
-                                    else if (Math.abs(myRight - oLeft) < SNAP_DISTANCE) { itemNewX = oLeft - effectiveWidth; snappedX = true; }
-                                    // ... 可以加入更多吸附點的判斷
-                                }
-                                if (!snappedY) {
-                                     if (Math.abs(myTop - oBottom) < SNAP_DISTANCE) { itemNewY = oBottom; snappedY = true; }
-                                     else if (Math.abs(myBottom - oTop) < SNAP_DISTANCE) { itemNewY = oTop - effectiveHeight; snappedY = true; }
-                                     // ...
-                                }
-                                if (snappedX && snappedY) break;
-                            }
-                            // 更新位移量，讓其他物件跟隨
-                            dx = itemNewX - startPos.startX;
-                            dy = itemNewY - startPos.startY;
-                        }
+                // --- Apply displacement to all targets BEFORE snapping/collision checks ---
+                 dragStartPositions.forEach((startPos) => {
+                     const item = startPos.element;
+                     item.style.left = startPos.startX + dx + 'px';
+                     item.style.top = startPos.startY + dy + 'px';
+                 });
 
-                        // 碰撞 (僅軸對齊，且只檢查第一個物件)
-                        let isColliding = false;
-                        if (document.getElementById('preventOverlap').checked && isAxisAligned) {
-                            const otherFurn = Array.from(canvas.querySelectorAll('.furniture')).filter(el => !currentDragTargets.includes(el));
-                            for (const sibling of otherFurn) {
-                                const sRect = { left: sibling.offsetLeft, top: sibling.offsetTop, right: sibling.offsetLeft + sibling.clientWidth, bottom: sibling.offsetTop + sibling.clientHeight };
-                                const eRect = { left: itemNewX, top: itemNewY, right: itemNewX + effectiveWidth, bottom: itemNewY + effectiveHeight };
-                                if (eRect.left < sRect.right && eRect.right > sRect.left && eRect.top < sRect.bottom && eRect.bottom > sRect.top) {
-                                    isColliding = true; break;
-                                }
-                            }
+
+                // --- Snapping & Collision (Based on the first item in the dragged set) ---
+                const firstItem = dragStartPositions[0].element;
+                let firstItemNewX = dragStartPositions[0].startX + dx;
+                let firstItemNewY = dragStartPositions[0].startY + dy;
+
+                const elemWidth = firstItem.clientWidth;
+                const elemHeight = firstItem.clientHeight;
+                const rotation = parseFloat(firstItem.dataset.rotation) || 0;
+                const isAxisAligned = (rotation % 90 === 0);
+                let effectiveWidth = elemWidth, effectiveHeight = elemHeight;
+                 if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { // Check if rotated 90 or 270
+                    effectiveWidth = elemHeight; effectiveHeight = elemWidth;
+                }
+
+                let finalDx = dx;
+                let finalDy = dy;
+                let isColliding = false;
+
+                // Snapping (僅軸對齊)
+                if (document.getElementById('enableSnapping').checked && isAxisAligned) {
+                    let snappedX = false, snappedY = false;
+                    let potentialSnapX = firstItemNewX;
+                    let potentialSnapY = firstItemNewY;
+
+                    const myLeft = firstItemNewX, myRight = firstItemNewX + effectiveWidth, myTop = firstItemNewY, myBottom = firstItemNewY + effectiveHeight;
+
+                    // 吸附其他未被拖曳的物件 + 所有房間
+                    const otherItems = Array.from(canvas.querySelectorAll('.room, .furniture')).filter(el => !currentDragTargets.includes(el));
+
+                    for (const other of otherItems) {
+                        const oLeft = other.offsetLeft, oRight = oLeft + other.clientWidth, oTop = other.offsetTop, oBottom = oTop + other.clientHeight;
+                        const otherRotation = parseFloat(other.dataset.rotation) || 0;
+                         const otherIsAxisAligned = (otherRotation % 90 === 0);
+                         let otherEffectiveWidth = other.clientWidth, otherEffectiveHeight = other.clientHeight;
+                         if (otherIsAxisAligned && (otherRotation % 180 !== 0) && otherRotation !== 0) {
+                            otherEffectiveWidth = other.clientHeight; otherEffectiveHeight = other.clientWidth;
+                         }
+                         const oEffectiveRight = oLeft + otherEffectiveWidth;
+                         const oEffectiveBottom = oTop + otherEffectiveHeight;
+
+
+                        // Horizontal Snapping
+                        if (!snappedX) {
+                            if (Math.abs(myLeft - oEffectiveRight) < SNAP_DISTANCE) { potentialSnapX = oEffectiveRight; snappedX = true; }
+                            else if (Math.abs(myRight - oLeft) < SNAP_DISTANCE) { potentialSnapX = oLeft - effectiveWidth; snappedX = true; }
+                            else if (Math.abs(myLeft - oLeft) < SNAP_DISTANCE) { potentialSnapX = oLeft; snappedX = true; } // Align left edges
+                            else if (Math.abs(myRight - oEffectiveRight) < SNAP_DISTANCE) { potentialSnapX = oEffectiveRight - effectiveWidth; snappedX = true; } // Align right edges
                         }
-                        
-                        // 更新碰撞樣式 (只對第一個物件)
-                        if (isColliding) { item.classList.add('colliding'); } 
-                        else { item.classList.remove('colliding'); }
-                        
-                        // 更新所有拖曳物件的位置 (基於第一個物件計算出的 dx, dy)
-                        currentDragTargets.forEach((target, i) => {
-                             target.style.left = dragStartPositions[i].startX + dx + 'px';
-                             target.style.top = dragStartPositions[i].startY + dy + 'px';
-                             if (!isColliding) { // 只有沒碰撞才更新有效位置
-                                 target.dataset.lastValidX = dragStartPositions[i].startX + dx;
-                                 target.dataset.lastValidY = dragStartPositions[i].startY + dy;
-                             }
-                        });
-                        
-                    } // end if (index === 0)
-                    
-                }); // end dragStartPositions.forEach
+                        // Vertical Snapping
+                        if (!snappedY) {
+                             if (Math.abs(myTop - oEffectiveBottom) < SNAP_DISTANCE) { potentialSnapY = oEffectiveBottom; snappedY = true; }
+                             else if (Math.abs(myBottom - oTop) < SNAP_DISTANCE) { potentialSnapY = oTop - effectiveHeight; snappedY = true; }
+                             else if (Math.abs(myTop - oTop) < SNAP_DISTANCE) { potentialSnapY = oTop; snappedY = true; } // Align top edges
+                             else if (Math.abs(myBottom - oEffectiveBottom) < SNAP_DISTANCE) { potentialSnapY = oEffectiveBottom - effectiveHeight; snappedY = true; } // Align bottom edges
+                        }
+                        // if (snappedX && snappedY) break; // Allow snapping to different objects vertically and horizontally
+                    }
+
+                    // If snapped, update position and recalculate displacement
+                    if (snappedX || snappedY) {
+                         firstItemNewX = potentialSnapX; // Use snapped X if available
+                         firstItemNewY = potentialSnapY; // Use snapped Y if available
+                         finalDx = firstItemNewX - dragStartPositions[0].startX; // (*** 修正: This uses let now ***)
+                         finalDy = firstItemNewY - dragStartPositions[0].startY; // (*** 修正: This uses let now ***)
+
+                         // Re-apply the *final* displacement to all items
+                         dragStartPositions.forEach((startPos) => {
+                             const item = startPos.element;
+                             item.style.left = startPos.startX + finalDx + 'px';
+                             item.style.top = startPos.startY + finalDy + 'px';
+                         });
+                    }
+                }
+
+
+                // Collision (僅軸對齊，且只檢查第一個物件, using potentially snapped position)
+                if (document.getElementById('preventOverlap').checked && isAxisAligned) {
+                    const otherFurn = Array.from(canvas.querySelectorAll('.furniture')).filter(el => !currentDragTargets.includes(el));
+                    for (const sibling of otherFurn) {
+                         const siblingRotation = parseFloat(sibling.dataset.rotation) || 0;
+                         if (siblingRotation % 90 !== 0) continue; // Only check against other axis-aligned items
+
+                         let siblingEffectiveWidth = sibling.clientWidth;
+                         let siblingEffectiveHeight = sibling.clientHeight;
+                         if ((siblingRotation % 180 !== 0) && siblingRotation !== 0) {
+                            siblingEffectiveWidth = sibling.clientHeight; siblingEffectiveHeight = sibling.clientWidth;
+                         }
+
+                        const sRect = { left: sibling.offsetLeft, top: sibling.offsetTop, right: sibling.offsetLeft + siblingEffectiveWidth, bottom: sibling.offsetTop + siblingEffectiveHeight };
+                        const eRect = { left: firstItemNewX, top: firstItemNewY, right: firstItemNewX + effectiveWidth, bottom: firstItemNewY + effectiveHeight };
+                        // Basic overlap check
+                        if (eRect.left < sRect.right && eRect.right > sRect.left && eRect.top < sRect.bottom && eRect.bottom > sRect.top) {
+                            isColliding = true; break;
+                        }
+                    }
+                }
+
+                // Update collision styles for ALL dragged items
+                 currentDragTargets.forEach(item => {
+                    if (isColliding) {
+                        item.classList.add('colliding');
+                    } else {
+                        item.classList.remove('colliding');
+                        // Store last valid position only if not colliding
+                        item.dataset.lastValidX = item.offsetLeft; // Use current style pos
+                        item.dataset.lastValidY = item.offsetTop;
+                    }
+                 });
+
             } // end onDragMove
 
             function onDragEnd(e) {
                 if (!isDragging) return;
                 isDragging = false;
 
+                let stateWasSaved = false;
                 if (hasMoved && stateBeforeDrag) {
-                    // 檢查是否有碰撞，如果有，則還原
+                    // Check if any item ended in a colliding state
                     const collisionHappened = currentDragTargets.some(item => item.classList.contains('colliding'));
-                    
+
                     if (collisionHappened && document.getElementById('preventOverlap').checked) {
-                         // 還原位置
+                         // Revert ALL dragged items to their last known valid positions (or start if no valid move occurred)
                          currentDragTargets.forEach((item, i) => {
-                            item.style.left = dragStartPositions[i].startX + 'px';
-                            item.style.top = dragStartPositions[i].startY + 'px';
-                            item.classList.remove('colliding');
+                             const lastX = item.dataset.lastValidX !== undefined ? item.dataset.lastValidX + 'px' : dragStartPositions[i].startX + 'px';
+                             const lastY = item.dataset.lastValidY !== undefined ? item.dataset.lastValidY + 'px' : dragStartPositions[i].startY + 'px';
+                             item.style.left = lastX;
+                             item.style.top = lastY;
+                             item.classList.remove('colliding');
+                             // Clear last valid position marker
+                             delete item.dataset.lastValidX;
+                             delete item.dataset.lastValidY;
                          });
-                         // 並且不儲存歷史紀錄，因為是無效移動
-                         stateBeforeDrag = null; 
+                         // Do not save history for an invalid move
+                         stateBeforeDrag = null;
+                         console.log("Collision detected, move reverted.");
                     } else {
-                        // 儲存拖曳後的狀態
+                        // Valid move, save the state BEFORE the drag started
                         redoStack = [];
                         historyStack.push(stateBeforeDrag);
                         updateUndoRedoButtons();
+                        stateWasSaved = true;
+                        console.log("Move successful, state saved.");
+                        // Clear last valid position markers
+                        currentDragTargets.forEach(item => {
+                            delete item.dataset.lastValidX;
+                            delete item.dataset.lastValidY;
+                        });
                     }
                 }
-                stateBeforeDrag = null;
+                stateBeforeDrag = null; // Clear the saved state
 
                 currentDragTargets.forEach(item => {
                     const baseZ = item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE;
-                    item.style.zIndex = parseInt(item.style.zIndex) - 1000; // 恢復 z-index
+                     // Retrieve original z-index if possible, otherwise use base
+                     const originalZ = stateWasSaved && historyStack[historyStack.length-1]?.layout // Check if state was saved
+                        ? (item.classList.contains('room')
+                           ? historyStack[historyStack.length-1].layout.rooms.find(r=>r.id===item.dataset.id)?.zIndex
+                           : historyStack[historyStack.length-1].layout.furniture.find(f=>f.id===item.dataset.id)?.zIndex)
+                        : null;
+                     item.style.zIndex = originalZ || baseZ; // Restore original or base z-index
+
                     item.style.transition = 'left 0.1s ease-out, top 0.1s ease-out, background-color 0.2s, transform 0.2s, box-shadow 0.2s';
-                    item.classList.remove('colliding'); // 確保移除
+                    item.classList.remove('colliding'); // Ensure removal
                 });
+
                 currentDragTargets = [];
                 dragStartPositions = [];
-                
+
                 document.removeEventListener('mousemove', onDragMove);
                 document.removeEventListener('mouseup', onDragEnd);
                 document.removeEventListener('touchmove', onDragMove);
                 document.removeEventListener('touchend', onDragEnd);
-                
-                // 拖曳結束後保持選取
-                updateSelectionUI(); 
+
+                // Ensure UI reflects the final state (especially if reverted)
+                updateSelectionUI();
             }
-            
+
+            // Add listener for starting drag (non-passive needed for potential preventDefault)
             element.addEventListener('mousedown', onDragStart);
             element.addEventListener('touchstart', onDragStart, { passive: false });
         }
-        
+
         // --- 初始設定 ---
         renderLibrary(); // (新) 載入物件庫
         updateUndoRedoButtons();
-        historyStack.push(getCurrentState()); // 儲存空白的初始狀態
+        // Don't save initial state here, save it after first action or on import/load
+        // historyStack.push(getCurrentState()); // Removed - save state on first action
+
+        // Save initial empty state manually if needed for undoing first action
+         if(historyStack.length === 0) {
+             historyStack.push({ version: CURRENT_LAYOUT_VERSION, layout: { rooms: [], furniture: [] } });
+             updateUndoRedoButtons();
+         }
+
 
     </script>
 </body>
