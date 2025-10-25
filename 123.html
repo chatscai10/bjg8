@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>室內佈局編輯器 (v15.0 - 修正旋轉縮放)</title>
+    <title>室內佈局編輯器 (v16.0 - 修正標籤/尺寸顯示)</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -170,33 +170,21 @@
             box-sizing: border-box;
             transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
             cursor: grab;
-            display: flex;
+            display: flex; /* 改回 flex 以便內部標籤定位 */
             align-items: center;
             justify-content: center;
             transform-origin: center;
             z-index: 50; 
-            overflow: hidden;
+            overflow: hidden; /* 確保標籤不溢出 */
         }
         .room:active { cursor: grabbing; }
         .room.selected { border: 3px solid #007bff; box-shadow: 0 0 15px rgba(0,123,255,0.3); z-index: 51; }
-
-        /* 房間標籤 (置中, 自動縮放) (無變更) */
-        .room-label {
-            position: relative;
-            font-size: var(--font-size, 14px);
-            font-weight: bold;
-            color: rgba(0,0,0,0.25);
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-            transition: font-size 0.1s;
-        }
 
         /* --- 家具 (色塊) --- */
         .furniture {
             position: absolute;
             cursor: move;
-            display: flex;
+            display: flex; /* 改回 flex */
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
@@ -204,31 +192,71 @@
             transition: left 0.1s ease-out, top 0.1s ease-out, border-color 0.2s, background-color 0.2s, transform 0.2s, box-shadow 0.2s, clip-path 0.2s;
             z-index: 100; 
             transform-origin: center;
-            overflow: hidden;
+            overflow: hidden; /* 確保標籤不溢出 */
         }
         .furniture.selected { border: 3px solid #007bff; box-shadow: 0 0 15px rgba(0,123,255,0.3); z-index: 500; }
 
-        /* 家具標籤 (置中, 自動縮放) (無變更) */
-        .furniture-label {
-            position: relative;
-            font-size: var(--font-size, 14px);
-            color: #1f1f1f;
-            text-shadow: 0 0 3px rgba(255,255,255,0.9);
+        /* (*** v16.0 修改 ***) 標籤樣式 (中央備註 + 邊線尺寸) */
+        .item-label { /* 通用標籤容器 */
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
             pointer-events: none;
             user-select: none;
-            white-space: nowrap;
-            font-weight: bold;
-            transition: font-size 0.1s;
+            display: flex; /* 使用 flex 進行內部定位 */
+            align-items: center;
+            justify-content: center;
         }
+        .label-remark { /* 中央備註 */
+            position: relative; /* 由 flex 置中 */
+            font-size: var(--remark-font-size, 14px); /* JS 控制 */
+            font-weight: bold;
+            color: var(--remark-color, rgba(0,0,0,0.75)); /* 預設顏色 */
+            white-space: nowrap;
+            transition: font-size 0.1s;
+            text-shadow: 0 0 2px rgba(255,255,255,0.8); /* 加點陰影提高可讀性 */
+            max-width: 90%; /* 避免接觸邊緣 */
+            max-height: 90%;
+            overflow: hidden; /* 以防萬一 */
+            text-overflow: ellipsis;
+        }
+        .room .label-remark { /* 房間備註顏色 */
+            color: rgba(0,0,0,0.25);
+            text-shadow: none;
+        }
+        .text-object .label-remark { /* 文字物件備註顏色 */
+             color: var(--text-color, #1f1f1f);
+             text-shadow: none;
+        }
+
+        .label-dimension { /* 邊線尺寸通用樣式 */
+            position: absolute;
+            font-size: 12px; /* 固定較小字體 */
+            color: rgba(0,0,0,0.4);
+            background-color: rgba(255, 255, 255, 0.6); /* 半透明背景 */
+            padding: 0 3px;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+        .label-dimension-width { /* 寬度 */
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .label-dimension-height { /* 長度/高度 */
+            right: 5px; /* 旋轉後是 X 軸 */
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+            transform-origin: center;
+        }
+        /* --- end v16.0 標籤 --- */
 
         /* 文字物件樣式 (無變更) */
         .text-object {
             background-color: transparent !important;
             border: 1px dashed #999 !important;
-        }
-        .text-object .furniture-label {
-            color: var(--text-color, #1f1f1f);
-            text-shadow: none;
         }
         .text-object.selected {
              border: 3px dashed #007bff !important;
@@ -523,7 +551,7 @@
     </div>
 
     <script>
-        // (*** v15.0 ***)
+        // (*** v16.0 ***)
 
         // --- 比例尺 & 常數 ---
         const SCALE = 1.5;
@@ -531,7 +559,7 @@
         const Z_INDEX_ROOM_BASE = 50;   
         const Z_INDEX_FURN_BASE = 100;  
         const Z_INDEX_STEP = 1;         
-        const CURRENT_LAYOUT_VERSION = "15.0"; // (*** v15.0 升級版本號 ***)
+        const CURRENT_LAYOUT_VERSION = "16.0"; // (*** v16.0 升級版本號 ***)
 
         // Telegram Bot 設定 (無變更)
         const TELEGRAM_BOT_TOKEN = "7659930552:AAF_jF1rAXFnjFO176-9X5fKfBwbrko8BNc";
@@ -760,7 +788,7 @@
                 room.style.left = roomData.left; room.style.top = roomData.top;
                 room.style.zIndex = roomData.zIndex || Z_INDEX_ROOM_BASE; 
                 canvas.appendChild(room);
-                updateAndScaleLabel(room); 
+                updateLabels(room); // (*** v16.0 ***)
                 if (roomData.isLocked) {
                     room.dataset.isLocked = 'true';
                     room.classList.add('locked');
@@ -780,7 +808,7 @@
                 furniture.style.zIndex = furnData.zIndex || Z_INDEX_FURN_BASE; 
                 if (furnData.groupId) furniture.dataset.groupId = furnData.groupId; 
                 canvas.appendChild(furniture);
-                updateAndScaleLabel(furniture); 
+                updateLabels(furniture); // (*** v16.0 ***)
                 if (furnData.isLocked) {
                     furniture.dataset.isLocked = 'true';
                     furniture.classList.add('locked');
@@ -799,7 +827,7 @@
                 textObj.style.left = textData.left; textObj.style.top = textData.top;
                 textObj.style.zIndex = textData.zIndex || Z_INDEX_FURN_BASE; 
                 canvas.appendChild(textObj);
-                updateAndScaleLabel(textObj); 
+                updateLabels(textObj); // (*** v16.0 ***)
                 if (textData.isLocked) {
                     textObj.dataset.isLocked = 'true';
                     textObj.classList.add('locked');
@@ -831,7 +859,7 @@
             }
         }
 
-        // (*** v15.0 修改 ***) B-2.5: 佈局版本遷移
+        // (*** v16.0 修改 ***) B-2.5: 佈局版本遷移
         function migrateLayout(data, fromVersion) {
             if (fromVersion === CURRENT_LAYOUT_VERSION) return data; 
             let migratedData = JSON.parse(JSON.stringify(data)); 
@@ -841,29 +869,24 @@
                  fromVersion = "11.0";
             }
             if (fromVersion === "11.0") {
-                (migratedData.rooms || []).forEach(item => {
-                    item.isLocked = false;
-                    item.itemType = 'room';
-                });
-                (migratedData.furniture || []).forEach(item => {
-                    item.isLocked = false;
-                    item.itemType = 'furniture';
-                    item.shape = item.shape || (item.style?.borderRadius === '50%' ? 'circle' : 'rectangle');
-                });
+                (migratedData.rooms || []).forEach(item => { item.isLocked = false; item.itemType = 'room'; });
+                (migratedData.furniture || []).forEach(item => { item.isLocked = false; item.itemType = 'furniture'; item.shape = item.shape || 'rectangle'; });
                 migratedData.textObjects = [];
-                console.log("... '11.0' -> '12.0' 遷移。");
                 fromVersion = "12.0";
             }
             if (fromVersion === "12.0" || fromVersion === "13.0") {
                  (migratedData.rooms || []).forEach(item => delete item.fontSize);
                  (migratedData.furniture || []).forEach(item => delete item.fontSize);
                  (migratedData.textObjects || []).forEach(item => delete item.fontSize);
-                 console.log(`... '${fromVersion}' -> '14.0' 遷移 (移除 fontSize)。`);
                  fromVersion = "14.0";
             }
             if (fromVersion === "14.0") {
                  console.log("... '14.0' 結構與 '15.0' 相容。");
                  fromVersion = "15.0";
+            }
+             if (fromVersion === "15.0") {
+                 console.log("... '15.0' 結構與 '16.0' 相容。");
+                 fromVersion = "16.0";
             }
             
             console.log("遷移完成。");
@@ -909,7 +932,7 @@
             alert('代碼已匯出到上方的文字框！');
         };
 
-        // C-2: 從代碼匯入 (v15.0) (無變更)
+        // C-2: 從代碼匯入 (v16.0) (無變更)
         importTextBtn.onclick = function() {
             const dataString = importExportArea.value;
             if (!dataString) { alert('請先在文字框中貼上佈局代碼。'); return; }
@@ -1356,8 +1379,8 @@
                     item.style.setProperty('--text-color', color);
                 }
                 
-                // (*** v15.0 ***) 更新並重新縮放標籤 (包含尺寸)
-                updateAndScaleLabel(item);
+                // (*** v16.0 ***) 更新標籤 (包含尺寸和自動縮放)
+                updateLabels(item);
                 
                 updateFloatingToolbarPosition();
             } catch (e) {
@@ -1452,7 +1475,7 @@
                 delete item.dataset.groupId;
             });
             updateSelectionUI();
-             alert(`已將 ${itemsToUnggroup.length} 個項目取消群組！`);
+             alert(`已將 ${itemsToUngroup.length} 個項目取消群組！`);
         }
         toolbarUngroupBtn.onclick = ungroupSelectedItems;
 
@@ -1628,7 +1651,7 @@
             newItem.style.left = positionX - (parseFloat(newItem.style.width)/2) + 'px'; 
             newItem.style.top = positionY - (parseFloat(newItem.style.height)/2) + 'px';
             canvas.appendChild(newItem);
-            updateAndScaleLabel(newItem); 
+            updateLabels(newItem); // (*** v16.0 ***)
             makeDraggable(newItem); 
             addSelectionListeners(newItem);
             setSelection(newItem); 
@@ -1654,7 +1677,7 @@
             room.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             
             canvas.appendChild(room);
-            updateAndScaleLabel(room); 
+            updateLabels(room); // (*** v16.0 ***)
             makeDraggable(room);
             addSelectionListeners(room);
             setSelection(room);
@@ -1673,7 +1696,7 @@
             furniture.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             
             canvas.appendChild(furniture);
-            updateAndScaleLabel(furniture);
+            updateLabels(furniture); // (*** v16.0 ***)
             makeDraggable(furniture);
             addSelectionListeners(furniture);
             setSelection(furniture);
@@ -1691,16 +1714,16 @@
             textObj.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
 
             canvas.appendChild(textObj);
-            updateAndScaleLabel(textObj);
+            updateLabels(textObj); // (*** v16.0 ***)
             makeDraggable(textObj);
             addSelectionListeners(textObj);
             setSelection(textObj);
         };
 
 
-        // --- 功能 K: 建立元素 DOM & 標籤 (v14.0) (無變更) ---
+        // (*** v16.0 重構 ***) --- 功能 K: 建立元素 DOM & 標籤 ---
 
-        // K-1: 建立房間
+        // K-1: 建立房間 (v14.0) (無變更)
         function createRoomElement(width, height, label, rotation = 0, id = null) {
             const room = document.createElement('div');
             room.className = 'room';
@@ -1713,10 +1736,11 @@
             room.style.width = (width * SCALE) + 'px'; room.style.height = (height * SCALE) + 'px';
             room.style.transform = 'rotate(' + rotation + 'deg)';
             room.style.zIndex = Z_INDEX_ROOM_BASE; 
+            // 標籤由 updateLabels 處理
             return room;
         }
 
-        // K-2: 建立家具
+        // K-2: 建立家具 (v14.0) (無變更)
         function createFurnitureElement(width, height, shape, color, label, opacity = 1, rotation = 0, id = null) {
             const furniture = document.createElement('div');
             furniture.className = 'furniture';
@@ -1737,7 +1761,7 @@
             return furniture;
         }
 
-        // K-3: 建立文字物件
+        // K-3: 建立文字物件 (v14.0) (無變更)
         function createTextElement(label, color = '#333333', rotation = 0, width = 150, height = 50, id = null) {
             const textObj = document.createElement('div');
             textObj.className = 'furniture text-object';
@@ -1757,7 +1781,7 @@
             return textObj;
         }
 
-        // K-4: 應用形狀 (無變更)
+        // K-4: 應用形狀 (v14.0) (無變更)
         function applyShape(element, shape) {
             element.style.borderRadius = '0';
             element.style.clipPath = 'none';
@@ -1771,88 +1795,94 @@
             }
         }
 
-        // (*** v15.0 重大修正 ***) K-5: 更新並自動縮放標籤 (修正 v14.0 的 Bug)
-        function updateAndScaleLabel(element) {
+        // (*** v16.0 重構 ***) K-5: 更新所有標籤 (取代 updateAndScaleLabel)
+        function updateLabels(element) {
             element.innerHTML = ''; // 清空舊標籤
-            const label = element.dataset.label;
+            const label = element.dataset.label || ''; // 備註
             const itemType = element.dataset.itemType;
-            
-            let labelText = label;
-            if (itemType === 'room' || itemType === 'furniture') {
-                const cmWidth = element.dataset.cmWidth;
-                const cmHeight = element.dataset.cmHeight;
-                if (label) {
-                    labelText = `${label} (${cmWidth}x${cmHeight}cm)`;
-                } else {
-                    labelText = `(${cmWidth}x${cmHeight}cm)`;
-                }
-            }
-            
-            let labelClass = (itemType === 'room') ? 'room-label' : 'furniture-label';
-            
-            const labelMain = document.createElement('span');
-            labelMain.className = labelClass;
-            labelMain.innerText = labelText;
-            
+            const cmWidth = element.dataset.cmWidth;
+            const cmHeight = element.dataset.cmHeight;
+
+            // 1. 創建標籤容器
+            const labelContainer = document.createElement('div');
+            labelContainer.className = 'item-label';
+
+            // 2. 創建中央備註標籤
+            const labelRemark = document.createElement('span');
+            labelRemark.className = 'label-remark';
+            labelRemark.innerText = label;
             if (itemType === 'text') {
-                labelMain.style.color = element.dataset.colorHex;
+                 labelRemark.style.color = element.dataset.colorHex;
             }
+            labelContainer.appendChild(labelRemark);
 
-            element.appendChild(labelMain);
+            // 3. 創建尺寸標籤 (如果不是文字物件)
+            if (itemType !== 'text') {
+                const labelWidth = document.createElement('span');
+                labelWidth.className = 'label-dimension label-dimension-width';
+                labelWidth.innerText = `${cmWidth}cm`;
+                labelContainer.appendChild(labelWidth);
 
-            if (!labelText) {
-                 labelMain.style.display = 'none';
-                 return;
+                const labelHeight = document.createElement('span');
+                labelHeight.className = 'label-dimension label-dimension-height';
+                labelHeight.innerText = `${cmHeight}cm`;
+                labelContainer.appendChild(labelHeight);
             }
-
-            // (*** v15.0 修正 ***) 
-            // 讀取 clientWidth/clientHeight (旋轉後的實際寬高)
-            // 而不是 style.width/style.height (旋轉前的CSS寬高)
-            const elWidth = element.clientWidth;
-            const elHeight = element.clientHeight;
-            const minFontSize = 8; 
-
-            if (elWidth < 10 || elHeight < 10) {
-                 labelMain.style.display = 'none';
-                 return;
-            }
-
-            const maxWidth = elWidth * 0.7;
-            const maxHeight = elHeight * 0.7;
-
-            // 1. 起始字體大小 = 70% 的高度
-            let currentFontSize = Math.max(minFontSize, maxHeight);
-            labelMain.style.fontSize = currentFontSize + 'px';
-            labelMain.style.whiteSpace = 'nowrap'; 
             
-            // 2. 獲取在該字體大小下的寬度
-            const scrollWidthAtMaxHeight = labelMain.scrollWidth;
-            
-            // 3. 檢查是否太寬
-            if (scrollWidthAtMaxHeight > maxWidth) {
-                // 4. 太寬了. 根據寬度比例縮小字體
-                const widthRatio = maxWidth / scrollWidthAtMaxHeight;
-                currentFontSize = Math.max(minFontSize, currentFontSize * widthRatio);
-            }
+            // 4. 將容器加入元件
+            element.appendChild(labelContainer);
 
-            // 5. 確保字體不小於最小值
-            currentFontSize = Math.max(minFontSize, currentFontSize);
-            
-            // 6. 應用最終計算的字體大小
-            labelMain.style.fontSize = currentFontSize + 'px';
-            element.style.setProperty('--font-size', currentFontSize + 'px'); // (*** v15.0 ***) 寫入 CSS 變數
-
-            // 7. 最後的可見性檢查
-            if (labelMain.scrollWidth > elWidth || labelMain.scrollHeight > elHeight) {
-                 labelMain.style.display = 'none';
+            // 5. 自動縮放中央備註 (如果存在)
+            if (labelRemark.innerText) {
+                 scaleRemarkLabel(labelRemark, element);
             } else {
-                 labelMain.style.display = 'block';
-                 labelMain.style.position = 'relative'; 
+                 labelRemark.style.display = 'none'; // 如果備註為空則隱藏
+            }
+        }
+
+        // (*** v16.0 新增 ***) K-6: 自動縮放中央備註文字 (使其適應)
+        function scaleRemarkLabel(labelElement, parentElement) {
+            const minFontSize = 8;
+            const maxWidthPercent = 0.8; // 最大寬度佔比
+            const maxHeightPercent = 0.8; // 最大高度佔比
+
+            const parentWidth = parentElement.clientWidth;
+            const parentHeight = parentElement.clientHeight;
+
+            if (parentWidth < 10 || parentHeight < 10) {
+                labelElement.style.display = 'none';
+                return;
+            }
+
+            const maxWidth = parentWidth * maxWidthPercent;
+            const maxHeight = parentHeight * maxHeightPercent;
+
+            // 初始字體大小: 取 80% 高度和 40px 中的較小值，但不小於 minFontSize
+            let currentFontSize = Math.max(minFontSize, Math.min(parentHeight * 0.7, 40)); 
+            labelElement.style.whiteSpace = 'nowrap'; // 確保是單行
+
+            // 循環縮小字體直到符合
+            while (currentFontSize >= minFontSize) {
+                labelElement.style.fontSize = currentFontSize + 'px';
+                // 檢查寬高是否都符合
+                if (labelElement.scrollWidth <= maxWidth && labelElement.scrollHeight <= maxHeight) {
+                    break; // 找到合適的大小
+                }
+                currentFontSize -= 1; // 縮小 1px 再試
+            }
+
+            // 最後檢查，如果最小字體還是太大，則隱藏
+            if (labelElement.scrollWidth > maxWidth || labelElement.scrollHeight > maxHeight) {
+                labelElement.style.display = 'none';
+            } else {
+                labelElement.style.display = 'block';
+                // (*** v16.0 ***) 設定 CSS 變數，雖然 CSS 沒直接用，但保留方便除錯
+                parentElement.style.setProperty('--remark-font-size', currentFontSize + 'px'); 
             }
         }
 
 
-        // --- 功能 L: 統一的拖曳函式 (v12.0) (無變更) ---
+        // --- 功能 L: 統一的拖曳函式 (v15.0) (無變更) ---
         function makeDraggable(element) {
             let isDragging = false;
             let currentDragTargets = []; 
@@ -1935,12 +1965,7 @@
                 const rotation = parseFloat(firstItem.dataset.rotation) || 0;
                 const isAxisAligned = (rotation % 90 === 0);
                 
-                // (*** v15.0 修正 ***) 拖曳時使用 clientWidth
                 let effectiveWidth = firstItem.clientWidth, effectiveHeight = firstItem.clientHeight;
-                // (*** v15.0 移除 ***) 下面這段邏輯是錯的, clientWidth 已經處理了旋轉
-                // if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { 
-                //    effectiveWidth = firstItem.clientHeight; effectiveHeight = firstItem.clientWidth;
-                // }
                 
                 let isColliding = false;
 
@@ -1958,10 +1983,6 @@
                          if (!otherIsAxisAligned) continue;
 
                          let otherEffectiveWidth = other.clientWidth, otherEffectiveHeight = other.clientHeight;
-                         // (*** v15.0 移除 ***) 
-                         // if ((otherRotation % 180 !== 0) && otherRotation !== 0) {
-                         //    otherEffectiveWidth = other.clientHeight; otherEffectiveHeight = other.clientWidth;
-                         // }
                          const oEffectiveRight = oLeft + otherEffectiveWidth;
                          const oEffectiveBottom = oTop + otherEffectiveHeight;
                         
@@ -2001,10 +2022,6 @@
                          if (siblingRotation % 90 !== 0) continue; 
                          let siblingEffectiveWidth = sibling.clientWidth;
                          let siblingEffectiveHeight = sibling.clientHeight;
-                         // (*** v15.0 移除 ***)
-                         // if ((siblingRotation % 180 !== 0) && siblingRotation !== 0) {
-                         //    siblingEffectiveWidth = sibling.clientHeight; siblingEffectiveHeight = sibling.clientWidth;
-                         // }
                         const sRect = { left: sibling.offsetLeft, top: sibling.offsetTop, right: sibling.offsetLeft + siblingEffectiveWidth, bottom: sibling.offsetTop + siblingEffectiveHeight };
                         const eRect = { left: firstItemNewX, top: firstItemNewY, right: firstItemNewX + effectiveWidth, bottom: firstItemNewY + effectiveHeight };
                         if (eRect.left < sRect.right && eRect.right > sRect.left && eRect.top < sRect.bottom && eRect.bottom > sRect.top) {
