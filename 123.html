@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業室內佈局編輯器 (v10.0 - 全功能)</title>
+    <title>室內佈局編輯器 (v11.0 - 浮動工具欄)</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -19,6 +19,32 @@
             height: 100vh;
         }
 
+        /* (*** 新增 ***) 側邊欄收合按鈕 */
+        #toggleControlsBtn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-left: none;
+            width: 30px;
+            height: 40px;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            border-radius: 0 4px 4px 0;
+            transition: transform 0.3s ease;
+            writing-mode: vertical-rl; /* (新) 讓手機版顯示也OK */
+            text-orientation: mixed;
+            line-height: 28px;
+        }
+        #toggleControlsBtn.collapsed {
+            transform: translateX(-10px); /* 按鈕本身也稍微移動 */
+        }
+
+
         /* --- 控制面板 (左側) --- */
         .controls {
             width: 300px;
@@ -30,7 +56,20 @@
             z-index: 100;
             height: 100vh;
             box-sizing: border-box;
+            transition: width 0.3s ease, padding 0.3s ease, transform 0.3s ease;
+            transform: translateX(0);
         }
+
+        /* (*** 新增 ***) 側邊欄收合狀態 */
+        .controls.collapsed {
+            width: 0;
+            padding-left: 0;
+            padding-right: 0;
+            overflow: hidden;
+            transform: translateX(-300px);
+            box-shadow: none;
+        }
+
 
         .controls h3 { margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .controls h3:first-child { margin-top: 0; }
@@ -61,9 +100,9 @@
         .controls button.success:hover { background-color: #218838; }
         .controls button.danger { background-color: #dc3545; }
         .controls button.danger:hover { background-color: #c82333; }
-        .controls button.info { background-color: #17a2b8; } /* (新) */
+        .controls button.info { background-color: #17a2b8; }
         .controls button.info:hover { background-color: #138496; }
-        .controls button.warning { background-color: #ffc107; color:#333; } /* (新) */
+        .controls button.warning { background-color: #ffc107; color:#333; }
         .controls button.warning:hover { background-color: #e0a800; }
 
         .controls button:disabled,
@@ -74,12 +113,12 @@
         }
 
         .control-row { display: flex; gap: 10px; }
-        .control-row button { width: 100%; font-size: 14px; padding: 8px;} /* (修改) 按鈕小一點 */
+        .control-row button { width: 100%; font-size: 14px; padding: 8px;} 
 
         .checkbox-group { display: flex; align-items: center; gap: 10px; }
         .checkbox-group label { margin-bottom: 0; font-weight: normal; }
 
-        /* (新) 物件庫樣式 */
+        /* 物件庫樣式 (無變更) */
         #libraryItems {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -89,7 +128,7 @@
             padding-top: 10px;
         }
         .library-item {
-            aspect-ratio: 1 / 1; /* 正方形 */
+            aspect-ratio: 1 / 1; 
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
@@ -102,7 +141,6 @@
         }
         .library-item:hover { background-color: #e9ecef; }
         .library-item-preview {
-             /* 預覽色塊樣式, JS 會動態設定 */
             width: 70%;
             height: 70%;
             border: 1px dashed #aaa;
@@ -121,7 +159,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .library-item button.delete-lib-item { /* (新) 刪除庫項目按鈕 */
+        .library-item button.delete-lib-item {
             position: absolute;
             top: 1px;
             right: 1px;
@@ -145,9 +183,8 @@
             overflow: auto;
             background-color: #e9ebee;
             -webkit-overflow-scrolling: touch;
-            cursor: default; /* (新) 預設游標 */
+            cursor: default; 
         }
-        /* (新) 平移模式下的游標 */
         #canvas-wrapper.pan-mode { cursor: grab; }
         #canvas-wrapper.pan-mode:active { cursor: grabbing; }
 
@@ -163,14 +200,14 @@
             transition: transform 0.2s ease-out;
         }
 
-        /* (新) 拖曳選框 */
+        /* 拖曳選框 (無變更) */
         #selectionBox {
             position: absolute;
             border: 1px dashed #007bff;
             background-color: rgba(0, 123, 255, 0.1);
-            pointer-events: none; /* 讓滑鼠可以穿透 */
+            pointer-events: none; 
             z-index: 9999;
-            display: none; /* 預設隱藏 */
+            display: none; 
         }
 
 
@@ -178,7 +215,7 @@
         .room {
             position: absolute;
             background-color: #ffffff;
-            border: 2px solid #aaa; /* (修改) 預設邊框細一點 */
+            border: 2px solid #aaa; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             box-sizing: border-box;
             transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
@@ -187,16 +224,16 @@
             align-items: center;
             justify-content: center;
             transform-origin: center;
-            z-index: 50; /* (新) 房間的基礎 z-index */
+            z-index: 50; 
         }
         .room:active { cursor: grabbing; }
-        .room.selected { /* (新) 多重選取樣式 */
+        .room.selected { 
             border: 3px solid #007bff;
             box-shadow: 0 0 15px rgba(0,123,255,0.3);
-            z-index: 51; /* 選中時提高一點 */
+            z-index: 51; 
         }
 
-        /* --- 房間標籤 --- */
+        /* 房間標籤 (無變更) */
         .room-label {
             position: absolute;
             font-size: var(--font-size, 14px);
@@ -210,7 +247,7 @@
         .label-room-width { bottom: 5px; left: 50%; transform: translateX(-50%); }
         .label-room-height { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center; }
 
-        /* --- 家具 (色塊) --- */
+        /* 家具 (色塊) (無變更) */
         .furniture {
             position: absolute;
             cursor: move;
@@ -220,17 +257,17 @@
             box-sizing: border-box;
             border: 2px solid #555;
             transition: left 0.1s ease-out, top 0.1s ease-out, border-color 0.2s, background-color 0.2s, transform 0.2s, box-shadow 0.2s;
-            z-index: 100; /* (新) 家具的基礎 z-index */
+            z-index: 100; 
             transform-origin: center;
         }
 
-        .furniture.selected { /* (新) 多重選取樣式 */
+        .furniture.selected { 
             border: 3px solid #007bff;
             box-shadow: 0 0 15px rgba(0,123,255,0.3);
-            z-index: 500; /* 選中時最高 */
+            z-index: 500; 
         }
 
-        /* --- 家具標籤 --- */
+        /* 家具標籤 (無變更) */
         .furniture-label {
             position: absolute;
             font-size: var(--font-size, 14px);
@@ -251,19 +288,102 @@
             transition: none;
         }
 
-        /* --- 手機版響應式樣式 --- */
+        /* (*** 新增 ***) 浮動工具欄樣式 */
+        #floating-toolbar {
+            position: absolute; /* 相對於 #canvas 定位 */
+            background: #ffffff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000; /* 必須高於所有物件 */
+            border-radius: 8px;
+            display: flex; /* (*** 修改 ***) 預設隱藏, JS控制 */
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none; /* 預設不可點 */
+        }
+        #floating-toolbar.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto; /* 顯示時可點 */
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .toolbar-group label {
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .toolbar-group input[type="number"],
+        .toolbar-group input[type="text"] {
+            width: 60px;
+            padding: 4px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .toolbar-group input[type="text"] { width: 100px; }
+        .toolbar-group button {
+            min-width: 30px;
+            height: 30px;
+            padding: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .toolbar-group button:hover { background-color: #e0e0e0; }
+        .toolbar-group button:disabled { background-color: #f9f9f9; color: #aaa; }
+        #toolbarDeleteBtn { background-color: #fce8e6; color: #c82333; }
+        #toolbarDeleteBtn:hover { background-color: #f8d7da; }
+        #toolbarUpdateBtn { background-color: #e6f7ec; color: #218838; }
+        #toolbarUpdateBtn:hover { background-color: #d4edda; }
+        
+        /* 手機版響應式樣式 (無變更) */
         @media (max-width: 768px) {
             body { flex-direction: column; height: 100vh; }
-            .controls { width: 100%; height: 40vh; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-            #canvas-wrapper { height: 60vh; }
+            .controls { 
+                width: 100%; 
+                height: 40vh; 
+                flex-shrink: 0; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+                transform: translateY(0); /* (*** 修改 ***) 手機版不左右滑動 */
+            }
+             /* (*** 修改 ***) 手機版收合 */
+            .controls.collapsed {
+                height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                transform: translateY(-40vh);
+                box-shadow: none;
+            }
+            #canvas-wrapper { height: 100vh; } /* (*** 修改 ***) 手機版畫布佔滿，選單浮在上面 */
+            #toggleControlsBtn {
+                top: auto;
+                bottom: 10px; /* (*** 修改 ***) 手機版按鈕改到底部 */
+                left: 10px;
+                writing-mode: horizontal-tb;
+                line-height: 38px;
+            }
+             #toggleControlsBtn.collapsed { transform: none; }
         }
 
     </style>
 </head>
 <body>
 
+    <button id="toggleControlsBtn" title="切換控制面板">&laquo;</button>
+
     <div class="controls">
-        <h3>視圖控制</h3>
+        <h3>視圖 & 設定</h3>
         <div class="control-group control-row">
             <button id="zoomInBtn">+</button>
             <button id="zoomOutBtn">-</button>
@@ -274,6 +394,18 @@
             <button id="redoBtn" class="secondary" disabled>下一步</button>
             <button id="panModeBtn" class="secondary">平移模式 (🖐️)</button>
         </div>
+        <div class="control-group">
+            <button id="zoomFitBtn" class="info">自動縮放 (👁️)</button>
+        </div>
+        <div class="control-group checkbox-group">
+            <input type="checkbox" id="preventOverlap">
+            <label for="preventOverlap">禁止家具重疊 (限0/90度)</label>
+        </div>
+        <div class="control-group checkbox-group">
+            <input type="checkbox" id="enableSnapping" checked>
+            <label for="enableSnapping">啟用邊緣吸附 (限0/90度)</label>
+        </div>
+
 
         <h3>專案 (分享/匯入)</h3>
         <div class="control-group">
@@ -283,35 +415,8 @@
             <button id="exportTextBtn">匯出為代碼</button>
         </div>
         <div class="control-group">
-            <button id="exportImageBtn" class="secondary">輸出為圖片 (PNG)</button>
+             <button id="exportTelegramBtn" class="secondary">傳送到 Telegram (含圖片)</button>
             <button id="clearBtn" class="danger">清空所有</button>
-        </div>
-
-        <h3>編輯選中項目</h3>
-        <div class="control-group">
-            <p id="selectionInfo" style="font-size: 13px; color: #555;">(請點擊/觸控畫布上的項目)</p>
-             <div class="control-row" style="margin-bottom: 10px;">
-                <button id="bringForwardBtn" class="info" disabled>上移一層</button>
-                <button id="sendBackwardBtn" class="info" disabled>下移一層</button>
-            </div>
-            <div class="control-row" style="margin-bottom: 10px;">
-                <button id="bringToFrontBtn" class="info" disabled>置於頂層</button>
-                <button id="sendToBackBtn" class="info" disabled>置於底層</button>
-            </div>
-             <div class="control-row" style="margin-bottom: 10px;">
-                <button id="groupBtn" class="warning" disabled>設為群組</button>
-                <button id="ungroupBtn" class="warning" disabled>取消群組</button>
-            </div>
-            <button id="updateBtn" class="success" disabled>更新屬性</button>
-            <button id="deleteBtn" class="danger" disabled>刪除選中項目</button>
-        </div>
-        <div class="control-group checkbox-group">
-            <input type="checkbox" id="preventOverlap">
-            <label for="preventOverlap">禁止家具重疊 (限0/90度)</label>
-        </div>
-        <div class="control-group checkbox-group">
-            <input type="checkbox" id="enableSnapping" checked>
-            <label for="enableSnapping">啟用邊緣吸附 (限0/90度)</label>
         </div>
 
         <h3>物件庫</h3>
@@ -391,7 +496,31 @@
 
     <div id="canvas-wrapper">
         <div id="canvas">
+             <div id="floating-toolbar">
+                <div class="toolbar-group">
+                    <label>寬:</label><input type="number" id="toolbarWidth" step="10">
+                    <label>長:</label><input type="number" id="toolbarHeight" step="10">
+                </div>
+                <div class="toolbar-group">
+                    <label>備註:</label><input type="text" id="toolbarLabel">
+                </div>
+                <div class="toolbar-group">
+                    <label>旋轉:</label><input type="number" id="toolbarRotation" step="5">
+                    <button id="toolbarUpdateBtn" title="更新">✔️</button>
+                </div>
+                 <div class="toolbar-group">
+                    <button id="toolbarBringForwardBtn" title="上移一層">🔼</button>
+                    <button id="toolbarSendBackwardBtn" title="下移一層">🔽</button>
+                    <button id="toolbarBringToFrontBtn" title="置於頂層">⏫</button>
+                    <button id="toolbarSendToBackBtn" title="置於底層">⏬</button>
+                </div>
+                <div class="toolbar-group">
+                    <button id="toolbarGroupBtn" title="設為群組">G+</button>
+                    <button id="toolbarUngroupBtn" title="取消群組">G-</button>
+                    <button id="toolbarDeleteBtn" title="刪除">🗑️</button>
+                </div>
             </div>
+        </div>
         <div id="selectionBox"></div>
     </div>
 
@@ -401,29 +530,52 @@
         // --- 比例尺 & 常數 ---
         const SCALE = 1.5;
         const SNAP_DISTANCE = 10;
-        const Z_INDEX_ROOM_BASE = 50;   // (新)
-        const Z_INDEX_FURN_BASE = 100;  // (新)
-        const Z_INDEX_STEP = 1;         // (新)
-        const CURRENT_LAYOUT_VERSION = "10.0"; // (*** 新增：版本控制 ***)
+        const Z_INDEX_ROOM_BASE = 50;   
+        const Z_INDEX_FURN_BASE = 100;  
+        const Z_INDEX_STEP = 1;         
+        const CURRENT_LAYOUT_VERSION = "11.0"; // (*** 升級版本號 ***)
+
+        // (*** 新增 ***) Telegram Bot 設定
+        const TELEGRAM_BOT_TOKEN = "7659930552:AAF_jF1rAXFnjFO176-9X5fKfBwbrko8BNc";
+        const TELEGRAM_CHAT_ID = "-1002658082392";
 
         // 獲取元素
-        const controlsPanel = document.querySelector('.controls'); // (新)
+        const controlsPanel = document.querySelector('.controls'); 
         const canvasWrapper = document.getElementById('canvas-wrapper');
         const canvas = document.getElementById('canvas');
         const addRoomBtn = document.getElementById('addRoomBtn');
         const addFurnitureBtn = document.getElementById('addFurnitureBtn');
         const opacitySlider = document.getElementById('furnOpacity');
         const opacityValue = document.getElementById('opacityValue');
-        const selectionBox = document.getElementById('selectionBox'); // (新)
-        const selectionInfo = document.getElementById('selectionInfo'); // (新)
+        const selectionBox = document.getElementById('selectionBox'); 
+
+        // (*** 新增 ***) 側邊欄控制元素
+        const toggleControlsBtn = document.getElementById('toggleControlsBtn');
+
+        // (*** 新增 ***) 浮動工具欄元素
+        const floatingToolbar = document.getElementById('floating-toolbar');
+        const toolbarWidth = document.getElementById('toolbarWidth');
+        const toolbarHeight = document.getElementById('toolbarHeight');
+        const toolbarLabel = document.getElementById('toolbarLabel');
+        const toolbarRotation = document.getElementById('toolbarRotation');
+        const toolbarUpdateBtn = document.getElementById('toolbarUpdateBtn');
+        const toolbarDeleteBtn = document.getElementById('toolbarDeleteBtn');
+        const toolbarGroupBtn = document.getElementById('toolbarGroupBtn');
+        const toolbarUngroupBtn = document.getElementById('toolbarUngroupBtn');
+        const toolbarBringForwardBtn = document.getElementById('toolbarBringForwardBtn');
+        const toolbarSendBackwardBtn = document.getElementById('toolbarSendBackwardBtn');
+        const toolbarBringToFrontBtn = document.getElementById('toolbarBringToFrontBtn');
+        const toolbarSendToBackBtn = document.getElementById('toolbarSendToBackBtn');
+        const saveToLibraryBtn = document.getElementById('saveToLibraryBtn'); // (*** 修改 ***) 這個還在側邊欄
+
 
         // 全局變數
-        let selectedItems = []; // (新) 多選陣列
+        let selectedItems = []; 
         let zoomLevel = 1.0;
-        let isPanMode = false; // (新)
-        let panStartX = 0, panStartY = 0, scrollStartX = 0, scrollStartY = 0; // (新)
-        let isSelectingBox = false; // (新)
-        let selectionStartX = 0, selectionStartY = 0; // (新)
+        let isPanMode = false; 
+        let panStartX = 0, panStartY = 0, scrollStartX = 0, scrollStartY = 0; 
+        let isSelectingBox = false; 
+        let selectionStartX = 0, selectionStartY = 0; 
 
         // --- 歷史紀錄功能變數 ---
         const undoBtn = document.getElementById('undoBtn');
@@ -433,22 +585,19 @@
         let stateBeforeDrag = null;
         let dragOffsetX = 0, dragOffsetY = 0;
 
-        // --- 輔助函式：取得事件座標 ---
+        // --- 輔助函式 (無變更) ---
         function getEventCoords(e) {
             if (e.touches && e.touches.length) {
                 return { x: e.touches[0].clientX, y: e.touches[0].clientY };
             }
-            // (新) 考慮觸控結束事件 e.changedTouches
             if (e.changedTouches && e.changedTouches.length) {
                 return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
             }
             return { x: e.clientX, y: e.clientY };
         }
-
-        // --- 輔助函式：Hex 轉 RGB ---
         function hexToRgb(hex) {
             let r = 0, g = 0, b = 0;
-            if (!hex) return {r:0,g:0,b:0}; // (新) 防禦 nil
+            if (!hex) return {r:0,g:0,b:0}; 
             if (hex.length == 4) {
                 r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
             } else if (hex.length == 7) {
@@ -456,39 +605,59 @@
             }
             return { r, g, b };
         }
-
-        // 更新透明度滑桿文字
         opacitySlider.oninput = function() {
             opacityValue.innerText = this.value;
         }
 
-        // --- 功能 A: 視圖縮放 (滾輪) ---
+        // --- (*** 新增 ***) 功能 A-1: 側邊欄控制 ---
+        function toggleControls(show) {
+            const isCollapsed = controlsPanel.classList.contains('collapsed');
+            const isMobile = window.innerWidth <= 768;
+            
+            let shouldShow = show;
+            if (show === undefined) {
+                shouldShow = isCollapsed; // Toggle
+            }
+
+            if (shouldShow) { // 顯示
+                controlsPanel.classList.remove('collapsed');
+                toggleControlsBtn.classList.remove('collapsed');
+                toggleControlsBtn.innerHTML = isMobile ? '▽' : '&laquo;';
+                toggleControlsBtn.title = '隱藏控制面板';
+            } else { // 隱藏
+                controlsPanel.classList.add('collapsed');
+                toggleControlsBtn.classList.add('collapsed');
+                toggleControlsBtn.innerHTML = isMobile ? '△' : '&raquo;';
+                toggleControlsBtn.title = '顯示控制面板';
+            }
+        }
+        toggleControlsBtn.onclick = () => toggleControls();
+         // (*** 修改 ***) 初始設定按鈕文字
+        if (window.innerWidth <= 768) {
+            toggleControlsBtn.innerHTML = '▽';
+        }
+
+
+        // --- 功能 A-2: 視圖縮放 ---
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
         const zoomResetBtn = document.getElementById('zoomResetBtn');
+        const zoomFitBtn = document.getElementById('zoomFitBtn'); // (*** 新增 ***)
 
         function applyZoom(newZoomLevel, centerX, centerY) {
+            // (此函式內容無變更)
             const currentZoom = zoomLevel;
-            newZoomLevel = Math.max(0.2, Math.min(newZoomLevel, 3.0)); // 限制範圍
-
+            newZoomLevel = Math.max(0.2, Math.min(newZoomLevel, 3.0)); 
             if (newZoomLevel === currentZoom) return;
-
             const scrollX = canvasWrapper.scrollLeft;
             const scrollY = canvasWrapper.scrollTop;
-
-            // 相對於畫布左上角的縮放中心點
             const canvasRect = canvas.getBoundingClientRect();
             const relativeX = centerX - canvasRect.left;
             const relativeY = centerY - canvasRect.top;
-
-            // 計算縮放前後中心點的位移
             const dx = (relativeX / currentZoom) * (newZoomLevel - currentZoom);
             const dy = (relativeY / currentZoom) * (newZoomLevel - currentZoom);
-
             zoomLevel = newZoomLevel;
             canvas.style.transform = `scale(${zoomLevel})`;
-
-            // 調整滾動位置以保持中心點
             canvasWrapper.scrollLeft = scrollX + dx;
             canvasWrapper.scrollTop = scrollY + dy;
         }
@@ -505,80 +674,132 @@
              const rect = canvasWrapper.getBoundingClientRect();
             applyZoom(1.0, rect.left + rect.width / 2, rect.top + rect.height / 2);
          };
-
-        // (新) 滾輪縮放
         canvasWrapper.addEventListener('wheel', (e) => {
-            if (isPanMode) return; // 平移模式下禁用滾輪縮放
+            if (isPanMode) return; 
             e.preventDefault();
             const delta = e.deltaY > 0 ? -0.1 : 0.1;
             applyZoom(zoomLevel + delta, e.clientX, e.clientY);
-        }, { passive: false }); // 需要 preventDefault
+        }, { passive: false }); 
+
+        // --- (*** 新增 ***) 功能 A-3: 自動縮放 (Fit to View) ---
+        zoomFitBtn.onclick = function() {
+            const items = canvas.querySelectorAll('.room, .furniture');
+            if (items.length === 0) {
+                zoomResetBtn.onclick();
+                return;
+            }
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+            items.forEach(item => {
+                // (*** 修改 ***) 使用 getBoundingClientRect() 相對於 canvas 來計算旋轉後的邊界
+                const rect = item.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+
+                const left = (rect.left - canvasRect.left) / zoomLevel;
+                const top = (rect.top - canvasRect.top) / zoomLevel;
+                const right = (rect.right - canvasRect.left) / zoomLevel;
+                const bottom = (rect.bottom - canvasRect.top) / zoomLevel;
+
+                if (left < minX) minX = left;
+                if (top < minY) minY = top;
+                if (right > maxX) maxX = right;
+                if (bottom > maxY) maxY = bottom;
+            });
+
+            if (minX === Infinity) return; // 沒有有效物件
+
+            const padding = 50; // (畫布空間)
+            const boundsWidth = (maxX - minX) + padding * 2;
+            const boundsHeight = (maxY - minY) + padding * 2;
+            const boundsCenterX = minX + (boundsWidth - padding * 2) / 2;
+            const boundsCenterY = minY + (boundsHeight - padding * 2) / 2;
+
+            const wrapperRect = canvasWrapper.getBoundingClientRect();
+            const wrapperWidth = wrapperRect.width;
+            const wrapperHeight = wrapperRect.height;
+
+            // 計算所需縮放
+            const zoomX = wrapperWidth / boundsWidth;
+            const zoomY = wrapperHeight / boundsHeight;
+            const newZoom = Math.min(zoomX, zoomY, 2.0); // 限制最大 2x
+
+            // (*** 新增 ***) 隱藏控制面板
+            toggleControls(false);
+
+            // 直接設定縮放
+            zoomLevel = newZoom;
+            canvas.style.transform = `scale(${zoomLevel})`;
+
+            // 計算新滾動位置以置中
+            // 目標：(newScrollLeft + wrapperWidth / 2) / newZoom = boundsCenterX
+            const newScrollLeft = (boundsCenterX * newZoom) - (wrapperWidth / 2);
+            const newScrollTop = (boundsCenterY * newZoom) - (wrapperHeight / 2);
+
+            canvasWrapper.scrollLeft = newScrollLeft;
+            canvasWrapper.scrollTop = newScrollTop;
+        }
 
 
         // --- 功能 B: 歷史紀錄 (Undo/Redo) ---
-
-        // B-1: 取得目前狀態
+        // (*** 修改 ***) 版本號更新
         function getCurrentState() {
             const layoutData = { rooms: [], furniture: [] };
             canvas.querySelectorAll('.room').forEach(room => {
                 layoutData.rooms.push({
-                    id: room.dataset.id, // (新) 儲存 ID
+                    id: room.dataset.id, 
                     left: room.style.left, top: room.style.top,
                     width: room.style.width, height: room.style.height,
                     cmWidth: room.dataset.cmWidth, cmHeight: room.dataset.cmHeight,
                     label: room.dataset.label, fontSize: room.dataset.fontSize,
-                    rotation: room.dataset.rotation, zIndex: room.style.zIndex || Z_INDEX_ROOM_BASE // (新) zIndex
+                    rotation: room.dataset.rotation, zIndex: room.style.zIndex || Z_INDEX_ROOM_BASE 
                 });
             });
             canvas.querySelectorAll('.furniture').forEach(f => {
                 layoutData.furniture.push({
-                    id: f.dataset.id, // (新) 儲存 ID
-                    groupId: f.dataset.groupId || null, // (新) 儲存群組 ID
+                    id: f.dataset.id, 
+                    groupId: f.dataset.groupId || null, 
                     left: f.style.left, top: f.style.top,
                     width: f.style.width, height: f.style.height,
                     color: f.dataset.colorHex, opacity: f.dataset.opacity,
                     shape: f.style.borderRadius === '50%' ? 'circle' : 'rectangle',
                     label: f.dataset.label, cmWidth: f.dataset.cmWidth, cmHeight: f.dataset.cmHeight,
                     fontSize: f.dataset.fontSize, rotation: f.dataset.rotation,
-                    zIndex: f.style.zIndex || Z_INDEX_FURN_BASE // (新) zIndex
+                    zIndex: f.style.zIndex || Z_INDEX_FURN_BASE 
                 });
             });
 
-            // (*** 修改：回傳包含版本號的包裝物件 ***)
             return {
-                version: CURRENT_LAYOUT_VERSION,
+                version: CURRENT_LAYOUT_VERSION, // (*** 修改 ***)
                 layout: layoutData
             };
         }
 
-        // B-2: 載入狀態 (***注意：此函式現在接收的是 layoutData.layout 物件***)
+        // B-2: 載入狀態
         function loadLayout(layoutData) {
-            clearSelection(); // (新) 清除選取
+            clearSelection(); 
             clearCanvas(false);
             if (!layoutData) { console.error("Invalid layout data to load."); return; }
 
             (layoutData.rooms || []).forEach((roomData) => {
                 const fontSize = roomData.fontSize || 14;
                 const rotation = roomData.rotation || 0;
-                // Defensive check for width/height - important if migrating from older data
-                const cmWidth = roomData.cmWidth || 500; // Provide a default
-                const cmHeight = roomData.cmHeight || 400; // Provide a default
-                const label = roomData.label || 'Room'; // Provide a default
+                const cmWidth = roomData.cmWidth || 500; 
+                const cmHeight = roomData.cmHeight || 400; 
+                const label = roomData.label || 'Room'; 
                 const room = createRoomElement(cmWidth, cmHeight, label, fontSize, rotation, roomData.id);
                 room.style.left = roomData.left; room.style.top = roomData.top;
-                room.style.zIndex = roomData.zIndex || Z_INDEX_ROOM_BASE; // (新)
+                room.style.zIndex = roomData.zIndex || Z_INDEX_ROOM_BASE; 
                 canvas.appendChild(room);
-                makeDraggable(room); // (新) 統一的拖曳函式
-                 // Add event listeners for selection AFTER makeDraggable
+                makeDraggable(room); 
                 room.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(room, e.shiftKey); });
-                room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); }, { passive: true }); // *** 修正: passive true ***
+                room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); }, { passive: true }); 
             });
 
             (layoutData.furniture || []).forEach(furnData => {
                 const opacity = furnData.opacity || 1;
                 const fontSize = furnData.fontSize || 14;
                 const rotation = furnData.rotation || 0;
-                // Defensive checks
                 const cmWidth = furnData.cmWidth || 100;
                 const cmHeight = furnData.cmHeight || 50;
                 const shape = furnData.shape || 'rectangle';
@@ -586,106 +807,78 @@
                 const label = furnData.label || 'Furniture';
                 const furniture = createFurnitureElement(cmWidth, cmHeight, shape, color, label, opacity, fontSize, rotation, furnData.id);
                 furniture.style.left = furnData.left; furniture.style.top = furnData.top;
-                furniture.style.zIndex = furnData.zIndex || Z_INDEX_FURN_BASE; // (新)
-                if (furnData.groupId) furniture.dataset.groupId = furnData.groupId; // (新)
+                furniture.style.zIndex = furnData.zIndex || Z_INDEX_FURN_BASE; 
+                if (furnData.groupId) furniture.dataset.groupId = furnData.groupId; 
                 canvas.appendChild(furniture);
-                makeDraggable(furniture); // (新) 統一的拖曳函式
-                 // Add event listeners for selection AFTER makeDraggable
+                makeDraggable(furniture); 
                 furniture.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(furniture, e.shiftKey); });
-                furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); }, { passive: true }); // *** 修正: passive true ***
+                furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); }, { passive: true }); 
             });
         }
 
-
-        // (*** 新增 B-2.5: 佈局版本遷移函式 ***)
+        // B-2.5: 佈局版本遷移 (*** 修改 ***)
         function migrateLayout(data, fromVersion) {
             if (fromVersion === CURRENT_LAYOUT_VERSION) {
-                return data; // 版本相同，無需遷移
+                return data; 
             }
 
-            let migratedData = JSON.parse(JSON.stringify(data)); // 深度複製以安全操作
+            let migratedData = JSON.parse(JSON.stringify(data)); 
             console.log(`正在從 ${fromVersion} 遷移到 ${CURRENT_LAYOUT_VERSION}...`);
 
-            // --- 遷移邏輯 ---
-            // 範例：如果 v10.0 之前的版本 (pre-10.0)
             if (fromVersion === "pre-10.0") {
-                // 假設 pre-10.0 的 "label" 欄位在 v10.0 中改名為 "name"
-                // (migratedData.rooms || []).forEach(r => {
-                //    r.name = r.label; delete r.label;
-                // });
-                // (migratedData.furniture || []).forEach(f => {
-                //    f.name = f.label; delete f.label;
-                // });
-
-                // 目前 v10.0 仍然使用 'label'，且 loadLayout 具有良好的向下相容性
-                // (會為 zIndex, groupId 等提供預設值)，所以這裡不需要實際的遷移代碼。
-                // 這裡只是為未來的版本更新提供一個框架。
-                console.log("... 'pre-10.0' 結構與 '10.0' 相容, 無需重大變更。");
-                fromVersion = "10.0"; // 標記為已升級到 10.0
+                console.log("... 'pre-10.0' 結構與 '10.0' 相容。");
+                fromVersion = "10.0";
             }
-
-            // 範例：如果未來有 v11.0
-            /*
             if (fromVersion === "10.0") {
-                // 假設 v11.0 新增了 'isLocked' 屬性
-                (migratedData.rooms || []).forEach(r => { r.isLocked = false; });
-                (migratedData.furniture || []).forEach(f => { f.isLocked = false; });
-                fromVersion = "11.0"; // 標記為已升級到 11.0
+                 // v10.0 遷移到 v11.0 (目前無變更)
+                console.log("... '10.0' 結構與 '11.0' 相容。");
+                fromVersion = "11.0";
             }
-            */
-
+            
             console.log("遷移完成。");
             return migratedData;
         }
 
-        // B-3: 更新 Undo/Redo 按鈕狀態
+        // B-3 ~ B-6 (歷史紀錄核心功能無變更)
         function updateUndoRedoButtons() {
             undoBtn.disabled = historyStack.length === 0;
             redoBtn.disabled = redoStack.length === 0;
         }
-
-        // B-4: 儲存一個動作到歷史
-        function saveStateForUndo(actionDescription = "") { // (新) 可選描述
-             // console.log("Saving state for:", actionDescription); // Debug
+        function saveStateForUndo(actionDescription = "") { 
             redoStack = [];
-            historyStack.push(getCurrentState()); // getCurrentState() 已包含版本包裝
+            historyStack.push(getCurrentState()); 
             if (historyStack.length > 50) historyStack.shift();
             updateUndoRedoButtons();
         }
-
-        // B-5: 按下 Undo
         undoBtn.onclick = function() {
             if (historyStack.length === 0) return;
             redoStack.push(getCurrentState());
-            const stateToLoad = historyStack.pop(); // 這是包裝物件
-            loadLayout(stateToLoad.layout); // (*** 修改：傳入 .layout ***)
+            const stateToLoad = historyStack.pop(); 
+            loadLayout(stateToLoad.layout); 
             updateUndoRedoButtons();
         };
-
-        // B-6: 按下 Redo
         redoBtn.onclick = function() {
             if (redoStack.length === 0) return;
             historyStack.push(getCurrentState());
-            const stateToLoad = redoStack.pop(); // 這是包裝物件
-            loadLayout(stateToLoad.layout); // (*** 修改：傳入 .layout ***)
+            const stateToLoad = redoStack.pop(); 
+            loadLayout(stateToLoad.layout); 
             updateUndoRedoButtons();
         };
 
-        // --- 功能 C: 專案 (代碼匯入/匯出) ---
+        // --- 功能 C: 專案 (代碼匯入 / 匯出 / Telegram) ---
         const importTextBtn = document.getElementById('importTextBtn');
         const exportTextBtn = document.getElementById('exportTextBtn');
-        const exportImageBtn = document.getElementById('exportImageBtn');
+        const exportTelegramBtn = document.getElementById('exportTelegramBtn'); // (*** 修改 ***)
         const clearBtn = document.getElementById('clearBtn');
         const importExportArea = document.getElementById('importExportArea');
 
-        // C-1: 匯出為代碼
+        // C-1: 匯出為代碼 (無變更)
         exportTextBtn.onclick = function() {
-            // getCurrentState() 已包含版本包裝
             importExportArea.value = JSON.stringify(getCurrentState(), null, 2);
             alert('代碼已匯出到上方的文字框！');
         };
 
-        // C-2: 從代碼匯入
+        // C-2: 從代碼匯入 (*** 修改 ***)
         importTextBtn.onclick = function() {
             const dataString = importExportArea.value;
             if (!dataString) { alert('請先在文字框中貼上佈局代碼。'); return; }
@@ -693,47 +886,120 @@
             try { parsedData = JSON.parse(dataString); }
             catch (e) { alert('代碼格式錯誤，無法解析。\n' + e.message); return; }
 
-            // (*** 修改：加入版本檢查與遷移 ***)
             let dataToLoad;
-            let sourceVersion = "pre-10.0"; // Assume old format initially
+            let sourceVersion = "pre-10.0"; 
             if (parsedData.version && parsedData.layout) {
-                 // Looks like v10.0+ format
                  sourceVersion = parsedData.version;
                  dataToLoad = migrateLayout(parsedData.layout, sourceVersion);
             } else if (Array.isArray(parsedData.rooms) || Array.isArray(parsedData.furniture)) {
-                 // Looks like old (pre-10.0) format (check if it has room/furniture arrays)
                  dataToLoad = migrateLayout(parsedData, sourceVersion);
             } else {
                  alert('無法識別的代碼格式。');
                  return;
             }
 
-
             historyStack = [];
             redoStack = [];
-            loadLayout(dataToLoad); // 載入遷移後的數據
-            historyStack.push(getCurrentState()); // 儲存包含版本包裝的當前狀態
+            loadLayout(dataToLoad); 
+            historyStack.push(getCurrentState()); 
             updateUndoRedoButtons();
 
             alert('佈局已從代碼載入！');
         };
 
-        // C-3: 輸出圖片
-        exportImageBtn.onclick = function() {
-            if (typeof html2canvas === 'undefined') { alert('錯誤：圖片輸出函式庫載入失敗。'); return; }
-            alert('正在準備輸出圖片... 請稍候。');
+        // --- (*** 新增 ***) C-3: 傳送到 Telegram ---
+        exportTelegramBtn.onclick = async function() {
+            alert('正在準備傳送... 請稍候。');
             clearSelection();
 
-            html2canvas(canvas, { useCORS: true, backgroundColor: '#e9ebee' })
-            .then(canvasImage => {
-                const link = document.createElement('a');
-                link.download = 'my-layout.png';
-                link.href = canvasImage.toDataURL('image/png');
-                link.click();
-            }).catch(err => { alert('輸出失敗: ' + err.message); });
+            let canvasImageBlob, layoutDataString;
+
+            try {
+                // 1. 產生圖片
+                const canvasImageElement = await html2canvas(canvas, { useCORS: true, backgroundColor: '#e9ebee' });
+                canvasImageBlob = await new Promise(resolve => canvasImageElement.toBlob(resolve, 'image/png'));
+
+                // 2. 取得佈局代碼
+                layoutDataString = JSON.stringify(getCurrentState(), null, 2);
+
+            } catch (err) {
+                alert('產生資料失敗: ' + err.message);
+                return;
+            }
+
+            // 3. 傳送圖片
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', TELEGRAM_CHAT_ID);
+                formData.append('photo', canvasImageBlob, 'layout.png');
+                formData.append('caption', '佈局預覽圖 (Layout Preview)');
+
+                const photoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const photoJson = await photoRes.json();
+                if (!photoJson.ok) throw new Error('圖片傳送失敗: ' + (photoJson.description || 'Unknown error'));
+
+            } catch (err) {
+                alert('傳送圖片失敗: ' + err.message);
+                return; // 圖片失敗就不繼續
+            }
+
+            // 4. 傳送佈局代碼 (處理過長問題)
+            try {
+                const MAX_MSG_LENGTH = 4096; // Telegram 訊息長度限制
+                
+                // 嘗試作為 Markdown 訊息傳送
+                const messageText = '佈局機器碼 (Layout Code):\n```json\n' + layoutDataString + '\n```';
+
+                if (messageText.length <= MAX_MSG_LENGTH) {
+                    // 作為一般文字訊息傳送
+                    const msgRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: TELEGRAM_CHAT_ID,
+                            text: messageText,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+                    const msgJson = await msgRes.json();
+                    if (!msgJson.ok) throw new Error(msgJson.description); // 如果失敗，會進入 catch 並嘗試檔案
+                } else {
+                    // (*** 新增 ***) 如果訊息太長，拋出錯誤，讓 catch 處理
+                    throw new Error("Message too long, sending as file.");
+                }
+
+                alert('成功傳送到 Telegram！');
+
+            } catch (err) {
+                // 訊息傳送失敗 (可能太長, 或 Markdown 錯誤), 改為傳送檔案
+                console.warn("Text message failed, attempting to send as file:", err.message);
+                try {
+                    const jsonBlob = new Blob([layoutDataString], { type: 'application/json' });
+                    const docFormData = new FormData();
+                    docFormData.append('chat_id', TELEGRAM_CHAT_ID);
+                    docFormData.append('document', jsonBlob, 'layout.json');
+                    docFormData.append('caption', '佈局機器碼 (Layout Code)');
+
+                    const docRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
+                        method: 'POST',
+                        body: docFormData
+                    });
+                    const docJson = await docRes.json();
+                    if (!docJson.ok) throw new Error('JSON檔案傳送失敗: ' + (docJson.description || 'Unknown error'));
+                    
+                    alert('成功傳送到 Telegram (圖片 + JSON 檔案)！');
+
+                } catch (fileErr) {
+                    alert('傳送機器碼失敗: ' + fileErr.message);
+                }
+            }
         };
 
-        // C-4: 清空畫布
+
+        // C-4: 清空畫布 (無變更)
         clearBtn.onclick = function() {
             if (confirm('確定要清空所有房間和家具嗎？')) {
                 saveStateForUndo("Clear Canvas");
@@ -741,26 +1007,18 @@
                 updateUndoRedoButtons();
             }
         };
-
         function clearCanvas(saveHistory = true) {
             if (saveHistory) saveStateForUndo("Clear Canvas Internal");
-            canvas.innerHTML = '';
+            canvas.innerHTML = ''; // (*** 警告：這會刪除浮動工具欄! ***)
+            // (*** 修正 ***) 必須重新附加工具欄
+            canvas.appendChild(floatingToolbar); 
             clearSelection();
             if (saveHistory) updateUndoRedoButtons();
         }
 
         // --- (*** 重構 ***) 功能 D: 選取管理 (支援多選) ---
 
-        const updateBtn = document.getElementById('updateBtn');
-        const deleteBtn = document.getElementById('deleteBtn');
-        const bringForwardBtn = document.getElementById('bringForwardBtn');
-        const sendBackwardBtn = document.getElementById('sendBackwardBtn');
-        const bringToFrontBtn = document.getElementById('bringToFrontBtn');
-        const sendToBackBtn = document.getElementById('sendToBackBtn');
-        const groupBtn = document.getElementById('groupBtn');
-        const ungroupBtn = document.getElementById('ungroupBtn');
-        const saveToLibraryBtn = document.getElementById('saveToLibraryBtn');
-
+        // (*** 移除 ***) 舊的側邊欄按鈕變數
 
         // D-1: 清除所有選取
         function clearSelection() {
@@ -769,26 +1027,22 @@
             updateSelectionUI();
         }
 
-        // D-2: 設定選取 (核心)
+        // D-2: 設定選取
         function setSelection(items) {
-            clearSelection(); // 先清除舊的
-            selectedItems = Array.isArray(items) ? items : [items]; // 確保是陣列
+            clearSelection(); 
+            selectedItems = Array.isArray(items) ? items : [items]; 
             selectedItems.forEach(item => item.classList.add('selected'));
             updateSelectionUI();
         }
 
-        // D-3: 切換單一物件的選取狀態
+        // D-3: 切換單一物件的選取狀態 (無變更)
         function toggleSelection(item, isShiftKey) {
             const groupId = item.dataset.groupId;
             let itemsToToggle = [item];
-
-            // 如果點擊的是群組物件，選取整個群組
             if (groupId) {
                 itemsToToggle = Array.from(canvas.querySelectorAll(`[data-group-id="${groupId}"]`));
             }
-
             if (isShiftKey) {
-                // Shift 鍵：加入/移出選取
                 itemsToToggle.forEach(it => {
                     const index = selectedItems.indexOf(it);
                     if (index > -1) {
@@ -800,9 +1054,6 @@
                     }
                 });
             } else {
-                // 沒有 Shift 鍵：
-                // 1. 如果點擊的物件(或其群組)已在選取中 -> 不變 (允許直接拖曳)
-                // 2. 如果點擊的物件(或其群組)不在選取中 -> 只選取它(們)
                 const alreadySelected = itemsToToggle.every(it => selectedItems.includes(it));
                 if (!alreadySelected) {
                     setSelection(itemsToToggle);
@@ -812,168 +1063,170 @@
         }
 
 
-        // D-4: 更新 UI 狀態 (按鈕啟用/禁用, 表單內容)
+        // (*** 重構 ***) D-4: 更新 UI 狀態 (浮動工具欄)
         function updateSelectionUI() {
             const count = selectedItems.length;
 
-            // 更新提示文字
             if (count === 0) {
-                selectionInfo.textContent = "(請點擊/觸控畫布上的項目)";
-            } else if (count === 1) {
-                selectionInfo.textContent = `已選取 1 個項目 (${selectedItems[0].dataset.label})`;
-            } else {
-                selectionInfo.textContent = `已選取 ${count} 個項目`;
+                floatingToolbar.classList.remove('visible');
+                saveToLibraryBtn.disabled = true; // 側邊欄的儲存按鈕
+                return;
             }
 
-            // 更新按鈕狀態
-            updateBtn.disabled = count !== 1; // 只能更新單一物件
-            deleteBtn.disabled = count === 0;
-            bringForwardBtn.disabled = count !== 1;
-            sendBackwardBtn.disabled = count !== 1;
-            bringToFrontBtn.disabled = count !== 1;
-            sendToBackBtn.disabled = count !== 1;
-            groupBtn.disabled = count < 2; // 至少要選 2 個才能群組
-            ungroupBtn.disabled = count === 0 || !selectedItems.some(item => item.dataset.groupId); // 至少要選一個在群組中的物件
+            // 啟用側邊欄的 "儲存至庫" 按鈕 (僅限單選)
             saveToLibraryBtn.disabled = count !== 1;
 
-            // 如果只選了一個，載入其屬性到表單
-            if (count === 1) {
-                const item = selectedItems[0];
-                const isRoom = item.classList.contains('room');
+            // --- 設定工具欄按鈕狀態 ---
+            const hasGroup = selectedItems.some(item => item.dataset.groupId);
+            toolbarDeleteBtn.disabled = false;
+            toolbarGroupBtn.disabled = count < 2;
+            toolbarUngroupBtn.disabled = !hasGroup;
 
-                if (isRoom) {
-                    document.getElementById('roomWidth').value = item.dataset.cmWidth;
-                    document.getElementById('roomHeight').value = item.dataset.cmHeight;
-                    document.getElementById('roomLabel').value = item.dataset.label;
-                    document.getElementById('roomFontSize').value = item.dataset.fontSize || 14;
-                    document.getElementById('roomRotation').value = item.dataset.rotation || 0;
-                } else { // is Furniture
-                    document.getElementById('furnWidth').value = item.dataset.cmWidth;
-                    document.getElementById('furnHeight').value = item.dataset.cmHeight;
-                    document.getElementById('furnLabel').value = item.dataset.label;
-                    document.getElementById('furnColor').value = item.dataset.colorHex;
-                    document.getElementById('furnShape').value = item.style.borderRadius === '50%' ? 'circle' : 'rectangle';
-                    document.getElementById('furnFontSize').value = item.dataset.fontSize || 14;
-                    document.getElementById('furnRotation').value = item.dataset.rotation || 0;
-                    const opacity = (item.dataset.opacity || 1) * 100;
-                    opacitySlider.value = opacity;
-                    opacityValue.innerText = Math.round(opacity);
-                }
+            // 單選 vs 多選
+            const isSingleSelection = count === 1;
+            toolbarWidth.disabled = !isSingleSelection;
+            toolbarHeight.disabled = !isSingleSelection;
+            toolbarLabel.disabled = !isSingleSelection;
+            toolbarRotation.disabled = !isSingleSelection;
+            toolbarUpdateBtn.disabled = !isSingleSelection;
+            toolbarBringForwardBtn.disabled = !isSingleSelection;
+            toolbarSendBackwardBtn.disabled = !isSingleSelection;
+            toolbarBringToFrontBtn.disabled = !isSingleSelection;
+            toolbarSendToBackBtn.disabled = !isSingleSelection;
+
+            // 載入屬性 (僅限單選)
+            if (isSingleSelection) {
+                const item = selectedItems[0];
+                toolbarWidth.value = item.dataset.cmWidth;
+                toolbarHeight.value = item.dataset.cmHeight;
+                toolbarLabel.value = item.dataset.label;
+                toolbarRotation.value = item.dataset.rotation || 0;
+            } else {
+                // 多選時清空
+                toolbarWidth.value = '';
+                toolbarHeight.value = '';
+                toolbarLabel.value = '';
+                toolbarRotation.value = '';
             }
+            
+            // 更新工具欄位置並顯示
+            updateFloatingToolbarPosition();
+            floatingToolbar.classList.add('visible');
         }
 
-        // D-5: 點擊/觸控畫布背景 -> 開始拖曳選框 或 取消選取
+        // (*** 新增 ***) D-4.5: 更新浮動工具欄位置
+        function updateFloatingToolbarPosition() {
+            if (selectedItems.length === 0) {
+                floatingToolbar.classList.remove('visible');
+                return;
+            }
+
+            // (*** 修改 ***) 以第一個選中物件的 BoundingRect 為基準
+            const item = selectedItems[0];
+            const itemRect = item.getBoundingClientRect(); // 相對於 Viewport
+            const canvasRect = canvas.getBoundingClientRect(); // 相對於 Viewport
+
+            // 計算在 Viewport 中的位置
+            const vpRight = itemRect.right;
+            const vpTop = itemRect.top;
+            
+            // 轉換回 Canvas 內部座標 (因為工具欄在 #canvas 內)
+            const canvasLeft = (vpRight - canvasRect.left) / zoomLevel + 10; // 偏移 10px
+            const canvasTop = (vpTop - canvasRect.top) / zoomLevel;
+
+            floatingToolbar.style.left = canvasLeft + 'px';
+            floatingToolbar.style.top = canvasTop + 'px';
+        }
+
+
+        // D-5: 點擊/觸控畫布背景 (無變更)
         canvasWrapper.addEventListener('mousedown', startSelectionOrPan);
         canvasWrapper.addEventListener('touchstart', startSelectionOrPan, { passive: false });
-
         function startSelectionOrPan(e) {
-            // 如果點擊的是物件，忽略 (由物件自己的事件處理)
             if (e.target !== canvasWrapper && e.target !== canvas) return;
-             // 如果按著 Shift 鍵，忽略 (保留現有選取)
             if (e.shiftKey) return;
-
             const { x, y } = getEventCoords(e);
-
             if (isPanMode) {
-                // 開始平移
                 canvasWrapper.style.cursor = 'grabbing';
-                panStartX = x;
-                panStartY = y;
-                scrollStartX = canvasWrapper.scrollLeft;
-                scrollStartY = canvasWrapper.scrollTop;
+                panStartX = x; panStartY = y;
+                scrollStartX = canvasWrapper.scrollLeft; scrollStartY = canvasWrapper.scrollTop;
                 document.addEventListener('mousemove', panCanvas);
                 document.addEventListener('mouseup', endPan);
                 document.addEventListener('touchmove', panCanvas, { passive: false });
                 document.addEventListener('touchend', endPan);
             } else {
-                // 開始拖曳選框
                 isSelectingBox = true;
-                const canvasRect = canvasWrapper.getBoundingClientRect(); // 相對於 viewport
+                const canvasRect = canvasWrapper.getBoundingClientRect(); 
                 selectionStartX = x - canvasRect.left + canvasWrapper.scrollLeft;
                 selectionStartY = y - canvasRect.top + canvasWrapper.scrollTop;
-
                 selectionBox.style.left = selectionStartX + 'px';
                 selectionBox.style.top = selectionStartY + 'px';
                 selectionBox.style.width = '0px';
                 selectionBox.style.height = '0px';
                 selectionBox.style.display = 'block';
-
                 document.addEventListener('mousemove', dragSelectionBox);
                 document.addEventListener('mouseup', endSelectionBox);
                 document.addEventListener('touchmove', dragSelectionBox, { passive: false });
                 document.addEventListener('touchend', endSelectionBox);
-
-                // 清除之前的選取
                 clearSelection();
             }
         }
 
-        // D-6: 拖曳選框中
+        // D-6: 拖曳選框中 (無變更)
         function dragSelectionBox(e) {
             if (!isSelectingBox) return;
-            if (e.touches) e.preventDefault(); // 防滾動
-
+            if (e.touches && e.cancelable) e.preventDefault(); // (*** 修正 ***)
             const { x, y } = getEventCoords(e);
             const canvasRect = canvasWrapper.getBoundingClientRect();
             const currentX = x - canvasRect.left + canvasWrapper.scrollLeft;
             const currentY = y - canvasRect.top + canvasWrapper.scrollTop;
-
             const left = Math.min(selectionStartX, currentX);
             const top = Math.min(selectionStartY, currentY);
             const width = Math.abs(selectionStartX - currentX);
             const height = Math.abs(selectionStartY - currentY);
-
             selectionBox.style.left = left + 'px';
             selectionBox.style.top = top + 'px';
             selectionBox.style.width = width + 'px';
             selectionBox.style.height = height + 'px';
         }
 
-        // D-7: 拖曳選框結束
+        // D-7: 拖曳選框結束 (無變更)
         function endSelectionBox(e) {
             if (!isSelectingBox) return;
             isSelectingBox = false;
             selectionBox.style.display = 'none';
-
             document.removeEventListener('mousemove', dragSelectionBox);
             document.removeEventListener('mouseup', endSelectionBox);
             document.removeEventListener('touchmove', dragSelectionBox);
             document.removeEventListener('touchend', endSelectionBox);
-
-            // 計算選框範圍 (考慮縮放)
             const boxLeft = parseFloat(selectionBox.style.left) / zoomLevel;
             const boxTop = parseFloat(selectionBox.style.top) / zoomLevel;
             const boxWidth = parseFloat(selectionBox.style.width) / zoomLevel;
             const boxHeight = parseFloat(selectionBox.style.height) / zoomLevel;
             const boxRight = boxLeft + boxWidth;
             const boxBottom = boxTop + boxHeight;
-
-            // 找出所有與選框重疊的物件
             const itemsInBox = [];
             const allItems = canvas.querySelectorAll('.room, .furniture');
             allItems.forEach(item => {
                 const itemLeft = item.offsetLeft;
                 const itemTop = item.offsetTop;
-                // 簡化判斷：只檢查物件中心點是否在框內
                 const itemCenterX = itemLeft + item.offsetWidth / 2;
                 const itemCenterY = itemTop + item.offsetHeight / 2;
-
                 if (itemCenterX >= boxLeft && itemCenterX <= boxRight &&
                     itemCenterY >= boxTop && itemCenterY <= boxBottom) {
                     itemsInBox.push(item);
                 }
             });
-
             if (itemsInBox.length > 0) {
                 setSelection(itemsInBox);
             }
         }
 
 
-        // --- 功能 E: 編輯 / 刪除 ---
+        // --- (*** 重構 ***) 功能 E: 編輯 / 刪除 (來自浮動工具欄) ---
 
         // E-1: 刪除 (多選)
-        deleteBtn.onclick = function() {
+        function deleteSelectedItems() {
             if (selectedItems.length === 0) {
                  alert('請先選取要刪除的項目。');
                  return;
@@ -981,12 +1234,13 @@
             if (confirm(`確定要刪除選取的 ${selectedItems.length} 個項目嗎？`)) {
                 saveStateForUndo("Delete Selected");
                 selectedItems.forEach(item => item.remove());
-                clearSelection(); // 清空選取
+                clearSelection(); // 清空選取 (會自動隱藏工具欄)
             }
         };
+        toolbarDeleteBtn.onclick = deleteSelectedItems; // 綁定
 
         // E-2: 更新 (僅限單選)
-        updateBtn.onclick = function() {
+        function updateSelectedItem() {
             if (selectedItems.length !== 1) {
                  alert('請只選取一個項目來更新屬性。');
                  return;
@@ -997,66 +1251,57 @@
             const isRoom = item.classList.contains('room');
 
             try {
+                // (*** 修改 ***) 從浮動工具欄讀取
+                const width = toolbarWidth.value, height = toolbarHeight.value;
+                const label = toolbarLabel.value;
+                const rotation = toolbarRotation.value;
+                // (*** 修改 ***) 房間/家具共用的屬性
+                item.dataset.cmWidth = width; item.dataset.cmHeight = height;
+                item.dataset.label = label; 
+                item.dataset.rotation = rotation;
+                item.style.width = (width * SCALE) + 'px'; item.style.height = (height * SCALE) + 'px';
+                item.style.transform = 'rotate(' + rotation + 'deg)';
+                
                 if (isRoom) {
-                    const width = document.getElementById('roomWidth').value, height = document.getElementById('roomHeight').value;
-                    const label = document.getElementById('roomLabel').value;
-                    const fontSize = document.getElementById('roomFontSize').value;
-                    const rotation = document.getElementById('roomRotation').value;
-
-                    item.dataset.cmWidth = width; item.dataset.cmHeight = height;
-                    item.dataset.label = label; item.dataset.fontSize = fontSize;
-                    item.dataset.rotation = rotation;
-
-                    item.style.width = (width * SCALE) + 'px'; item.style.height = (height * SCALE) + 'px';
+                    const fontSize = item.dataset.fontSize || 14; // 字體大小不在工具欄上，保持原樣
+                    item.dataset.fontSize = fontSize;
                     item.style.setProperty('--font-size', fontSize + 'px');
-                    item.style.transform = 'rotate(' + rotation + 'deg)';
                     updateElementLabels(item, 'room', label, width, height);
                 } else { // Furniture
-                    const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
-                    const label = document.getElementById('furnLabel').value, color = document.getElementById('furnColor').value;
-                    const shape = document.getElementById('furnShape').value, opacity = opacitySlider.value / 100;
-                    const fontSize = document.getElementById('furnFontSize').value;
-                    const rotation = document.getElementById('furnRotation').value;
-
-                    item.dataset.cmWidth = width; item.dataset.cmHeight = height;
-                    item.dataset.label = label; item.dataset.colorHex = color;
-                    item.dataset.opacity = opacity; item.dataset.fontSize = fontSize;
-                    item.dataset.rotation = rotation;
-
-                    item.style.width = (width * SCALE) + 'px'; item.style.height = (height * SCALE) + 'px';
-                    item.style.borderRadius = (shape === 'circle') ? '50%' : '0';
+                    // 家具的獨有屬性 (顏色, 透明度, 形狀, 字體) 保持不變
+                    const color = item.dataset.colorHex;
+                    const opacity = item.dataset.opacity;
+                    const shape = item.style.borderRadius === '50%' ? 'circle' : 'rectangle';
+                    const fontSize = item.dataset.fontSize || 14;
+                    
+                    item.dataset.fontSize = fontSize;
                     item.style.setProperty('--font-size', fontSize + 'px');
-                    item.style.transform = 'rotate(' + rotation + 'deg)';
-                    const rgb = hexToRgb(color);
-                    item.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+                    // (*** 修正 ***) 更新家具標籤
                     updateElementLabels(item, 'furniture', label, width, height);
                 }
-                alert('項目已更新！');
+                
+                // (*** 新增 ***) 更新後，重新定位工具欄 (因為寬高可能改變)
+                updateFloatingToolbarPosition();
+                // alert('項目已更新！'); // 頻繁更新，提示有點煩，先註解
+
             } catch (e) {
                 alert('更新失敗: ' + e.message);
-                // 如果更新失敗，復原到上一步
-                // (*** 修改：從包裝物件中取出 .layout ***)
                 if (historyStack.length > 0) loadLayout(historyStack.pop().layout);
                 updateUndoRedoButtons();
             }
         };
+        toolbarUpdateBtn.onclick = updateSelectedItem; // 綁定
 
-        // --- (新) 功能 F: 圖層管理 ---
-        bringForwardBtn.onclick = () => changeLayer(1);
-        sendBackwardBtn.onclick = () => changeLayer(-1);
-        bringToFrontBtn.onclick = () => changeLayer(Infinity);
-        sendToBackBtn.onclick = () => changeLayer(-Infinity);
 
+        // --- (*** 重構 ***) 功能 F: 圖層管理 ---
         function changeLayer(delta) {
             if (selectedItems.length !== 1) return;
             const item = selectedItems[0];
             const currentZ = parseInt(item.style.zIndex || (item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE));
             let newZ;
-
             saveStateForUndo("Change Layer");
 
             if (delta === Infinity) { // 置頂
-                // 找到畫布上目前最高的 z-index 再加 1
                 let maxZ = item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE;
                 canvas.querySelectorAll('.room, .furniture').forEach(el => {
                     const z = parseInt(el.style.zIndex);
@@ -1067,7 +1312,6 @@
                 newZ = item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE;
             } else { // 上移/下移
                 newZ = currentZ + delta * Z_INDEX_STEP;
-                // 確保不低於基礎值
                 if (item.classList.contains('room')) {
                     newZ = Math.max(Z_INDEX_ROOM_BASE, newZ);
                 } else {
@@ -1076,33 +1320,40 @@
             }
             item.style.zIndex = newZ;
         }
+        // 綁定
+        toolbarBringForwardBtn.onclick = () => changeLayer(1);
+        toolbarSendBackwardBtn.onclick = () => changeLayer(-1);
+        toolbarBringToFrontBtn.onclick = () => changeLayer(Infinity);
+        toolbarSendToBackBtn.onclick = () => changeLayer(-Infinity);
 
-        // --- (新) 功能 G: 群組 ---
-        groupBtn.onclick = function() {
+
+        // --- (*** 重構 ***) 功能 G: 群組 ---
+        function groupSelectedItems() {
             if (selectedItems.length < 2) return;
             saveStateForUndo("Group Items");
             const groupId = `group-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
             selectedItems.forEach(item => {
                 item.dataset.groupId = groupId;
             });
-            // 群組後保持選取狀態
-            updateSelectionUI();
+            updateSelectionUI(); // 更新工具欄狀態
             alert(`已將 ${selectedItems.length} 個項目設為群組！`);
         }
+        toolbarGroupBtn.onclick = groupSelectedItems; // 綁定
 
-        ungroupBtn.onclick = function() {
+        function ungroupSelectedItems() {
             const itemsToUngroup = selectedItems.filter(item => item.dataset.groupId);
             if (itemsToUngroup.length === 0) return;
             saveStateForUndo("Ungroup Items");
             itemsToUngroup.forEach(item => {
                 delete item.dataset.groupId;
             });
-            // 解散群組後保持選取狀態
-            updateSelectionUI();
+            updateSelectionUI(); // 更新工具欄狀態
              alert(`已將 ${itemsToUngroup.length} 個項目取消群組！`);
         }
+        toolbarUngroupBtn.onclick = ungroupSelectedItems; // 綁定
 
-        // --- (新) 功能 H: 平移模式 ---
+
+        // --- 功能 H: 平移模式 (無變更) ---
         const panModeBtn = document.getElementById('panModeBtn');
         panModeBtn.onclick = function() {
             isPanMode = !isPanMode;
@@ -1111,7 +1362,7 @@
                 panModeBtn.classList.add('info');
                 panModeBtn.classList.remove('secondary');
                 canvasWrapper.classList.add('pan-mode');
-                clearSelection(); // 進入平移模式時取消選取
+                clearSelection(); 
             } else {
                 panModeBtn.textContent = '平移模式 (🖐️)';
                 panModeBtn.classList.add('secondary');
@@ -1119,46 +1370,36 @@
                 canvasWrapper.classList.remove('pan-mode');
             }
         }
-
         function panCanvas(e) {
             if (!isPanMode) return;
-            if (e.touches) e.preventDefault(); // 阻止頁面滾動
-
+            if (e.touches && e.cancelable) e.preventDefault(); // (*** 修正 ***)
             const { x, y } = getEventCoords(e);
             const dx = x - panStartX;
             const dy = y - panStartY;
-
             canvasWrapper.scrollLeft = scrollStartX - dx;
             canvasWrapper.scrollTop = scrollStartY - dy;
         }
-
         function endPan(e) {
             if (!isPanMode) return;
-            canvasWrapper.style.cursor = 'grab'; // 恢復游標
+            canvasWrapper.style.cursor = 'grab'; 
             document.removeEventListener('mousemove', panCanvas);
             document.removeEventListener('mouseup', endPan);
             document.removeEventListener('touchmove', panCanvas);
             document.removeEventListener('touchend', endPan);
         }
 
-        // --- (新) 功能 I: 物件庫 ---
-
+        // --- 功能 I: 物件庫 (無變更) ---
         const libraryItemsContainer = document.getElementById('libraryItems');
         let objectLibrary = JSON.parse(localStorage.getItem('objectLibrary') || '[]');
-
-        // I-1: 渲染物件庫
         function renderLibrary() {
             libraryItemsContainer.innerHTML = '';
             objectLibrary.forEach((itemData, index) => {
                 const itemWrapper = document.createElement('div');
                 itemWrapper.className = 'library-item';
                 itemWrapper.title = itemData.label;
-
                 const preview = document.createElement('div');
                 preview.className = 'library-item-preview';
-
-                // 應用樣式
-                const isRoom = !itemData.color; // 簡單判斷是否為房間
+                const isRoom = !itemData.color; 
                 if (isRoom) {
                      preview.style.backgroundColor = '#fff';
                      preview.style.border = '2px solid #ccc';
@@ -1168,132 +1409,95 @@
                     preview.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
                     if (itemData.shape === 'circle') preview.style.borderRadius = '50%';
                 }
-                // 預覽不顯示文字，只顯示形狀和顏色
-                // preview.style.transform = `rotate(${itemData.rotation || 0}deg)`; // 預覽是否要旋轉? 先不要
-
                 const label = document.createElement('span');
                 label.className = 'library-item-label';
                 label.textContent = itemData.label;
-
-                // (新) 刪除按鈕
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-lib-item';
                 deleteButton.innerHTML = '&times;';
                 deleteButton.title = '從庫中刪除';
                 deleteButton.onclick = (e) => {
-                    e.stopPropagation(); // 防止觸發新增
+                    e.stopPropagation(); 
                     if (confirm(`確定要從物件庫刪除 "${itemData.label}" 嗎？`)) {
                         deleteFromLibrary(index);
                     }
                 };
-
                 itemWrapper.appendChild(preview);
                 itemWrapper.appendChild(label);
                 itemWrapper.appendChild(deleteButton);
-
-                // 點擊新增
                 itemWrapper.onclick = () => {
                     addItemFromLibrary(itemData);
                 };
-
                 libraryItemsContainer.appendChild(itemWrapper);
             });
         }
-
-        // I-2: 儲存選中至庫
         saveToLibraryBtn.onclick = function() {
             if (selectedItems.length !== 1) return;
             const item = selectedItems[0];
             const isRoom = item.classList.contains('room');
-
             const itemData = {
                 cmWidth: item.dataset.cmWidth, cmHeight: item.dataset.cmHeight,
                 label: item.dataset.label, fontSize: item.dataset.fontSize,
                 rotation: item.dataset.rotation
             };
-
             if (!isRoom) {
                 itemData.color = item.dataset.colorHex;
                 itemData.opacity = item.dataset.opacity;
                 itemData.shape = item.style.borderRadius === '50%' ? 'circle' : 'rectangle';
             }
-
-            // 檢查是否已存在 (簡易判斷)
             const exists = objectLibrary.some(libItem => libItem.label === itemData.label && libItem.cmWidth === itemData.cmWidth && libItem.cmHeight === itemData.cmHeight);
-
             if (exists) {
                 if (!confirm(`物件 "${itemData.label}" 已存在庫中，是否覆蓋？`)) {
                     return;
                 }
-                // 覆蓋: 先刪除舊的
                 objectLibrary = objectLibrary.filter(libItem => !(libItem.label === itemData.label && libItem.cmWidth === itemData.cmWidth && libItem.cmHeight === itemData.cmHeight));
             }
-
             objectLibrary.push(itemData);
             localStorage.setItem('objectLibrary', JSON.stringify(objectLibrary));
             renderLibrary();
             alert(`"${itemData.label}" 已儲存至物件庫！`);
         };
-
-        // I-3: 從庫中新增物件
         function addItemFromLibrary(itemData) {
             saveStateForUndo("Add Item from Library");
-
             let newItem;
             const isRoom = !itemData.color;
-            const positionX = (canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2) / zoomLevel; // 畫面中央
+            const positionX = (canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2) / zoomLevel; 
             const positionY = (canvasWrapper.scrollTop + canvasWrapper.offsetHeight / 2) / zoomLevel;
-
             if (isRoom) {
                 newItem = createRoomElement(itemData.cmWidth, itemData.cmHeight, itemData.label, itemData.fontSize, itemData.rotation);
             } else {
                 newItem = createFurnitureElement(itemData.cmWidth, itemData.cmHeight, itemData.shape, itemData.color, itemData.label, itemData.opacity, itemData.fontSize, itemData.rotation);
             }
-
-            newItem.style.left = positionX - newItem.offsetWidth / 2 + 'px'; // 放到中央
+            newItem.style.left = positionX - newItem.offsetWidth / 2 + 'px'; 
             newItem.style.top = positionY - newItem.offsetHeight / 2 + 'px';
-
             canvas.appendChild(newItem);
-            makeDraggable(newItem); // 綁定拖曳
-
-            // 綁定選取 (*** 修正: touchstart passive ***)
+            makeDraggable(newItem); 
             newItem.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(newItem, e.shiftKey); });
             newItem.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(newItem, false); }, { passive: true });
-
-            setSelection(newItem); // 新增後自動選取
+            setSelection(newItem); 
         }
-
-        // (新) I-4: 從庫中刪除
         function deleteFromLibrary(index) {
              objectLibrary.splice(index, 1);
              localStorage.setItem('objectLibrary', JSON.stringify(objectLibrary));
              renderLibrary();
         }
 
-        // --- 功能 J: 新增項目 ---
-
-        // J-1: 新增房間
+        // --- 功能 J: 新增項目 (無變更) ---
         addRoomBtn.onclick = function() {
             saveStateForUndo("Add Room");
             const roomWidth = document.getElementById('roomWidth').value, roomHeight = document.getElementById('roomHeight').value;
             const roomLabel = document.getElementById('roomLabel').value;
             const roomFontSize = document.getElementById('roomFontSize').value;
             const roomRotation = document.getElementById('roomRotation').value;
-
             const room = createRoomElement(roomWidth, roomHeight, roomLabel, roomFontSize, roomRotation);
             room.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
             room.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
             makeDraggable(room);
-
-            // (*** 修正: touchstart passive ***)
             room.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(room, e.shiftKey); });
             room.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(room, false); }, { passive: true });
-
             canvas.appendChild(room);
             setSelection(room);
         };
-
-        // J-2: 新增家具
         addFurnitureBtn.onclick = function() {
             saveStateForUndo("Add Furniture");
             const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
@@ -1301,138 +1505,100 @@
             const label = document.getElementById('furnLabel').value, opacity = opacitySlider.value / 100;
             const fontSize = document.getElementById('furnFontSize').value;
             const rotation = document.getElementById('furnRotation').value;
-
             const furniture = createFurnitureElement(width, height, shape, color, label, opacity, fontSize, rotation);
             furniture.style.left = (canvasWrapper.scrollLeft + 50) / zoomLevel + 'px';
             furniture.style.top = (canvasWrapper.scrollTop + 50) / zoomLevel + 'px';
-
             canvas.appendChild(furniture);
             makeDraggable(furniture);
-
-            // (*** 修正: touchstart passive ***)
             furniture.addEventListener('click', (e) => { e.stopPropagation(); toggleSelection(furniture, e.shiftKey); });
             furniture.addEventListener('touchstart', (e) => { e.stopPropagation(); toggleSelection(furniture, false); }, { passive: true });
-
             setSelection(furniture);
         };
 
-        // --- 輔助功能：建立元素 DOM ---
-
-        // K-1: 建立房間
+        // --- 輔助功能：建立元素 DOM (無變更) ---
         function createRoomElement(width, height, label, fontSize = 14, rotation = 0, id = null) {
             const room = document.createElement('div');
             room.className = 'room';
-            room.dataset.id = id || `room-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`; // (新) ID
+            room.dataset.id = id || `room-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`; 
             room.dataset.cmWidth = width; room.dataset.cmHeight = height;
             room.dataset.label = label; room.dataset.fontSize = fontSize;
             room.dataset.rotation = rotation;
             room.style.width = (width * SCALE) + 'px'; room.style.height = (height * SCALE) + 'px';
             room.style.setProperty('--font-size', fontSize + 'px');
             room.style.transform = 'rotate(' + rotation + 'deg)';
-            room.style.zIndex = Z_INDEX_ROOM_BASE; // (新)
+            room.style.zIndex = Z_INDEX_ROOM_BASE; 
             updateElementLabels(room, 'room', label, width, height);
             return room;
         }
-
-        // K-2: 建立家具
         function createFurnitureElement(width, height, shape, color, label, opacity = 1, fontSize = 14, rotation = 0, id = null) {
             const furniture = document.createElement('div');
             furniture.className = 'furniture';
-            furniture.dataset.id = id || `furn-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`; // (新) ID
+            furniture.dataset.id = id || `furn-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`; 
             furniture.dataset.cmWidth = width; furniture.dataset.cmHeight = height;
             furniture.dataset.label = label; furniture.dataset.colorHex = color;
             furniture.dataset.opacity = opacity; furniture.dataset.fontSize = fontSize;
             furniture.dataset.rotation = rotation;
-
             furniture.style.width = (width * SCALE) + 'px'; furniture.style.height = (height * SCALE) + 'px';
             furniture.style.setProperty('--font-size', fontSize + 'px');
             furniture.style.transform = 'rotate(' + rotation + 'deg)';
-            furniture.style.zIndex = Z_INDEX_FURN_BASE; // (新)
-
+            furniture.style.zIndex = Z_INDEX_FURN_BASE; 
             const rgb = hexToRgb(color);
             furniture.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
             if (shape === 'circle') furniture.style.borderRadius = '50%';
             updateElementLabels(furniture, 'furniture', label, width, height);
             return furniture;
         }
-
-        // K-3: 更新元素標籤
         function updateElementLabels(element, type, label, width, height) {
             element.innerHTML = '';
             const prefix = (type === 'room') ? 'room-' : '';
             const mainClass = (type === 'room') ? 'label-room-main' : 'label-main';
             const widthClass = (type === 'room') ? 'label-room-width' : 'label-width';
             const heightClass = (type === 'room') ? 'label-room-height' : 'label-height';
-
             const labelMain = document.createElement('span');
             labelMain.className = `${prefix}label ${mainClass}`;
             labelMain.innerText = label;
-
             const labelWidth = document.createElement('span');
             labelWidth.className = `${prefix}label ${widthClass}`;
             labelWidth.innerText = `${width} cm`;
-
             const labelHeight = document.createElement('span');
             labelHeight.className = `${prefix}label ${heightClass}`;
             labelHeight.innerText = `${height} cm`;
-
             element.appendChild(labelMain);
             element.appendChild(labelWidth);
             element.appendChild(labelHeight);
         }
 
 
-        // --- (*** 重構 ***) 功能 L: 統一的拖曳函式 (支援多選/群組/旋轉優化) ---
+        // --- 功能 L: 統一的拖曳函式 ---
+        // (*** 重構 ***) 加入浮動工具欄的更新
         function makeDraggable(element) {
             let isDragging = false;
-            let currentDragTargets = []; // (新) 可能拖曳單一或多個 (群組/多選)
-            let dragStartPositions = []; // (新) 儲存每個物件的初始位置
+            let currentDragTargets = []; 
+            let dragStartPositions = []; 
             let hasMoved = false;
 
             function onDragStart(e) {
-                // (新) 平移模式下禁止拖曳
                 if (isPanMode) return;
+                
+                // (*** 新增 ***) 如果點擊的是工具欄，絕對禁止拖曳
+                if (e.target.closest('#floating-toolbar')) return;
 
-                // (新) 點擊選取邏輯
-                // Note: Click/Tap for selection is now handled by separate listeners added AFTER makeDraggable is called
-                // This allows the touchstart listener here to focus *only* on starting the drag if needed.
-                // We still need to check if the clicked item is *part* of the current selection to allow dragging multiple items.
                 if (!selectedItems.includes(e.target)) {
-                    // If the clicked item isn't selected (and Shift wasn't pressed), the separate click/tap listener would have already handled the selection change.
-                    // If Shift *was* pressed, the other listener handles adding/removing.
-                    // Therefore, if we get here and the target isn't selected, it means we shouldn't start a drag.
-                    // Exception: If the target belongs to a selected group, allow drag start.
                     const targetGroupId = e.target.dataset.groupId;
                     if (!targetGroupId || !selectedItems.some(item => item.dataset.groupId === targetGroupId)) {
-                         // Also check if any selected item is the target itself (case: single item selected, no group)
                          if (!selectedItems.includes(e.target)) {
-                            return; // Don't start drag if clicking outside the selection/selected group
+                            return; 
                          }
                     }
-                     // If it's part of a selected group, proceed to drag the whole selection
                 }
-
-
-                // Make sure we drag ALL currently selected items, not just the clicked one
+                
                 currentDragTargets = [...selectedItems];
-                if (currentDragTargets.length === 0) return; // Should not happen if selection logic is correct, but safety check
+                if (currentDragTargets.length === 0) return; 
 
-
-                // If we reach here, a drag should commence
-                e.stopPropagation(); // Prevent canvas click/pan
-                // For touch events, explicitly prevent default if we are definitely starting a drag
-                // to avoid scrolling interference immediately.
-                 if (e.type === 'touchstart') {
-                     // We might conditionally call preventDefault in onDragMove, but preventing it here
-                     // ensures the drag starts smoothly without page scroll attempts.
-                     // However, this might interfere with tap-selection if the user taps and slightly moves.
-                     // Let's defer preventDefault to onDragMove when actual movement happens.
-                     // e.preventDefault(); // Moved to onDragMove
-                 }
-
+                e.stopPropagation(); 
                 isDragging = true;
                 hasMoved = false;
-                stateBeforeDrag = getCurrentState(); // 儲存包含版本包裝的狀態
+                stateBeforeDrag = getCurrentState(); 
 
                 dragStartPositions = currentDragTargets.map(item => ({
                     element: item,
@@ -1442,97 +1608,74 @@
 
                 const { x, y } = getEventCoords(e);
                 const canvasRect = canvas.getBoundingClientRect();
-
-                // (新) 計算滑鼠相對於 Canvas 的點擊位置
                 const pointerStartX = (x / zoomLevel) - (canvasRect.left / zoomLevel);
                 const pointerStartY = (y / zoomLevel) - (canvasRect.top / zoomLevel);
-
-                // (新) 計算滑鼠相對於「被點擊元素」左上角的偏移
                 dragOffsetX = pointerStartX - e.target.offsetLeft;
                 dragOffsetY = pointerStartY - e.target.offsetTop;
 
                 currentDragTargets.forEach(item => {
-                    // Ensure zIndex is a number before adding
                     const currentZ = parseInt(item.style.zIndex || (item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE));
-                    item.style.zIndex = currentZ + 1000; // 提高 z-index
-                    item.style.transition = 'none'; // 移除動畫
+                    item.style.zIndex = currentZ + 1000; 
+                    item.style.transition = 'none'; 
                 });
+                
+                // (*** 新增 ***) 拖曳時隱藏工具欄，避免閃爍
+                floatingToolbar.classList.remove('visible');
 
                 document.addEventListener('mousemove', onDragMove);
                 document.addEventListener('mouseup', onDragEnd);
-                document.addEventListener('touchmove', onDragMove, { passive: false }); // Needs preventDefault
+                document.addEventListener('touchmove', onDragMove, { passive: false }); 
                 document.addEventListener('touchend', onDragEnd);
             }
 
             function onDragMove(e) {
                 if (!isDragging) return;
-
-                // Only prevent default on touchmove IF dragging has actually started moving
-                if (!hasMoved && e.type === 'touchmove') {
-                   // Check if movement exceeds a small threshold to distinguish tap from drag? (Optional enhancement)
-                   // For now, assume any touchmove while dragging is intentional.
-                }
-                 if (e.cancelable && e.type === 'touchmove') e.preventDefault(); // Prevent scroll only when moving
-
-
+                if (e.cancelable && e.type === 'touchmove') e.preventDefault(); 
                 hasMoved = true;
-
+                
                 const { x, y } = getEventCoords(e);
                 const canvasRect = canvas.getBoundingClientRect();
-
                 const pointerX = (x / zoomLevel) - (canvasRect.left / zoomLevel);
                 const pointerY = (y / zoomLevel) - (canvasRect.top / zoomLevel);
-
-                // (新) 計算被點擊元素的目標新位置 (use dragStartPositions[0] as reference for group/multi-drag)
                 const referenceStartX = dragStartPositions.find(p => p.element === e.target)?.startX ?? dragStartPositions[0].startX;
                 const referenceStartY = dragStartPositions.find(p => p.element === e.target)?.startY ?? dragStartPositions[0].startY;
-
                 const targetNewX = pointerX - dragOffsetX;
                 const targetNewY = pointerY - dragOffsetY;
-
-                // (*** 修正: Use let instead of const ***)
-                // (新) 計算相對於拖曳開始時的位移量
                 let dx = targetNewX - referenceStartX;
                 let dy = targetNewY - referenceStartY;
 
-
-                // --- Apply displacement to all targets BEFORE snapping/collision checks ---
                  dragStartPositions.forEach((startPos) => {
                      const item = startPos.element;
                      item.style.left = startPos.startX + dx + 'px';
                      item.style.top = startPos.startY + dy + 'px';
                  });
 
+                // (*** 新增 ***) 拖曳時，持續更新工具欄的位置 (雖然它是隱藏的，但結束時需要)
+                // updateFloatingToolbarPosition(); 
+                // (*** 修正 ***) 不要在 onDragMove 中更新，會有效能問題。在 onDragEnd 更新即可。
 
-                // --- Snapping & Collision (Based on the first item in the dragged set) ---
                 const firstItem = dragStartPositions[0].element;
                 let firstItemNewX = dragStartPositions[0].startX + dx;
                 let firstItemNewY = dragStartPositions[0].startY + dy;
-
                 const elemWidth = firstItem.clientWidth;
                 const elemHeight = firstItem.clientHeight;
                 const rotation = parseFloat(firstItem.dataset.rotation) || 0;
                 const isAxisAligned = (rotation % 90 === 0);
                 let effectiveWidth = elemWidth, effectiveHeight = elemHeight;
-                 if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { // Check if rotated 90 or 270
+                 if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { 
                     effectiveWidth = elemHeight; effectiveHeight = elemWidth;
                 }
-
                 let finalDx = dx;
                 let finalDy = dy;
                 let isColliding = false;
 
-                // Snapping (僅軸對齊)
+                // 吸附 (Snapping)
                 if (document.getElementById('enableSnapping').checked && isAxisAligned) {
                     let snappedX = false, snappedY = false;
                     let potentialSnapX = firstItemNewX;
                     let potentialSnapY = firstItemNewY;
-
                     const myLeft = firstItemNewX, myRight = firstItemNewX + effectiveWidth, myTop = firstItemNewY, myBottom = firstItemNewY + effectiveHeight;
-
-                    // 吸附其他未被拖曳的物件 + 所有房間
                     const otherItems = Array.from(canvas.querySelectorAll('.room, .furniture')).filter(el => !currentDragTargets.includes(el));
-
                     for (const other of otherItems) {
                         const oLeft = other.offsetLeft, oRight = oLeft + other.clientWidth, oTop = other.offsetTop, oBottom = oTop + other.clientHeight;
                         const otherRotation = parseFloat(other.dataset.rotation) || 0;
@@ -1543,33 +1686,24 @@
                          }
                          const oEffectiveRight = oLeft + otherEffectiveWidth;
                          const oEffectiveBottom = oTop + otherEffectiveHeight;
-
-
-                        // Horizontal Snapping
                         if (!snappedX) {
                             if (Math.abs(myLeft - oEffectiveRight) < SNAP_DISTANCE) { potentialSnapX = oEffectiveRight; snappedX = true; }
                             else if (Math.abs(myRight - oLeft) < SNAP_DISTANCE) { potentialSnapX = oLeft - effectiveWidth; snappedX = true; }
-                            else if (Math.abs(myLeft - oLeft) < SNAP_DISTANCE) { potentialSnapX = oLeft; snappedX = true; } // Align left edges
-                            else if (Math.abs(myRight - oEffectiveRight) < SNAP_DISTANCE) { potentialSnapX = oEffectiveRight - effectiveWidth; snappedX = true; } // Align right edges
+                            else if (Math.abs(myLeft - oLeft) < SNAP_DISTANCE) { potentialSnapX = oLeft; snappedX = true; } 
+                            else if (Math.abs(myRight - oEffectiveRight) < SNAP_DISTANCE) { potentialSnapX = oEffectiveRight - effectiveWidth; snappedX = true; } 
                         }
-                        // Vertical Snapping
                         if (!snappedY) {
                              if (Math.abs(myTop - oEffectiveBottom) < SNAP_DISTANCE) { potentialSnapY = oEffectiveBottom; snappedY = true; }
                              else if (Math.abs(myBottom - oTop) < SNAP_DISTANCE) { potentialSnapY = oTop - effectiveHeight; snappedY = true; }
-                             else if (Math.abs(myTop - oTop) < SNAP_DISTANCE) { potentialSnapY = oTop; snappedY = true; } // Align top edges
-                             else if (Math.abs(myBottom - oEffectiveBottom) < SNAP_DISTANCE) { potentialSnapY = oEffectiveBottom - effectiveHeight; snappedY = true; } // Align bottom edges
+                             else if (Math.abs(myTop - oTop) < SNAP_DISTANCE) { potentialSnapY = oTop; snappedY = true; } 
+                             else if (Math.abs(myBottom - oEffectiveBottom) < SNAP_DISTANCE) { potentialSnapY = oEffectiveBottom - effectiveHeight; snappedY = true; } 
                         }
-                        // if (snappedX && snappedY) break; // Allow snapping to different objects vertically and horizontally
                     }
-
-                    // If snapped, update position and recalculate displacement
                     if (snappedX || snappedY) {
-                         firstItemNewX = potentialSnapX; // Use snapped X if available
-                         firstItemNewY = potentialSnapY; // Use snapped Y if available
-                         finalDx = firstItemNewX - dragStartPositions[0].startX; // (*** 修正: This uses let now ***)
-                         finalDy = firstItemNewY - dragStartPositions[0].startY; // (*** 修正: This uses let now ***)
-
-                         // Re-apply the *final* displacement to all items
+                         firstItemNewX = potentialSnapX; 
+                         firstItemNewY = potentialSnapY; 
+                         finalDx = firstItemNewX - dragStartPositions[0].startX; 
+                         finalDy = firstItemNewY - dragStartPositions[0].startY; 
                          dragStartPositions.forEach((startPos) => {
                              const item = startPos.element;
                              item.style.left = startPos.startX + finalDx + 'px';
@@ -1577,96 +1711,88 @@
                          });
                     }
                 }
-
-
-                // Collision (僅軸對齊，且只檢查第一個物件, using potentially snapped position)
+                
+                // 碰撞 (Collision)
                 if (document.getElementById('preventOverlap').checked && isAxisAligned) {
                     const otherFurn = Array.from(canvas.querySelectorAll('.furniture')).filter(el => !currentDragTargets.includes(el));
                     for (const sibling of otherFurn) {
                          const siblingRotation = parseFloat(sibling.dataset.rotation) || 0;
-                         if (siblingRotation % 90 !== 0) continue; // Only check against other axis-aligned items
-
+                         if (siblingRotation % 90 !== 0) continue; 
                          let siblingEffectiveWidth = sibling.clientWidth;
                          let siblingEffectiveHeight = sibling.clientHeight;
                          if ((siblingRotation % 180 !== 0) && siblingRotation !== 0) {
                             siblingEffectiveWidth = sibling.clientHeight; siblingEffectiveHeight = sibling.clientWidth;
                          }
-
                         const sRect = { left: sibling.offsetLeft, top: sibling.offsetTop, right: sibling.offsetLeft + siblingEffectiveWidth, bottom: sibling.offsetTop + siblingEffectiveHeight };
                         const eRect = { left: firstItemNewX, top: firstItemNewY, right: firstItemNewX + effectiveWidth, bottom: firstItemNewY + effectiveHeight };
-                        // Basic overlap check
                         if (eRect.left < sRect.right && eRect.right > sRect.left && eRect.top < sRect.bottom && eRect.bottom > sRect.top) {
                             isColliding = true; break;
                         }
                     }
                 }
-
-                // Update collision styles for ALL dragged items
                  currentDragTargets.forEach(item => {
                     if (isColliding) {
                         item.classList.add('colliding');
                     } else {
                         item.classList.remove('colliding');
-                        // Store last valid position only if not colliding
-                        item.dataset.lastValidX = item.offsetLeft; // Use current style pos
+                        item.dataset.lastValidX = item.offsetLeft; 
                         item.dataset.lastValidY = item.offsetTop;
                     }
                  });
-
-            } // end onDragMove
+            } 
 
             function onDragEnd(e) {
                 if (!isDragging) return;
                 isDragging = false;
 
+                // (*** 新增 ***) 拖曳結束後，更新工具欄位置並顯示
+                if (hasMoved) {
+                    updateFloatingToolbarPosition();
+                }
+                floatingToolbar.classList.add('visible');
+
+
                 let stateWasSaved = false;
                 if (hasMoved && stateBeforeDrag) {
-                    // Check if any item ended in a colliding state
                     const collisionHappened = currentDragTargets.some(item => item.classList.contains('colliding'));
-
                     if (collisionHappened && document.getElementById('preventOverlap').checked) {
-                         // Revert ALL dragged items to their last known valid positions (or start if no valid move occurred)
                          currentDragTargets.forEach((item, i) => {
                              const lastX = item.dataset.lastValidX !== undefined ? item.dataset.lastValidX + 'px' : dragStartPositions[i].startX + 'px';
                              const lastY = item.dataset.lastValidY !== undefined ? item.dataset.lastValidY + 'px' : dragStartPositions[i].startY + 'px';
                              item.style.left = lastX;
                              item.style.top = lastY;
                              item.classList.remove('colliding');
-                             // Clear last valid position marker
                              delete item.dataset.lastValidX;
                              delete item.dataset.lastValidY;
                          });
-                         // Do not save history for an invalid move
                          stateBeforeDrag = null;
                          console.log("Collision detected, move reverted.");
+                         // (*** 新增 ***) 即使復原，也要更新工具欄位置
+                         updateFloatingToolbarPosition();
                     } else {
-                        // Valid move, save the state BEFORE the drag started
                         redoStack = [];
                         historyStack.push(stateBeforeDrag);
                         updateUndoRedoButtons();
                         stateWasSaved = true;
                         console.log("Move successful, state saved.");
-                        // Clear last valid position markers
                         currentDragTargets.forEach(item => {
                             delete item.dataset.lastValidX;
                             delete item.dataset.lastValidY;
                         });
                     }
                 }
-                stateBeforeDrag = null; // Clear the saved state
+                stateBeforeDrag = null; 
 
                 currentDragTargets.forEach(item => {
                     const baseZ = item.classList.contains('room') ? Z_INDEX_ROOM_BASE : Z_INDEX_FURN_BASE;
-                     // Retrieve original z-index if possible, otherwise use base
-                     const originalZ = stateWasSaved && historyStack[historyStack.length-1]?.layout // Check if state was saved
+                     const originalZ = stateWasSaved && historyStack[historyStack.length-1]?.layout 
                         ? (item.classList.contains('room')
                            ? historyStack[historyStack.length-1].layout.rooms.find(r=>r.id===item.dataset.id)?.zIndex
                            : historyStack[historyStack.length-1].layout.furniture.find(f=>f.id===item.dataset.id)?.zIndex)
                         : null;
-                     item.style.zIndex = originalZ || baseZ; // Restore original or base z-index
-
+                     item.style.zIndex = originalZ || baseZ; 
                     item.style.transition = 'left 0.1s ease-out, top 0.1s ease-out, background-color 0.2s, transform 0.2s, box-shadow 0.2s';
-                    item.classList.remove('colliding'); // Ensure removal
+                    item.classList.remove('colliding'); 
                 });
 
                 currentDragTargets = [];
@@ -1677,27 +1803,20 @@
                 document.removeEventListener('touchmove', onDragMove);
                 document.removeEventListener('touchend', onDragEnd);
 
-                // Ensure UI reflects the final state (especially if reverted)
+                // (*** 修改 ***) 呼叫主函式來更新UI
                 updateSelectionUI();
             }
-
-            // Add listener for starting drag (non-passive needed for potential preventDefault)
             element.addEventListener('mousedown', onDragStart);
             element.addEventListener('touchstart', onDragStart, { passive: false });
         }
 
         // --- 初始設定 ---
-        renderLibrary(); // (新) 載入物件庫
+        renderLibrary(); 
         updateUndoRedoButtons();
-        // Don't save initial state here, save it after first action or on import/load
-        // historyStack.push(getCurrentState()); // Removed - save state on first action
-
-        // Save initial empty state manually if needed for undoing first action
          if(historyStack.length === 0) {
              historyStack.push({ version: CURRENT_LAYOUT_VERSION, layout: { rooms: [], furniture: [] } });
              updateUndoRedoButtons();
          }
-
 
     </script>
 </body>
