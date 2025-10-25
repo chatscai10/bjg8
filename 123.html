@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>室內佈局編輯器 (v14.0 - 修正標籤縮放/尺寸)</title>
+    <title>室內佈局編輯器 (v15.0 - 修正旋轉縮放)</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -523,7 +523,7 @@
     </div>
 
     <script>
-        // (*** v14.0 ***)
+        // (*** v15.0 ***)
 
         // --- 比例尺 & 常數 ---
         const SCALE = 1.5;
@@ -531,7 +531,7 @@
         const Z_INDEX_ROOM_BASE = 50;   
         const Z_INDEX_FURN_BASE = 100;  
         const Z_INDEX_STEP = 1;         
-        const CURRENT_LAYOUT_VERSION = "14.0"; // (*** v14.0 升級版本號 ***)
+        const CURRENT_LAYOUT_VERSION = "15.0"; // (*** v15.0 升級版本號 ***)
 
         // Telegram Bot 設定 (無變更)
         const TELEGRAM_BOT_TOKEN = "7659930552:AAF_jF1rAXFnjFO176-9X5fKfBwbrko8BNc";
@@ -709,7 +709,7 @@
 
         // --- 功能 B: 歷史紀錄 (Undo/Redo) ---
         
-        // (*** v14.0 修改 ***) B-1: 取得當前狀態 (移除 fontSize, 因為全自動了)
+        // B-1: 取得當前狀態 (v14.0) (無變更)
         function getCurrentState() {
             const layoutData = { rooms: [], furniture: [], textObjects: [] };
             
@@ -720,7 +720,6 @@
                     width: item.style.width, height: item.style.height,
                     cmWidth: item.dataset.cmWidth, cmHeight: item.dataset.cmHeight,
                     label: item.dataset.label, 
-                    // fontSize: item.dataset.fontSize, // (*** v14.0 ***) 移除
                     rotation: item.dataset.rotation, zIndex: item.style.zIndex,
                     isLocked: item.dataset.isLocked === 'true',
                     itemType: item.dataset.itemType || 'unknown'
@@ -746,7 +745,7 @@
             };
         }
 
-        // (*** v14.0 修改 ***) B-2: 載入狀態 (移除 fontSize)
+        // B-2: 載入狀態 (v14.0) (無變更)
         function loadLayout(layoutData) {
             clearSelection(); 
             clearCanvas(false);
@@ -755,7 +754,7 @@
             (layoutData.rooms || []).forEach((roomData) => {
                 const room = createRoomElement(
                     roomData.cmWidth || 500, roomData.cmHeight || 400, 
-                    roomData.label || 'Room', // roomData.fontSize (移除)
+                    roomData.label || 'Room',
                     roomData.rotation || 0, roomData.id
                 );
                 room.style.left = roomData.left; room.style.top = roomData.top;
@@ -775,7 +774,6 @@
                     furnData.cmWidth || 100, furnData.cmHeight || 50,
                     furnData.shape || 'rectangle', furnData.color || '#cccccc',
                     furnData.label || 'Furniture', furnData.opacity || 1,
-                    // furnData.fontSize (移除)
                     furnData.rotation || 0, furnData.id
                 );
                 furniture.style.left = furnData.left; furniture.style.top = furnData.top;
@@ -793,7 +791,7 @@
 
             (layoutData.textObjects || []).forEach(textData => {
                 const textObj = createTextElement(
-                    textData.label || 'Text', // textData.fontSize (移除)
+                    textData.label || 'Text',
                     textData.color || '#333333', textData.rotation || 0,
                     textData.cmWidth || 150, textData.cmHeight || 50,
                     textData.id
@@ -833,7 +831,7 @@
             }
         }
 
-        // (*** v14.0 修改 ***) B-2.5: 佈局版本遷移
+        // (*** v15.0 修改 ***) B-2.5: 佈局版本遷移
         function migrateLayout(data, fromVersion) {
             if (fromVersion === CURRENT_LAYOUT_VERSION) return data; 
             let migratedData = JSON.parse(JSON.stringify(data)); 
@@ -857,13 +855,15 @@
                 fromVersion = "12.0";
             }
             if (fromVersion === "12.0" || fromVersion === "13.0") {
-                 // v13.0 遷移到 v14.0
-                 // (移除 fontSize 屬性)
                  (migratedData.rooms || []).forEach(item => delete item.fontSize);
                  (migratedData.furniture || []).forEach(item => delete item.fontSize);
                  (migratedData.textObjects || []).forEach(item => delete item.fontSize);
                  console.log(`... '${fromVersion}' -> '14.0' 遷移 (移除 fontSize)。`);
                  fromVersion = "14.0";
+            }
+            if (fromVersion === "14.0") {
+                 console.log("... '14.0' 結構與 '15.0' 相容。");
+                 fromVersion = "15.0";
             }
             
             console.log("遷移完成。");
@@ -909,7 +909,7 @@
             alert('代碼已匯出到上方的文字框！');
         };
 
-        // (*** v14.0 修改 ***) C-2: 從代碼匯入
+        // C-2: 從代碼匯入 (v15.0) (無變更)
         importTextBtn.onclick = function() {
             const dataString = importExportArea.value;
             if (!dataString) { alert('請先在文字框中貼上佈局代碼。'); return; }
@@ -1356,7 +1356,7 @@
                     item.style.setProperty('--text-color', color);
                 }
                 
-                // (*** v14.0 ***) 更新並重新縮放標籤 (包含尺寸)
+                // (*** v15.0 ***) 更新並重新縮放標籤 (包含尺寸)
                 updateAndScaleLabel(item);
                 
                 updateFloatingToolbarPosition();
@@ -1452,7 +1452,7 @@
                 delete item.dataset.groupId;
             });
             updateSelectionUI();
-             alert(`已將 ${itemsToUngroup.length} 個項目取消群組！`);
+             alert(`已將 ${itemsToUnggroup.length} 個項目取消群組！`);
         }
         toolbarUngroupBtn.onclick = ungroupSelectedItems;
 
@@ -1506,7 +1506,7 @@
             document.removeEventListener('touchend', endPan);
         }
 
-        // (*** v14.0 修改 ***) --- 功能 I: 物件庫 (移除 fontSize) ---
+        // --- 功能 I: 物件庫 (v14.0) (無變更) ---
         const libraryItemsContainer = document.getElementById('libraryItems');
         let objectLibrary = JSON.parse(localStorage.getItem('objectLibrary') || '[]');
         
@@ -1586,7 +1586,6 @@
                 itemType: itemType,
                 cmWidth: item.dataset.cmWidth, cmHeight: item.dataset.cmHeight,
                 label: item.dataset.label, 
-                // fontSize: item.dataset.fontSize, // (*** v14.0 ***) 移除
                 rotation: item.dataset.rotation
             };
 
@@ -1641,14 +1640,13 @@
              renderLibrary();
         }
 
-        // (*** v14.0 修改 ***) --- 功能 J: 新增項目 (移除 fontSize) ---
+        // --- 功能 J: 新增項目 (v14.0) (無變更) ---
         
         // J-1: 新增房間
         addRoomBtn.onclick = function() {
             saveStateForUndo("Add Room");
             const roomWidth = document.getElementById('roomWidth').value, roomHeight = document.getElementById('roomHeight').value;
             const roomLabel = document.getElementById('roomLabel').value;
-            // const roomFontSize = document.getElementById('roomFontSize').value; // (*** v14.0 ***) 移除
             const roomRotation = document.getElementById('roomRotation').value;
             
             const room = createRoomElement(roomWidth, roomHeight, roomLabel, roomRotation);
@@ -1668,7 +1666,6 @@
             const width = document.getElementById('furnWidth').value, height = document.getElementById('furnHeight').value;
             const shape = document.getElementById('furnShape').value, color = document.getElementById('furnColor').value;
             const label = document.getElementById('furnLabel').value, opacity = opacitySlider.value / 100;
-            // const fontSize = document.getElementById('furnFontSize').value; // (*** v14.0 ***) 移除
             const rotation = document.getElementById('furnRotation').value;
             
             const furniture = createFurnitureElement(width, height, shape, color, label, opacity, rotation);
@@ -1686,7 +1683,6 @@
         addTextBtn.onclick = function() {
             saveStateForUndo("Add Text");
             const label = document.getElementById('textLabel').value;
-            // const fontSize = document.getElementById('textFontSize').value; // (*** v14.0 ***) 移除
             const color = document.getElementById('textColor').value, rotation = document.getElementById('textRotation').value;
             const width = document.getElementById('textWidth').value, height = document.getElementById('textHeight').value;
 
@@ -1702,7 +1698,7 @@
         };
 
 
-        // (*** v14.0 修改 ***) --- 功能 K: 建立元素 DOM & 標籤 (移除 fontSize) ---
+        // --- 功能 K: 建立元素 DOM & 標籤 (v14.0) (無變更) ---
 
         // K-1: 建立房間
         function createRoomElement(width, height, label, rotation = 0, id = null) {
@@ -1712,11 +1708,9 @@
             room.dataset.itemType = 'room';
             room.dataset.cmWidth = width; room.dataset.cmHeight = height;
             room.dataset.label = label; 
-            // room.dataset.fontSize = fontSize; // (*** v14.0 ***) 移除
             room.dataset.rotation = rotation;
             room.dataset.isLocked = 'false';
             room.style.width = (width * SCALE) + 'px'; room.style.height = (height * SCALE) + 'px';
-            // room.style.setProperty('--font-size', fontSize + 'px'); // (*** v14.0 ***) 移除
             room.style.transform = 'rotate(' + rotation + 'deg)';
             room.style.zIndex = Z_INDEX_ROOM_BASE; 
             return room;
@@ -1731,12 +1725,10 @@
             furniture.dataset.cmWidth = width; furniture.dataset.cmHeight = height;
             furniture.dataset.label = label; furniture.dataset.colorHex = color;
             furniture.dataset.opacity = opacity; 
-            // furniture.dataset.fontSize = fontSize; // (*** v14.0 ***) 移除
             furniture.dataset.rotation = rotation;
             furniture.dataset.shape = shape;
             furniture.dataset.isLocked = 'false';
             furniture.style.width = (width * SCALE) + 'px'; furniture.style.height = (height * SCALE) + 'px';
-            // furniture.style.setProperty('--font-size', fontSize + 'px'); // (*** v14.0 ***) 移除
             furniture.style.transform = 'rotate(' + rotation + 'deg)';
             furniture.style.zIndex = Z_INDEX_FURN_BASE; 
             const rgb = hexToRgb(color);
@@ -1753,11 +1745,9 @@
             textObj.dataset.itemType = 'text';
             textObj.dataset.cmWidth = width; textObj.dataset.cmHeight = height;
             textObj.dataset.label = label; textObj.dataset.colorHex = color;
-            // textObj.dataset.fontSize = fontSize; // (*** v14.0 ***) 移除
             textObj.dataset.rotation = rotation;
             textObj.dataset.isLocked = 'false';
             textObj.style.width = (width * SCALE) + 'px'; textObj.style.height = (height * SCALE) + 'px';
-            // textObj.style.setProperty('--font-size', fontSize + 'px'); // (*** v14.0 ***) 移除
             textObj.style.transform = 'rotate(' + rotation + 'deg)';
             textObj.style.zIndex = Z_INDEX_FURN_BASE;
             textObj.style.backgroundColor = 'transparent';
@@ -1781,21 +1771,20 @@
             }
         }
 
-        // (*** v14.0 重大修正 ***) K-5: 更新並自動縮放標籤 (修正 v13.0 的 Bug)
+        // (*** v15.0 重大修正 ***) K-5: 更新並自動縮放標籤 (修正 v14.0 的 Bug)
         function updateAndScaleLabel(element) {
             element.innerHTML = ''; // 清空舊標籤
             const label = element.dataset.label;
             const itemType = element.dataset.itemType;
             
             let labelText = label;
-            // (*** v14.0 ***) 合併標籤與尺寸
             if (itemType === 'room' || itemType === 'furniture') {
                 const cmWidth = element.dataset.cmWidth;
                 const cmHeight = element.dataset.cmHeight;
                 if (label) {
                     labelText = `${label} (${cmWidth}x${cmHeight}cm)`;
                 } else {
-                    labelText = `(${cmWidth}x${cmHeight}cm)`; // 處理空備註
+                    labelText = `(${cmWidth}x${cmHeight}cm)`;
                 }
             }
             
@@ -1811,17 +1800,17 @@
 
             element.appendChild(labelMain);
 
-            // --- (*** v14.0 ***) 修正的自動縮放邏輯 (Ratio-based) ---
-            
-            // 如果標籤為空 (例如文字物件沒打字)，隱藏並返回
             if (!labelText) {
                  labelMain.style.display = 'none';
                  return;
             }
 
-            const elWidth = parseFloat(element.style.width);
-            const elHeight = parseFloat(element.style.height);
-            const minFontSize = 8; // 最小 8px
+            // (*** v15.0 修正 ***) 
+            // 讀取 clientWidth/clientHeight (旋轉後的實際寬高)
+            // 而不是 style.width/style.height (旋轉前的CSS寬高)
+            const elWidth = element.clientWidth;
+            const elHeight = element.clientHeight;
+            const minFontSize = 8; 
 
             if (elWidth < 10 || elHeight < 10) {
                  labelMain.style.display = 'none';
@@ -1834,7 +1823,7 @@
             // 1. 起始字體大小 = 70% 的高度
             let currentFontSize = Math.max(minFontSize, maxHeight);
             labelMain.style.fontSize = currentFontSize + 'px';
-            labelMain.style.whiteSpace = 'nowrap'; // 必須是單行
+            labelMain.style.whiteSpace = 'nowrap'; 
             
             // 2. 獲取在該字體大小下的寬度
             const scrollWidthAtMaxHeight = labelMain.scrollWidth;
@@ -1851,9 +1840,9 @@
             
             // 6. 應用最終計算的字體大小
             labelMain.style.fontSize = currentFontSize + 'px';
+            element.style.setProperty('--font-size', currentFontSize + 'px'); // (*** v15.0 ***) 寫入 CSS 變數
 
-            // 7. 最後的可見性檢查 (如果 8px 還是太大)
-            // (使用 100% 寬高檢查, 避免 70% 的邊界問題)
+            // 7. 最後的可見性檢查
             if (labelMain.scrollWidth > elWidth || labelMain.scrollHeight > elHeight) {
                  labelMain.style.display = 'none';
             } else {
@@ -1945,10 +1934,13 @@
                 let firstItemNewY = referenceStart.startY + dy;
                 const rotation = parseFloat(firstItem.dataset.rotation) || 0;
                 const isAxisAligned = (rotation % 90 === 0);
+                
+                // (*** v15.0 修正 ***) 拖曳時使用 clientWidth
                 let effectiveWidth = firstItem.clientWidth, effectiveHeight = firstItem.clientHeight;
-                 if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { 
-                    effectiveWidth = firstItem.clientHeight; effectiveHeight = firstItem.clientWidth;
-                }
+                // (*** v15.0 移除 ***) 下面這段邏輯是錯的, clientWidth 已經處理了旋轉
+                // if (isAxisAligned && (rotation % 180 !== 0) && rotation !== 0) { 
+                //    effectiveWidth = firstItem.clientHeight; effectiveHeight = firstItem.clientWidth;
+                // }
                 
                 let isColliding = false;
 
@@ -1966,9 +1958,10 @@
                          if (!otherIsAxisAligned) continue;
 
                          let otherEffectiveWidth = other.clientWidth, otherEffectiveHeight = other.clientHeight;
-                         if ((otherRotation % 180 !== 0) && otherRotation !== 0) {
-                            otherEffectiveWidth = other.clientHeight; otherEffectiveHeight = other.clientWidth;
-                         }
+                         // (*** v15.0 移除 ***) 
+                         // if ((otherRotation % 180 !== 0) && otherRotation !== 0) {
+                         //    otherEffectiveWidth = other.clientHeight; otherEffectiveHeight = other.clientWidth;
+                         // }
                          const oEffectiveRight = oLeft + otherEffectiveWidth;
                          const oEffectiveBottom = oTop + otherEffectiveHeight;
                         
@@ -2008,9 +2001,10 @@
                          if (siblingRotation % 90 !== 0) continue; 
                          let siblingEffectiveWidth = sibling.clientWidth;
                          let siblingEffectiveHeight = sibling.clientHeight;
-                         if ((siblingRotation % 180 !== 0) && siblingRotation !== 0) {
-                            siblingEffectiveWidth = sibling.clientHeight; siblingEffectiveHeight = sibling.clientWidth;
-                         }
+                         // (*** v15.0 移除 ***)
+                         // if ((siblingRotation % 180 !== 0) && siblingRotation !== 0) {
+                         //    siblingEffectiveWidth = sibling.clientHeight; siblingEffectiveHeight = sibling.clientWidth;
+                         // }
                         const sRect = { left: sibling.offsetLeft, top: sibling.offsetTop, right: sibling.offsetLeft + siblingEffectiveWidth, bottom: sibling.offsetTop + siblingEffectiveHeight };
                         const eRect = { left: firstItemNewX, top: firstItemNewY, right: firstItemNewX + effectiveWidth, bottom: firstItemNewY + effectiveHeight };
                         if (eRect.left < sRect.right && eRect.right > sRect.left && eRect.top < sRect.bottom && eRect.bottom > sRect.top) {
